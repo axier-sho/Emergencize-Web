@@ -1,0 +1,133 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // User profiles - users can only read/write their own profile
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Allow reading other users' basic info for contact lists
+      allow read: if request.auth != null && 
+        resource.data.keys().hasAll(['displayName', 'isPublic']) && 
+        resource.data.isPublic == true;
+    }
+    
+    // Emergency contacts - users can manage their own emergency contacts
+    match /users/{userId}/emergencyContacts/{contactId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Emergency alerts - authenticated users can read/write alerts
+    match /alerts/{alertId} {
+      // Users can create alerts
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.fromUserId;
+      
+      // Users can read alerts sent to them or by them
+      allow read: if request.auth != null && (
+        request.auth.uid == resource.data.fromUserId ||
+        request.auth.uid in resource.data.toUserIds
+      );
+      
+      // Users can update alerts they created (mark as resolved, etc.)
+      allow update: if request.auth != null && 
+        request.auth.uid == resource.data.fromUserId;
+      
+      // Users can delete their own alerts
+      allow delete: if request.auth != null && 
+        request.auth.uid == resource.data.fromUserId;
+    }
+    
+    // Alert responses - users can respond to alerts sent to them
+    match /alerts/{alertId}/responses/{responseId} {
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.fromUserId;
+      
+      allow read: if request.auth != null;
+      
+      allow update, delete: if request.auth != null && 
+        request.auth.uid == resource.data.fromUserId;
+    }
+    
+    // User presence/online status - authenticated users can read all, write their own
+    match /presence/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Chat messages (for emergency communication)
+    match /chats/{chatId}/messages/{messageId} {
+      // Users can create messages in chats they're part of
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.fromUserId &&
+        request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
+      
+      // Users can read messages in chats they're part of
+      allow read: if request.auth != null && 
+        request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
+      
+      // Users can update/delete their own messages
+      allow update, delete: if request.auth != null && 
+        request.auth.uid == resource.data.fromUserId;
+    }
+    
+    // Chat metadata
+    match /chats/{chatId} {
+      // Users can read chats they're part of
+      allow read: if request.auth != null && 
+        request.auth.uid in resource.data.participants;
+      
+      // Users can create chats
+      allow create: if request.auth != null && 
+        request.auth.uid in request.resource.data.participants;
+      
+      // Users can update chats they're part of
+      allow update: if request.auth != null && 
+        request.auth.uid in resource.data.participants;
+    }
+    
+    // Location data - users can share their location during emergencies
+    match /locations/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Emergency groups - for group emergency alerts
+    match /emergencyGroups/{groupId} {
+      // Members can read group info
+      allow read: if request.auth != null && 
+        request.auth.uid in resource.data.members;
+      
+      // Group admins can manage the group
+      allow write: if request.auth != null && 
+        request.auth.uid in resource.data.admins;
+      
+      // Users can create groups (they become admin)
+      allow create: if request.auth != null && 
+        request.auth.uid in request.resource.data.admins;
+    }
+    
+    // System settings (read-only for users)
+    match /settings/{document=**} {
+      allow read: if request.auth != null;
+      allow write: if false; // Only allow through Cloud Functions
+    }
+    
+    // Helper functions for validation
+    function isValidAlert(alert) {
+      return alert.keys().hasAll(['type', 'message', 'fromUserId', 'timestamp']) &&
+             alert.type in ['help', 'danger'] &&
+             alert.message is string &&
+             alert.message.size() <= 500 &&
+             alert.fromUserId == request.auth.uid;
+    }
+    
+    function isValidUser(user) {
+      return user.keys().hasAll(['email', 'displayName', 'createdAt']) &&
+             user.email == request.auth.token.email &&
+             user.displayName is string &&
+             user.displayName.size() <= 100;
+    }
+  }
+}

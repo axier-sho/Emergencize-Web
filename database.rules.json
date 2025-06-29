@@ -1,0 +1,96 @@
+{
+  "rules": {
+    
+    "users": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid && newData.hasChildren(['displayName', 'email'])",
+        
+        "profile": {
+          ".read": "$uid === auth.uid || (auth != null && root.child('users').child($uid).child('profile').child('isPublic').val() === true)",
+          ".write": "$uid === auth.uid"
+        },
+        
+        "emergencyContacts": {
+          ".read": "$uid === auth.uid",
+          ".write": "$uid === auth.uid"
+        },
+        
+        "settings": {
+          ".read": "$uid === auth.uid",
+          ".write": "$uid === auth.uid"
+        }
+      }
+    },
+    
+    "presence": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "$uid === auth.uid",
+        ".validate": "newData.hasChildren(['isOnline', 'lastSeen'])"
+      }
+    },
+    
+    "alerts": {
+      "$alertId": {
+        ".read": "auth != null && (data.child('fromUserId').val() === auth.uid || data.child('toUserIds').child(auth.uid).exists())",
+        ".write": "auth != null && (!data.exists() || data.child('fromUserId').val() === auth.uid)",
+        ".validate": "newData.hasChildren(['type', 'message', 'fromUserId', 'timestamp']) && (newData.child('type').val() === 'help' || newData.child('type').val() === 'danger')",
+        
+        "responses": {
+          "$responseId": {
+            ".read": "auth != null",
+            ".write": "auth != null && (!data.exists() || data.child('fromUserId').val() === auth.uid)",
+            ".validate": "newData.hasChildren(['message', 'fromUserId', 'timestamp'])"
+          }
+        }
+      }
+    },
+    
+    "chats": {
+      "$chatId": {
+        ".read": "auth != null && root.child('chats').child($chatId).child('participants').child(auth.uid).exists()",
+        ".write": "auth != null && root.child('chats').child($chatId).child('participants').child(auth.uid).exists()",
+        
+        "messages": {
+          "$messageId": {
+            ".read": "auth != null && root.child('chats').child($chatId).child('participants').child(auth.uid).exists()",
+            ".write": "auth != null && (!data.exists() || data.child('fromUserId').val() === auth.uid)",
+            ".validate": "newData.hasChildren(['message', 'fromUserId', 'timestamp'])"
+          }
+        },
+        
+        "participants": {
+          ".read": "auth != null",
+          ".write": "auth != null && (data.child(auth.uid).exists() || newData.child(auth.uid).exists())"
+        }
+      }
+    },
+    
+    "locations": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "$uid === auth.uid",
+        ".validate": "newData.hasChildren(['lat', 'lng', 'timestamp'])"
+      }
+    },
+    
+    "emergencyGroups": {
+      "$groupId": {
+        ".read": "auth != null && (data.child('members').child(auth.uid).exists() || data.child('admins').child(auth.uid).exists())",
+        ".write": "auth != null && (data.child('admins').child(auth.uid).exists() || (!data.exists() && newData.child('admins').child(auth.uid).exists()))",
+        ".validate": "newData.hasChildren(['name', 'admins', 'members', 'createdAt'])"
+      }
+    },
+    
+    "onlineUsers": {
+      ".read": "auth != null",
+      ".write": false
+    },
+    
+    "systemStatus": {
+      ".read": "auth != null",
+      ".write": false
+    }
+  }
+}
