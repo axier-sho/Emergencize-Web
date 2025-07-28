@@ -1,6 +1,6 @@
 # Firebase Database Rules Setup Guide
 
-## 🔥 How to Apply These Rules
+## How to Apply These Rules
 
 ### **1. Firestore Security Rules**
 
@@ -20,30 +20,30 @@
 4. **Paste it** into the rules editor
 5. Click **"Publish"**
 
-## 🔒 What These Rules Protect
+## What These Rules Protect
 
 ### **User Data Security:**
-- ✅ Users can only access their own profile data
-- ✅ Users can only see public profiles of others
-- ✅ Emergency contacts are private to each user
+- Users can only access their own profile data
+- Users can only see public profiles of others
+- Emergency contacts are private to each user
 
 ### **Emergency Alerts:**
-- ✅ Users can create alerts with their own ID
-- ✅ Users can only see alerts sent to them or by them
-- ✅ Alert creators can update/delete their alerts
-- ✅ Alert responses are linked to the original alert
+- Users can create alerts with their own ID
+- Users can only see alerts sent to them or by them
+- Alert creators can update/delete their alerts
+- Alert responses are linked to the original alert
 
 ### **Real-time Features:**
-- ✅ Online presence is readable by all authenticated users
-- ✅ Users can only update their own presence status
-- ✅ Location sharing during emergencies is controlled
+- Online presence is readable by all authenticated users
+- Users can only update their own presence status
+- Location sharing during emergencies is controlled
 
 ### **Chat System:**
-- ✅ Users can only access chats they're part of
-- ✅ Message creation requires chat membership
-- ✅ Users can modify their own messages only
+- Users can only access chats they're part of
+- Message creation requires chat membership
+- Users can modify their own messages only
 
-## 📋 Rule Categories Explained
+## Rule Categories Explained
 
 ### **1. User Management**
 ```javascript
@@ -84,12 +84,12 @@ match /locations/{userId} {
 - Emergency location sharing visible to all authenticated users
 - Users control their own location data
 
-## ⚠️ Development vs Production
+## Development vs Production
 
 ### **Development (Current Rules):**
-- ✅ Permissive for testing
-- ✅ Detailed logging available
-- ✅ Easy debugging
+- Permissive for testing
+- Detailed logging available
+- Easy debugging
 
 ### **Production (Recommended Changes):**
 ```javascript
@@ -104,15 +104,15 @@ allow create: if isValidData(request.resource.data);
 allow write: if request.auth.token.admin == true;
 ```
 
-## 🧪 Testing Your Rules
+## Testing Your Rules
 
 ### **Test in Firebase Console:**
 1. Go to Firestore > Rules
 2. Click **"Rules playground"**
 3. Test different scenarios:
-   - ✅ Authenticated user accessing own data
-   - ❌ Authenticated user accessing other's private data
-   - ❌ Unauthenticated user accessing any data
+   - Authenticated user accessing own data (should ALLOW)
+   - Authenticated user accessing other's private data (should DENY)
+   - Unauthenticated user accessing any data (should DENY)
 
 ### **Common Test Cases:**
 ```javascript
@@ -133,7 +133,7 @@ operation = create
 data = { fromUserId: "user123", type: "help" }
 ```
 
-## 🔧 Monitoring and Debugging
+## Monitoring and Debugging
 
 ### **View Rule Violations:**
 1. Go to Firestore > Usage tab
@@ -146,7 +146,7 @@ data = { fromUserId: "user123", type: "help" }
 allow read, write: if true; // REMOVE IN PRODUCTION!
 ```
 
-## 📈 Performance Optimization
+## Performance Optimization
 
 ### **Index Requirements:**
 These rules may require composite indexes:
