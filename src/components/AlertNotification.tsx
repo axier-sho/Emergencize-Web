@@ -188,7 +188,10 @@ export default function AlertNotification({
           {visibleAlerts.map((alert, index) => (
             <motion.div
               key={alert.id}
-              ref={el => alertRefs.current[index] = el}
+              ref={(el: HTMLDivElement | null) => {
+                alertRefs.current[index] = el;
+                return undefined;
+              }}
               className={`glass-effect rounded-xl p-4 border-l-4 ${
                 alert.type === 'danger' 
                   ? 'border-red-500 bg-red-900 bg-opacity-20' 
