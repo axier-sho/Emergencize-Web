@@ -47,4 +47,119 @@
   .offline-indicator {
     @apply w-3 h-3 bg-gray-400 rounded-full;
   }
+
+  /* Screen reader only content */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+/* Accessibility Styles */
+@layer utilities {
+  /* High Contrast Mode */
+  .high-contrast {
+    --tw-bg-opacity: 1;
+    --tw-text-opacity: 1;
+  }
+  
+  .high-contrast .glass-effect {
+    background: rgba(0, 0, 0, 0.9) !important;
+    border: 2px solid #ffffff !important;
+    backdrop-filter: none !important;
+  }
+  
+  .high-contrast .text-gray-300,
+  .high-contrast .text-gray-400,
+  .high-contrast .text-blue-200 {
+    color: #ffffff !important;
+  }
+  
+  .high-contrast .bg-white.bg-opacity-10,
+  .high-contrast .bg-white.bg-opacity-5 {
+    background: rgba(255, 255, 255, 0.2) !important;
+  }
+
+  /* Font Size Classes */
+  .font-small {
+    font-size: 14px;
+  }
+  
+  .font-medium {
+    font-size: 16px;
+  }
+  
+  .font-large {
+    font-size: 18px;
+  }
+  
+  .font-extra-large {
+    font-size: 22px;
+  }
+  
+  .font-small h1 { font-size: 1.5rem; }
+  .font-small h2 { font-size: 1.25rem; }
+  .font-small h3 { font-size: 1.125rem; }
+  
+  .font-medium h1 { font-size: 2rem; }
+  .font-medium h2 { font-size: 1.5rem; }
+  .font-medium h3 { font-size: 1.25rem; }
+  
+  .font-large h1 { font-size: 2.5rem; }
+  .font-large h2 { font-size: 2rem; }
+  .font-large h3 { font-size: 1.5rem; }
+  
+  .font-extra-large h1 { font-size: 3rem; }
+  .font-extra-large h2 { font-size: 2.5rem; }
+  .font-extra-large h3 { font-size: 2rem; }
+
+  /* Reduced Motion */
+  .reduce-motion *,
+  .reduce-motion *::before,
+  .reduce-motion *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Focus Indicators */
+  .show-focus-indicators *:focus {
+    outline: 3px solid #3b82f6 !important;
+    outline-offset: 2px !important;
+  }
+  
+  .show-focus-indicators button:focus,
+  .show-focus-indicators a:focus,
+  .show-focus-indicators input:focus,
+  .show-focus-indicators textarea:focus,
+  .show-focus-indicators select:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5) !important;
+  }
+
+  /* Emergency Accessibility Enhancements */
+  .high-contrast .emergency-button {
+    border: 3px solid #ffffff !important;
+  }
+  
+  .high-contrast .help-button {
+    background: #0066cc !important;
+  }
+  
+  .high-contrast .danger-button {
+    background: #cc0000 !important;
+  }
+  
+  .font-large .emergency-button,
+  .font-extra-large .emergency-button {
+    padding: 2.5rem !important;
+    font-size: 1.5rem !important;
+  }
 }
