@@ -180,26 +180,14 @@ class PushNotificationService {
         icon: '/icon-192x192.png',
         badge: '/badge-72x72.png',
         tag: `alert-${alertId}`,
-        renotify: true,
         requireInteraction: type === 'danger',
         silent: false,
-        vibrate: type === 'danger' ? [200, 100, 200, 100, 200] : [200],
         data: {
           alertId,
           type,
           fromUser,
           url: '/dashboard'
-        },
-        actions: [
-          {
-            action: 'respond',
-            title: '💬 Respond'
-          },
-          {
-            action: 'dismiss',
-            title: '✕ Dismiss'
-          }
-        ]
+        }
       }
 
       const notification = new Notification(notificationTitle, notificationOptions)

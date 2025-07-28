@@ -626,11 +626,12 @@ class ValidationService {
     }
 
     // Check if it's a valid ISO string or Date object
-    let date: Date
+    let date: Date | null = null;
     try {
       date = new Date(timestamp)
       if (isNaN(date.getTime())) {
         errors.push('Invalid timestamp format')
+        date = null;
       }
     } catch (error) {
       errors.push('Invalid timestamp')

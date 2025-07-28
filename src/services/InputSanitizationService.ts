@@ -35,16 +35,16 @@ class InputSanitizationService {
     /on\w+\s*=/gi, // onclick, onload, etc.
     
     // SQL injection patterns (for completeness)
-    /('|(\\')|(;|(\%3B))|((\%27)|(\\x27))/gi,
-    /((\%3D)|(=))[^\n]*((\%27)|(\\')|(;|(\%3B)))/gi,
-    /\w*((\%27)|(\'))((\%6F)|o|(\%4F))((\%72)|r|(\%52))/gi,
+    /('|(\\')|;|(%3B)|(%27)|(\x27))/gi,
+    /((%3D)|=)[^\n]*((%27)|(\')|;|(%3B))/gi,
+    /\w*((%27)|(\'))((o|(%4F)|(%6F)))((%72)|r|(%52))/gi,
     
     // Command injection patterns
-    /[;&|`\$\(\)]/gi,
+    /[;&|`$()\[\]{}]/gi,
     
     // Path traversal patterns
     /\.\.\//gi,
-    /\.\.\\\/gi,
+    /\.\.\\/gi,
     /%2e%2e%2f/gi,
     /%2e%2e%5c/gi
   ]

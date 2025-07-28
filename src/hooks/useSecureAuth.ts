@@ -50,7 +50,7 @@ export const useSecureAuth = (): AuthState & AuthActions => {
           })
 
           if (!userValidation.isValid) {
-            throw new Error('Invalid user data: ' + userValidation.errors.join(', '))
+            throw new Error('Invalid user data: ' + Object.values(userValidation.errors).flat().join(', '))
           }
 
           // Get initial token
