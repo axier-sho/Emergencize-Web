@@ -43,6 +43,83 @@ export interface UserProfile {
   photoURL?: string
   bio?: string
   isPublic?: boolean
+  firstName?: string
+  lastName?: string
+  phone?: string
+  address?: string
+  emergencyContactName?: string
+  emergencyContactPhone?: string
+  medicalProfileId?: string
+  privacySettings?: PrivacySettings
+  onboardingCompleted?: boolean
+}
+
+export interface PrivacySettings {
+  locationSharing: 'precise' | 'approximate' | 'static'
+  medicalDataSharing: boolean
+  contactVisibility: 'all' | 'contacts' | 'none'
+  profileVisibility: 'public' | 'contacts' | 'private'
+  dataRetentionDays: number
+}
+
+export interface MedicalProfile {
+  id: string
+  userId: string
+  bloodType?: string
+  allergies: string[]
+  medications: MedicalMedication[]
+  conditions: MedicalCondition[]
+  emergencyContact: EmergencyMedicalContact
+  insuranceInfo?: InsuranceInformation
+  doctorInfo?: DoctorInformation
+  medicalNotes?: string
+  lastUpdated: Date
+  encryptionVersion: string
+}
+
+export interface MedicalMedication {
+  name: string
+  dosage: string
+  frequency: string
+  prescribedBy?: string
+  startDate?: Date
+  endDate?: Date
+  critical: boolean
+}
+
+export interface MedicalCondition {
+  name: string
+  severity: 'low' | 'medium' | 'high' | 'critical'
+  diagnosed: Date
+  treatingPhysician?: string
+  notes?: string
+  active: boolean
+}
+
+export interface EmergencyMedicalContact {
+  name: string
+  relationship: string
+  phone: string
+  email?: string
+  address?: string
+}
+
+export interface InsuranceInformation {
+  provider: string
+  policyNumber: string
+  groupNumber?: string
+  memberName: string
+  effectiveDate?: Date
+  expirationDate?: Date
+}
+
+export interface DoctorInformation {
+  name: string
+  specialty: string
+  phone: string
+  email?: string
+  address?: string
+  hospitalAffiliation?: string
 }
 
 export interface SafeZone {
@@ -148,6 +225,210 @@ class ValidationService {
     isPublic: {
       type: 'boolean',
       required: false
+    },
+    firstName: {
+      type: 'string',
+      required: false,
+      minLength: 1,
+      maxLength: 50
+    },
+    lastName: {
+      type: 'string',
+      required: false,
+      minLength: 1,
+      maxLength: 50
+    },
+    phone: {
+      type: 'string',
+      required: false,
+      pattern: /^\+?[\d\s\-\(\)]{10,20}$/
+    },
+    address: {
+      type: 'string',
+      required: false,
+      maxLength: 200
+    },
+    emergencyContactName: {
+      type: 'string',
+      required: false,
+      minLength: 1,
+      maxLength: 100
+    },
+    emergencyContactPhone: {
+      type: 'string',
+      required: false,
+      pattern: /^\+?[\d\s\-\(\)]{10,20}$/
+    },
+    medicalProfileId: {
+      type: 'string',
+      required: false,
+      maxLength: 128
+    },
+    onboardingCompleted: {
+      type: 'boolean',
+      required: false
+    }
+  }
+
+  /**
+   * Privacy Settings validation schema
+   */
+  private readonly privacySettingsSchema: ValidationSchema = {
+    locationSharing: {
+      type: 'string',
+      required: true,
+      allowedValues: ['precise', 'approximate', 'static']
+    },
+    medicalDataSharing: {
+      type: 'boolean',
+      required: true
+    },
+    contactVisibility: {
+      type: 'string',
+      required: true,
+      allowedValues: ['all', 'contacts', 'none']
+    },
+    profileVisibility: {
+      type: 'string',
+      required: true,
+      allowedValues: ['public', 'contacts', 'private']
+    },
+    dataRetentionDays: {
+      type: 'number',
+      required: true,
+      min: 30,
+      max: 3650
+    }
+  }
+
+  /**
+   * Medical Profile validation schema
+   */
+  private readonly medicalProfileSchema: ValidationSchema = {
+    id: {
+      type: 'string',
+      required: true,
+      maxLength: 128
+    },
+    userId: {
+      type: 'string',
+      required: true,
+      maxLength: 128
+    },
+    bloodType: {
+      type: 'string',
+      required: false,
+      allowedValues: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+    },
+    allergies: {
+      type: 'array',
+      required: false,
+      maxLength: 20
+    },
+    medications: {
+      type: 'array',
+      required: false,
+      maxLength: 50
+    },
+    conditions: {
+      type: 'array',
+      required: false,
+      maxLength: 20
+    },
+    'emergencyContact.name': {
+      type: 'string',
+      required: true,
+      minLength: 1,
+      maxLength: 100
+    },
+    'emergencyContact.relationship': {
+      type: 'string',
+      required: true,
+      minLength: 1,
+      maxLength: 50
+    },
+    'emergencyContact.phone': {
+      type: 'string',
+      required: true,
+      pattern: /^\+?[\d\s\-\(\)]{10,20}$/
+    },
+    'emergencyContact.email': {
+      type: 'email',
+      required: false
+    },
+    medicalNotes: {
+      type: 'string',
+      required: false,
+      maxLength: 1000
+    },
+    encryptionVersion: {
+      type: 'string',
+      required: true,
+      maxLength: 10
+    }
+  }
+
+  /**
+   * Medical Medication validation schema
+   */
+  private readonly medicalMedicationSchema: ValidationSchema = {
+    name: {
+      type: 'string',
+      required: true,
+      minLength: 1,
+      maxLength: 100
+    },
+    dosage: {
+      type: 'string',
+      required: true,
+      minLength: 1,
+      maxLength: 50
+    },
+    frequency: {
+      type: 'string',
+      required: true,
+      minLength: 1,
+      maxLength: 50
+    },
+    prescribedBy: {
+      type: 'string',
+      required: false,
+      maxLength: 100
+    },
+    critical: {
+      type: 'boolean',
+      required: true
+    }
+  }
+
+  /**
+   * Medical Condition validation schema
+   */
+  private readonly medicalConditionSchema: ValidationSchema = {
+    name: {
+      type: 'string',
+      required: true,
+      minLength: 1,
+      maxLength: 100
+    },
+    severity: {
+      type: 'string',
+      required: true,
+      allowedValues: ['low', 'medium', 'high', 'critical']
+    },
+    treatingPhysician: {
+      type: 'string',
+      required: false,
+      maxLength: 100
+    },
+    notes: {
+      type: 'string',
+      required: false,
+      maxLength: 500
+    },
+    active: {
+      type: 'boolean',
+      required: true
     }
   }
 
@@ -256,6 +537,75 @@ class ValidationService {
    */
   validateChatMessage(data: Partial<ChatMessage>): ValidationResults {
     return this.validate(data, this.chatMessageSchema)
+  }
+
+  /**
+   * Validate privacy settings data
+   */
+  validatePrivacySettings(data: Partial<PrivacySettings>): ValidationResults {
+    return this.validate(data, this.privacySettingsSchema)
+  }
+
+  /**
+   * Validate medical profile data
+   */
+  validateMedicalProfile(data: Partial<MedicalProfile>): ValidationResults {
+    return this.validate(data, this.medicalProfileSchema)
+  }
+
+  /**
+   * Validate medical medication data
+   */
+  validateMedicalMedication(data: Partial<MedicalMedication>): ValidationResults {
+    return this.validate(data, this.medicalMedicationSchema)
+  }
+
+  /**
+   * Validate medical condition data
+   */
+  validateMedicalCondition(data: Partial<MedicalCondition>): ValidationResults {
+    return this.validate(data, this.medicalConditionSchema)
+  }
+
+  /**
+   * Validate onboarding step data
+   */
+  validateOnboardingStep(data: { stepId: string; data: any }): ValidationResults {
+    const schemas: Record<string, ValidationSchema> = {
+      profile: this.userProfileSchema,
+      medical: this.medicalProfileSchema,
+      privacy: this.privacySettingsSchema,
+      safezones: this.safeZoneSchema
+    }
+
+    const schema = schemas[data.stepId]
+    if (!schema) {
+      return {
+        isValid: true,
+        errors: {},
+        warnings: {},
+        sanitizedData: data.data
+      }
+    }
+
+    return this.validate(data.data, schema)
+  }
+
+  /**
+   * Validate language code
+   */
+  validateLanguageCode(data: { languageCode: string }): ValidationResults {
+    const schema: ValidationSchema = {
+      languageCode: {
+        type: 'string',
+        required: true,
+        pattern: /^[a-z]{2}(-[A-Z]{2})?$/,
+        minLength: 2,
+        maxLength: 5
+      }
+    }
+
+    return this.validate(data, schema)
   }
 
   /**
