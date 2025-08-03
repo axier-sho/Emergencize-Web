@@ -12,8 +12,8 @@ export const metadata: Metadata = {
   themeColor: '#3b82f6',
   manifest: '/manifest.json',
   icons: {
-    icon: '/icon-192x192.png',
-    apple: '/icon-192x192.png'
+    icon: '/icon-192x192.svg',
+    apple: '/icon-192x192.svg'
   }
 }
 
@@ -24,13 +24,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#3b82f6" />
-        <link rel="manifest" href="/manifest.json" />
-        <link rel="icon" href="/icon-192x192.png" />
-        <link rel="apple-touch-icon" href="/icon-192x192.png" />
-      </head>
+
       <body className="antialiased">
         <ErrorBoundary>
           <AccessibilityProvider>

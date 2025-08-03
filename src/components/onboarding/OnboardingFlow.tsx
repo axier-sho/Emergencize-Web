@@ -2,19 +2,11 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Check, Skip, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Check, SkipForward, X } from 'lucide-react'
 import { useOnboarding } from './OnboardingProvider'
 import { useLocalization } from '../localization/LocalizationProvider'
 import WelcomeStep from './steps/WelcomeStep'
 import ProfileStep from './steps/ProfileStep'
-import ContactsStep from './steps/ContactsStep'
-import LocationStep from './steps/LocationStep'
-import MedicalStep from './steps/MedicalStep'
-import SafeZonesStep from './steps/SafeZonesStep'
-import PrivacyStep from './steps/PrivacyStep'
-import NotificationsStep from './steps/NotificationsStep'
-import TestStep from './steps/TestStep'
-import CompleteStep from './steps/CompleteStep'
 
 interface OnboardingFlowProps {
   onComplete?: () => void
@@ -24,15 +16,7 @@ interface OnboardingFlowProps {
 
 const stepComponents = {
   WelcomeStep,
-  ProfileStep,
-  ContactsStep,
-  LocationStep,
-  MedicalStep,
-  SafeZonesStep,
-  PrivacyStep,
-  NotificationsStep,
-  TestStep,
-  CompleteStep
+  ProfileStep
 }
 
 export function OnboardingFlow({ onComplete, onClose, className = '' }: OnboardingFlowProps) {
@@ -97,7 +81,7 @@ export function OnboardingFlow({ onComplete, onClose, className = '' }: Onboardi
   }
 
   const handleStepDataChange = (stepId: string, data: any) => {
-    setStepData(prev => ({
+    setStepData((prev: Record<string, any>) => ({
       ...prev,
       [stepId]: data
     }))
@@ -227,7 +211,7 @@ export function OnboardingFlow({ onComplete, onClose, className = '' }: Onboardi
                 whileHover={{ scale: isTransitioning ? 1 : 1.05 }}
                 whileTap={{ scale: isTransitioning ? 1 : 0.95 }}
               >
-                <Skip size={16} />
+                                      <SkipForward size={16} />
                 <span>{t('common.skip')}</span>
               </motion.button>
             )}

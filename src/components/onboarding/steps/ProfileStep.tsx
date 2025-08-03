@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { User, Mail, Phone, MapPin, Camera, Check, AlertCircle } from 'lucide-react'
 import { useLocalization } from '../../localization/LocalizationProvider'
-import { ValidationService } from '@/services/ValidationService'
+import { validationService } from '@/services/ValidationService'
 
 interface ProfileStepProps {
   onDataChange: (data: any) => void
@@ -46,16 +46,15 @@ export function ProfileStep({ onDataChange, initialData }: ProfileStepProps) {
   const validateAndUpdateData = async () => {
     setIsValidating(true)
     try {
-      const validationResult = ValidationService.validateUserProfile(profileData)
+      const validationResult = validationService.validateUserProfile(profileData)
       
       if (validationResult.isValid) {
         setErrors({})
         onDataChange(profileData)
       } else {
         const errorMap: Record<string, string> = {}
-        validationResult.errors.forEach(error => {
-          const field = error.split(':')[0]
-          errorMap[field] = error
+        Object.entries(validationResult.errors).forEach(([field, fieldErrors]) => {
+          errorMap[field] = fieldErrors.join(', ')
         })
         setErrors(errorMap)
       }

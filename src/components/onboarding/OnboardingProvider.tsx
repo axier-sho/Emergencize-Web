@@ -1,8 +1,8 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { ValidationService } from '@/services/ValidationService'
-import { SecurityMonitoringService } from '@/services/SecurityMonitoringService'
+import { validationService } from '@/services/ValidationService'
+import { securityMonitoringService } from '@/services/SecurityMonitoringService'
 
 export interface OnboardingStep {
   id: string
@@ -156,17 +156,15 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
           currentStep: newStepIndex
         }))
 
-        SecurityMonitoringService.getInstance().logSecurityEvent({
-          type: 'onboarding_step_progress',
+        securityMonitoringService.logSecurityEvent({
+          type: 'admin_action',
           severity: 'low',
           details: {
             stepId: steps[newStepIndex]?.id,
             stepIndex: newStepIndex,
             direction: 'forward'
           },
-          userId: 'current_user',
-          timestamp: new Date(),
-          riskScore: 0
+          userId: 'current_user'
         })
 
         return true
@@ -186,17 +184,15 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
         currentStep: newStepIndex
       }))
 
-      SecurityMonitoringService.getInstance().logSecurityEvent({
-        type: 'onboarding_step_progress',
+      securityMonitoringService.logSecurityEvent({
+        type: 'admin_action',
         severity: 'low',
         details: {
           stepId: steps[newStepIndex]?.id,
           stepIndex: newStepIndex,
           direction: 'backward'
         },
-        userId: 'current_user',
-        timestamp: new Date(),
-        riskScore: 0
+        userId: 'current_user'
       })
     }
   }
@@ -215,9 +211,9 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
     try {
       // Validate step completion data if provided
       if (data) {
-        const validationResult = ValidationService.validateOnboardingStep({ stepId, data })
+        const validationResult = validationService.validateOnboardingStep({ stepId, data })
         if (!validationResult.isValid) {
-          throw new Error(`Invalid step data: ${validationResult.errors.join(', ')}`)
+          throw new Error(`Invalid step data: ${Object.values(validationResult.errors).flat().join(', ')}`)
         }
       }
 
@@ -249,17 +245,15 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
         }
       })
 
-      SecurityMonitoringService.getInstance().logSecurityEvent({
-        type: 'onboarding_step_completed',
+      securityMonitoringService.logSecurityEvent({
+        type: 'admin_action',
         severity: 'low',
         details: {
           stepId,
           hasData: !!data,
           completedStepsCount: progress.completedSteps.length + 1
         },
-        userId: 'current_user',
-        timestamp: new Date(),
-        riskScore: 0
+        userId: 'current_user'
       })
 
       return true
@@ -287,13 +281,11 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
         )
       )
 
-      SecurityMonitoringService.getInstance().logSecurityEvent({
-        type: 'onboarding_step_skipped',
+      securityMonitoringService.logSecurityEvent({
+        type: 'admin_action',
         severity: 'low',
         details: { stepId },
-        userId: 'current_user',
-        timestamp: new Date(),
-        riskScore: 0
+        userId: 'current_user'
       })
 
       return true

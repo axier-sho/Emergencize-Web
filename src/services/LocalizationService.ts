@@ -1,5 +1,5 @@
-import { ValidationService } from './ValidationService'
-import { SecurityMonitoringService } from './SecurityMonitoringService'
+import { validationService } from './ValidationService'
+import { securityMonitoringService } from './SecurityMonitoringService'
 
 export interface SupportedLanguage {
   code: string
@@ -207,17 +207,15 @@ export class LocalizationService {
         this.currentLanguage = browserLanguage
       }
       
-      SecurityMonitoringService.getInstance().logSecurityEvent({
-        type: 'language_detection',
+      securityMonitoringService.logSecurityEvent({
+        type: 'admin_action',
         severity: 'low',
         details: {
           detectedLanguage: browserLanguage,
           selectedLanguage: this.currentLanguage,
           browserLanguages: navigator.languages
         },
-        userId: 'system',
-        timestamp: new Date(),
-        riskScore: 0
+        userId: 'system'
       })
     } catch (error) {
       console.warn('Failed to detect browser language:', error)
@@ -226,9 +224,9 @@ export class LocalizationService {
 
   async setLanguage(languageCode: string): Promise<boolean> {
     try {
-      const validationResult = ValidationService.validateLanguageCode({ languageCode })
+      const validationResult = validationService.validateLanguageCode({ languageCode })
       if (!validationResult.isValid) {
-        throw new Error(`Invalid language code: ${validationResult.errors.join(', ')}`)
+        throw new Error(`Invalid language code: ${Object.values(validationResult.errors).flat().join(', ')}`)
       }
 
       if (!this.isLanguageSupported(languageCode)) {
@@ -250,17 +248,15 @@ export class LocalizationService {
         localStorage.setItem('emergencize_language', languageCode)
       }
 
-      SecurityMonitoringService.getInstance().logSecurityEvent({
-        type: 'language_change',
+      securityMonitoringService.logSecurityEvent({
+        type: 'admin_action',
         severity: 'low',
         details: {
           previousLanguage,
           newLanguage: languageCode,
           userAgent: navigator.userAgent
         },
-        userId: 'current_user',
-        timestamp: new Date(),
-        riskScore: 0
+        userId: 'current_user'
       })
 
       return true

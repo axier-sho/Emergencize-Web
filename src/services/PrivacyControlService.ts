@@ -1,5 +1,5 @@
-import { ValidationService, PrivacySettings } from './ValidationService'
-import { SecurityMonitoringService } from './SecurityMonitoringService'
+import { validationService, PrivacySettings } from './ValidationService'
+import { securityMonitoringService } from './SecurityMonitoringService'
 
 export interface ContactPrivacySettings {
   contactId: string
@@ -70,7 +70,7 @@ export class PrivacyControlService {
   async updatePrivacySettings(userId: string, newSettings: Partial<PrivacySettings>): Promise<boolean> {
     try {
       // Validate new settings
-      const validationResult = ValidationService.getInstance().validatePrivacySettings(newSettings)
+      const validationResult = validationService.validatePrivacySettings(newSettings)
       if (!validationResult.isValid) {
         throw new Error(`Invalid privacy settings: ${Object.values(validationResult.errors).flat().join(', ')}`)
       }
@@ -94,17 +94,15 @@ export class PrivacyControlService {
         newValue: updatedSettings
       })
 
-      SecurityMonitoringService.getInstance().logSecurityEvent({
-        type: 'privacy_settings_updated',
+      securityMonitoringService.logSecurityEvent({
+        type: 'admin_action',
         severity: 'medium',
         details: {
           userId,
           changedSettings: Object.keys(newSettings),
           hasStricterSettings: this.isStricterPrivacy(currentSettings, updatedSettings)
         },
-        userId,
-        timestamp: new Date(),
-        riskScore: 15
+        userId
       })
 
       return true
@@ -295,8 +293,8 @@ export class PrivacyControlService {
         purpose: permission.purpose
       })
 
-      SecurityMonitoringService.getInstance().logSecurityEvent({
-        type: 'data_sharing_permission_granted',
+      securityMonitoringService.logSecurityEvent({
+        type: 'admin_action',
         severity: 'medium',
         details: {
           permissionId,
@@ -305,9 +303,7 @@ export class PrivacyControlService {
           purpose: permission.purpose,
           hasExpiration: !!permission.expiresAt
         },
-        userId: permission.userId,
-        timestamp: new Date(),
-        riskScore: 25
+        userId: permission.        userId
       })
 
       return permissionId
@@ -424,7 +420,7 @@ export class PrivacyControlService {
 
   private isStricterPrivacy(oldSettings: PrivacySettings, newSettings: PrivacySettings): boolean {
     const levelValues = { 'none': 0, 'static': 1, 'approximate': 2, 'precise': 3 }
-    const visibilityValues = { 'none': 0, 'private': 1, 'contacts': 2, 'public': 3 }
+    const visibilityValues = { 'none': 0, 'private': 1, 'contacts': 2, 'all': 2, 'public': 3 }
 
     return (
       levelValues[newSettings.locationSharing] < levelValues[oldSettings.locationSharing] ||

@@ -120,9 +120,7 @@ export class MedicalDataService {
           keyLength: this.KEY_LENGTH,
           version: this.CURRENT_VERSION
         },
-        userId: 'system',
-        timestamp: new Date(),
-        riskScore: 20
+        userId: 'system'
       })
     } catch (error) {
       console.error('Failed to initialize medical data encryption:', error)
@@ -149,9 +147,9 @@ export class MedicalDataService {
       }
 
       // Validate medical data before encryption
-      const validationResult = ValidationService.validateMedicalProfile(medicalProfile)
+      const validationResult = ValidationService.getInstance().validateMedicalProfile(medicalProfile)
       if (!validationResult.isValid) {
-        throw new Error(`Invalid medical data: ${validationResult.errors.join(', ')}`)
+        throw new Error(`Invalid medical data: ${Object.values(validationResult.errors).flat().join(', ')}`)
       }
 
       // Generate salt and IV
@@ -188,9 +186,7 @@ export class MedicalDataService {
           dataSize: dataString.length,
           version: this.CURRENT_VERSION
         },
-        userId: medicalProfile.userId,
-        timestamp: new Date(),
-        riskScore: 15
+        userId: medicalProfile.userId
       })
 
       return encryptedData
@@ -232,9 +228,7 @@ export class MedicalDataService {
           version: encryptedData.version,
           accessReason: 'data_retrieval'
         },
-        userId: medicalProfile.userId,
-        timestamp: new Date(),
-        riskScore: 25
+        userId: medicalProfile.userId
       })
 
       return medicalProfile
@@ -247,9 +241,7 @@ export class MedicalDataService {
           error: error instanceof Error ? error.message : 'Unknown error',
           version: encryptedData.version
         },
-        userId: 'unknown',
-        timestamp: new Date(),
-        riskScore: 80
+        userId: 'unknown'
       })
       throw new Error('Medical data decryption failed')
     }
@@ -292,9 +284,7 @@ export class MedicalDataService {
           hasMedications: medicalProfile.medications.length > 0,
           hasConditions: medicalProfile.conditions.length > 0
         },
-        userId,
-        timestamp: new Date(),
-        riskScore: 20
+        userId
       })
 
       return medicalProfile.id
@@ -330,9 +320,7 @@ export class MedicalDataService {
           userId: updatedProfile.userId,
           updatedFields: Object.keys(updates)
         },
-        userId: updatedProfile.userId,
-        timestamp: new Date(),
-        riskScore: 25
+        userId: updatedProfile.userId
       })
 
       return true
@@ -355,9 +343,7 @@ export class MedicalDataService {
             requestingUserId,
             reason: 'insufficient_permissions'
           },
-          userId: requestingUserId,
-          timestamp: new Date(),
-          riskScore: 60
+                  userId: requestingUserId
         })
         throw new Error('Access denied to medical data')
       }
@@ -410,9 +396,7 @@ export class MedicalDataService {
           profileId,
           accessType: 'emergency_info'
         },
-        userId,
-        timestamp: new Date(),
-        riskScore: 40
+        userId
       })
 
       await this.logMedicalDataAccess({
@@ -452,9 +436,7 @@ export class MedicalDataService {
           profileId,
           userId
         },
-        userId,
-        timestamp: new Date(),
-        riskScore: 30
+        userId
       })
 
       return true

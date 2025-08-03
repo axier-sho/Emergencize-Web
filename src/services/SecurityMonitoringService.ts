@@ -18,6 +18,15 @@ export type SecurityEventType =
   | 'device_change'
   | 'admin_action'
   | 'system_error'
+  | 'medical_encryption_initialized'
+  | 'medical_data_encrypted'
+  | 'medical_data_decrypted'
+  | 'medical_data_decryption_failed'
+  | 'medical_profile_created'
+  | 'medical_profile_updated'
+  | 'medical_data_access_denied'
+  | 'emergency_medical_access'
+  | 'medical_profile_deleted'
 
 export type SecuritySeverity = 'low' | 'medium' | 'high' | 'critical'
 
@@ -68,7 +77,15 @@ export interface SecurityMetrics {
 }
 
 class SecurityMonitoringService {
+  private static instance: SecurityMonitoringService
   private readonly MAX_RISK_SCORE = 100
+  
+  static getInstance(): SecurityMonitoringService {
+    if (!SecurityMonitoringService.instance) {
+      SecurityMonitoringService.instance = new SecurityMonitoringService()
+    }
+    return SecurityMonitoringService.instance
+  }
   private readonly RISK_THRESHOLDS = {
     low: 20,
     medium: 50,
@@ -216,7 +233,16 @@ class SecurityMonitoringService {
       'device_change': 1.1,
       'admin_action': 0.8,
       'system_error': 0.9,
-      'authentication_success': 0.5
+      'authentication_success': 0.5,
+      'medical_encryption_initialized': 0.8,
+      'medical_data_encrypted': 0.7,
+      'medical_data_decrypted': 1.2,
+      'medical_data_decryption_failed': 1.8,
+      'medical_profile_created': 0.6,
+      'medical_profile_updated': 0.7,
+      'medical_data_access_denied': 1.4,
+      'emergency_medical_access': 1.0,
+      'medical_profile_deleted': 1.1
     }
 
     baseScore *= typeMultipliers[type] || 1.0
@@ -300,7 +326,16 @@ class SecurityMonitoringService {
       'device_change': 'New Device Access',
       'admin_action': 'Administrative Action',
       'system_error': 'System Security Error',
-      'authentication_success': 'Authentication Event'
+      'authentication_success': 'Authentication Event',
+      'medical_encryption_initialized': 'Medical Data Encryption Setup',
+      'medical_data_encrypted': 'Medical Data Encrypted',
+      'medical_data_decrypted': 'Medical Data Access',
+      'medical_data_decryption_failed': 'Medical Data Decryption Failed',
+      'medical_profile_created': 'Medical Profile Created',
+      'medical_profile_updated': 'Medical Profile Updated',
+      'medical_data_access_denied': 'Medical Data Access Denied',
+      'emergency_medical_access': 'Emergency Medical Data Access',
+      'medical_profile_deleted': 'Medical Profile Deleted'
     }
 
     return titles[event.type] || 'Security Event'
@@ -531,6 +566,8 @@ class SecurityMonitoringService {
   }
 }
 
+// Export both the class and an instance for flexibility
+export { SecurityMonitoringService }
 export const securityMonitoringService = new SecurityMonitoringService()
 
 // React hook for security monitoring

@@ -143,6 +143,15 @@ export interface ChatMessage {
 }
 
 class ValidationService {
+  private static instance: ValidationService
+  
+  static getInstance(): ValidationService {
+    if (!ValidationService.instance) {
+      ValidationService.instance = new ValidationService()
+    }
+    return ValidationService.instance
+  }
+  
   /**
    * Emergency Alert validation schema
    */
@@ -1033,4 +1042,6 @@ class ValidationService {
   }
 }
 
+// Export both the class and an instance for flexibility
+export { ValidationService }
 export const validationService = new ValidationService()
