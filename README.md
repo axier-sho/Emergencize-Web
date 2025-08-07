@@ -1,36 +1,51 @@
 # Emergencize - Secure Real-Time Emergency Alert System
 
-![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB) ![Socket.io](https://img.shields.io/badge/Socket.io-black?style=for-the-badge&logo=socket.io&badgeColor=010101) ![Next JS](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white) ![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white) ![Firebase](https://img.shields.io/badge/firebase-a08021?style=for-the-badge&logo=firebase&logoColor=ffcd34) ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white) <br>
+![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB) ![Socket.io](https://img.shields.io/badge/Socket.io-black?style=for-the-badge&logo=socket.io&badgeColor=010101) ![Next JS](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white) ![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white) ![Firebase](https://img.shields.io/badge/firebase-a08021?style=for-the-badge&logo=firebase&logoColor=ffcd34) ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
 
-A modern, secure, and accessible web application for emergency alert management with real-time communication, comprehensive security features, and enterprise-level monitoring capabilities.
+A sophisticated, real-time emergency alert system built with Next.js, Socket.io, and Firebase. Features enterprise-grade security, comprehensive monitoring, accessibility compliance, and intelligent emergency response capabilities.
 
 ## Features
 
-### Core Emergency Features
-- **Real-time Emergency Alerts** - Instant notifications to online users with Socket.io
-- **Location Sharing** - GPS coordinates included in emergency alerts
-- **Geofencing & Safe Zones** - Set up safe zones and get alerts when contacts leave/enter areas
-- **Push Notifications** - Background alerts when app is not active
-- **Two Alert Types:**
-  - **Help Alert** - Non-critical assistance requests
-  - **Danger Alert** - Critical emergency situations
-- **Voice Calling** - WebRTC integration for emergency voice communication
+### Emergency Alert System
+- **Dual Alert Types** with intelligent targeting:
+  - **HELP Button** - Non-critical assistance requests (instant press, online contacts only)
+  - **DANGER Button** - Critical emergencies (3-second hold protection, all contacts including offline)
+- **Real-time Delivery** - Instant notifications via Socket.io to emergency contacts
+- **Location Integration** - GPS coordinates automatically included when permission granted
+- **Smart Contact Targeting** - Context-aware delivery based on alert severity
+- **Emergency Chat** - Direct messaging and group communication during emergencies
+- **Voice Call Signaling** - WebRTC integration for emergency voice communication
 
-### User Experience
-- **Modern Animated UI** - Smooth animations with Framer Motion
-- **Accessibility Features** - WCAG 2.1 AA compliance with customizable settings
-- **Online Presence System** - See who's currently online and available
-- **Error Handling** - Graceful error boundaries with user-friendly messages
-- **Responsive Design** - Works seamlessly on desktop and mobile devices
+### Contact Management & Presence
+- **Friend Request System** - Secure contact addition via email invitation
+- **Real-time Online Status** - Live presence tracking of emergency contacts
+- **Contact Customization** - Nicknames and relationship categorization
+- **Connection Status Indicators** - Visual feedback for system connectivity
+- **Contact Response Tracking** - Monitor alert acknowledgments and responses
+
+### Geofencing & Location Services
+- **Safe Zone Management** - Create and monitor custom geographic boundaries
+- **Zone Types** - Home, work, school, hospital, and custom locations
+- **Enter/Exit Notifications** - Automated alerts for safe zone transitions
+- **High-Accuracy GPS** - Precise location tracking during emergency situations
+- **Location Privacy Controls** - User-controlled location sharing preferences
+
+### Security Architecture
+- **Multi-Layer Input Sanitization** - XSS, SQL injection, and command injection protection
+- **Advanced Rate Limiting** - Operation-specific limits to prevent abuse
+- **Real-time Security Monitoring** - Comprehensive audit logging and threat detection
+- **Risk Scoring System** - Automated risk assessment for user actions
+- **Session Security** - Secure authentication with automatic token refresh
+- **Firebase Security Rules** - Database-level access control and validation
+
+### User Experience & Accessibility
+- **WCAG 2.1 AA Compliance** - Full accessibility support with screen reader compatibility
+- **Keyboard Navigation** - Complete keyboard-only operation for alerts and navigation
+- **Visual Animations** - Smooth Framer Motion animations with motion reduction options
+- **Glass Morphism Design** - Modern translucent UI with gradient backgrounds
 - **Progressive Web App** - App-like experience with offline capabilities
-
-### Security & Privacy
-- **Enterprise-Grade Security** - Comprehensive input validation and sanitization
-- **Rate Limiting** - Protection against abuse and spam
-- **XSS Protection** - Advanced pattern detection and content sanitization
-- **Secure Authentication** - Automatic token refresh and session management
-- **Audit Logging** - Complete security event tracking and monitoring
-- **Firebase Security Rules** - Multi-layered database protection
+- **Responsive Design** - Optimized for desktop, tablet, and mobile devices
+- **Error Boundaries** - Graceful error handling with user-friendly recovery options
 
 ## Quick Start
 
@@ -81,24 +96,46 @@ Open [http://localhost:3000](http://localhost:3000) in multiple browser windows 
 /
   src/
     app/
-      page.tsx                      # Main dashboard
-      layout.tsx                    # App layout
-      globals.css                   # Global styles
+      page.tsx                     # Landing page with authentication
+      dashboard/page.tsx           # Main emergency dashboard
+      about/page.tsx              # About page
+      notifications/page.tsx      # Notification center
+      how-to-use/page.tsx         # User guide
+      layout.tsx                  # App layout and global providers
+      globals.css                 # Global styles and animations
     components/
       accessibility/
-        AccessibilitySettings.tsx   # WCAG compliance settings
+        AccessibilityProvider.tsx  # WCAG compliance provider
+        AccessibilitySettings.tsx  # Accessibility configuration
       error-handling/
-        ErrorBoundary.tsx          # React error boundaries
-      notifications/
-        AlertNotification.tsx      # Enhanced alert notifications
-      ui/
-        LoadingAnimation.tsx       # Opening animation
-        EmergencyButton.tsx        # Emergency buttons
-        OnlineUsers.tsx           # User presence display
+        ErrorBoundary.tsx         # React error boundaries
+        ErrorNotifications.tsx     # Error display system
+        SocketErrorHandler.tsx     # Socket connection error handling
+      geofencing/
+        GeofenceManager.tsx       # Safe zone management UI
+      onboarding/
+        OnboardingFlow.tsx        # User onboarding process
+        OnboardingProvider.tsx    # Onboarding state management
+      EmergencyButton.tsx         # Emergency alert buttons
+      AlertNotification.tsx       # Enhanced alert notifications
+      OnlineUsers.tsx            # User presence display
+      ContactManager.tsx         # Contact management interface
+      DashboardStats.tsx         # Dashboard metrics display
+      QuickActions.tsx           # Quick action buttons
+      EmergencyChat.tsx          # Emergency chat system
+      ChatWindow.tsx             # Individual chat interface
+      SettingsModal.tsx          # User settings configuration
+      LoadingAnimation.tsx       # Animated loading screen
+      AuthModal.tsx              # Authentication modal
     hooks/
-      useAuth.ts                   # Firebase authentication
-      useSecureAuth.ts            # Enhanced auth with token refresh
-      useSocket.ts                # Socket.io connection
+      useAuth.ts                 # Firebase authentication
+      useSecureAuth.ts           # Enhanced auth with token refresh
+      useSocket.ts               # Socket.io connection management
+      useContacts.ts             # Contact management
+      useFriendRequests.ts       # Friend request system
+      useAccessibility.ts        # Accessibility preferences
+      useErrorHandler.ts         # Error handling utilities
+      usePushNotifications.ts    # Push notification management
     services/
       InputSanitizationService.ts # XSS protection & sanitization
       ValidationService.ts        # Schema-based data validation
@@ -106,15 +143,20 @@ Open [http://localhost:3000](http://localhost:3000) in multiple browser windows 
       SecurityMonitoringService.ts # Audit logging & threat detection
       PushNotificationService.ts  # Background notifications
       GeofencingService.ts        # Safe zone management
+      LocationService.ts          # GPS and location handling
+      MedicalDataService.ts       # Medical information encryption
+      PrivacyControlService.ts    # Privacy settings management
+      LocalizationService.ts     # Multi-language support
     utils/
-      securityUtils.ts            # Security utility functions
+      securityUtils.ts           # Security utility functions
     lib/
-      firebase.ts                 # Firebase configuration
-      database.ts                 # Database operations
-  server.js                       # Enhanced Socket.io server with security
-  firestore.rules                 # Firestore security rules
-  database.rules.json             # Realtime Database security rules
-  package.json                    # Dependencies
+      firebase.ts                # Firebase configuration
+      database.ts                # Database operations and queries
+  server.js                      # Enhanced Socket.io server with security
+  firestore.rules                # Firestore security rules
+  database.rules.json            # Realtime Database security rules
+  package.json                   # Dependencies and scripts
+  FIREBASE_SETUP.md              # Firebase configuration guide
 ```
 
 ## Design Features
@@ -133,24 +175,41 @@ Open [http://localhost:3000](http://localhost:3000) in multiple browser windows 
 
 ## Technical Implementation
 
-### Real-Time Communication
-- **Socket.io** for instant message delivery
-- **User Presence** tracking who's online
-- **Room-based** messaging system
-- **Automatic Reconnection** handling
+### Real-Time Communication Architecture
+- **Socket.io Server** - Node.js/Express server with comprehensive message validation
+- **User Presence System** - Live tracking of online/offline status with automatic cleanup
+- **Room-Based Messaging** - Secure, authenticated connections with user-specific rooms
+- **Message Validation** - Server-side sanitization and validation of all socket messages
+- **Automatic Reconnection** - Robust connection handling with graceful degradation
+- **Rate Limiting** - Per-user, per-operation limits to prevent abuse and spam
 
 ### Emergency Alert Flow
-1. User presses emergency button
-2. Location is captured (if permitted)
-3. Alert is sent via Socket.io to all online users
-4. Recipients receive animated notification
-5. Optional response system for acknowledgment
+1. **Button Interaction** - HELP (instant) or DANGER (3-second hold with progress indicator)
+2. **Location Capture** - GPS coordinates obtained if user permission granted
+3. **Contact Targeting** - Smart routing based on alert type and contact availability
+4. **Dual Delivery** - Real-time Socket.io + persistent Firebase storage
+5. **Visual Feedback** - Animated notifications with alert-specific styling and sounds
+6. **Response Tracking** - Acknowledgment system with response time monitoring
 
-### Web-Optimized Features
-- **Geolocation API** for location sharing
-- **Vibration API** for haptic feedback (mobile)
-- **Web Audio API** for alert sounds
-- **Service Workers** for background notifications
+### Security Implementation
+- **Input Sanitization Service** - Comprehensive XSS, injection, and malicious payload detection
+- **Validation Service** - Schema-based validation for all data structures
+- **Security Monitoring Service** - Real-time audit logging with risk scoring
+- **Rate Limit Service** - Configurable limits with automatic violation detection
+- **Firebase Security Rules** - Multi-layered database protection with user-based access control
+
+### Data Architecture
+- **Firebase Firestore** - Primary database for persistent data with security rules
+- **Firebase Realtime Database** - Live presence and real-time features
+- **Local Storage** - Offline caching and security event storage
+- **Session Management** - Secure token handling with automatic refresh
+
+### Web Platform Features
+- **Geolocation API** - High-accuracy GPS with fallback options
+- **Web Audio API** - Dynamic alert sounds with different patterns for alert types
+- **Vibration API** - Haptic feedback on supported mobile devices
+- **Service Workers** - Background notifications and offline capabilities
+- **Push Notifications** - Browser-based alerts when app is not active
 
 ## iPhone → Web Adaptations
 
@@ -198,38 +257,51 @@ The app is fully responsive and includes mobile-specific features:
 
 ## Security Architecture
 
-### Multi-Layer Security System
+### Comprehensive Multi-Layer Security System
 
-#### Input Validation & Sanitization
-- **XSS Protection**: Advanced pattern detection and HTML sanitization
-- **SQL Injection Prevention**: Parameterized queries and input validation
-- **Schema-Based Validation**: Type-safe validation for all data structures
-- **Content Security Policy**: Strict CSP headers and dangerous content filtering
+#### Advanced Input Sanitization
+- **XSS Protection**: Multi-pattern detection including script tags, iframes, javascript: URLs, and event handlers
+- **SQL Injection Prevention**: Pattern detection and input validation for database queries
+- **Command Injection Protection**: Detection and filtering of dangerous shell characters
+- **Path Traversal Prevention**: Protection against directory traversal attacks
+- **Schema-Based Validation**: Type-safe validation with configurable field rules and length limits
+- **HTML Sanitization**: Safe HTML processing with allowed tag and attribute whitelisting
 
-#### Authentication & Authorization
-- **Secure Token Management**: Automatic JWT refresh and expiration handling
-- **Session Security**: Secure session management with device fingerprinting
-- **Multi-Factor Support**: Ready for MFA integration
-- **Rate-Limited Auth**: Protection against brute force attacks
+#### Authentication & Session Security
+- **Firebase Authentication**: Enterprise-grade user authentication with automatic token refresh
+- **Session Management**: Secure session handling with device fingerprinting and anomaly detection
+- **Online Presence Tracking**: Real-time user status with automatic cleanup on disconnect
+- **Rate-Limited Authentication**: Brute force protection with configurable attempt limits
+- **Security Event Logging**: Comprehensive audit trail for all authentication events
 
 #### Real-Time Communication Security
-- **Socket Validation**: All socket messages validated and sanitized
-- **Rate Limiting**: Per-user, per-operation rate limits
-- **Connection Security**: Authenticated socket connections only
-- **Message Encryption**: Secure message transmission
+- **Socket Message Validation**: Server-side validation and sanitization of all Socket.io messages
+- **Rate Limiting by Operation**: Granular limits (emergency alerts: 5/min, chat: 60/min, status: 30/min)
+- **Authenticated Connections**: All socket connections require valid Firebase authentication
+- **Message Sanitization**: Real-time content filtering and dangerous pattern removal
+- **Connection State Management**: Secure user presence tracking with automatic cleanup
 
-#### Database Security
-- **Firebase Security Rules**: Comprehensive Firestore and Realtime Database rules
-- **Access Control**: User-based data access with strict validation
-- **Data Sanitization**: All data sanitized before storage
-- **Audit Logging**: Complete database operation logging
+#### Database Security & Access Control
+- **Firebase Security Rules**: Multi-layered access control for Firestore and Realtime Database
+- **User-Based Data Access**: Strict per-user data isolation with relationship-based sharing
+- **Emergency Alert Privacy**: Alerts only visible to sender and designated recipients
+- **Contact System Security**: Friend request validation and contact verification
+- **Location Data Protection**: Secure GPS coordinate handling with precision controls
 
-#### Monitoring & Threat Detection
-- **Real-Time Monitoring**: Live security event tracking
-- **Risk Scoring**: Automated risk assessment for user actions
-- **Anomaly Detection**: Suspicious behavior pattern recognition
-- **Alert System**: Automatic security alert generation
-- **Audit Trail**: Complete security event history
+#### Security Monitoring & Threat Detection
+- **Real-Time Audit Logging**: Comprehensive logging of all security-relevant events
+- **Risk Scoring System**: Automated risk assessment (0-100) based on event type and user behavior
+- **Anomaly Detection**: Pattern recognition for suspicious activities and repeated failures
+- **Security Alert Generation**: Automatic alert creation for high-risk events
+- **Threat Intelligence**: Behavioral analysis and trend monitoring
+- **Admin Notification System**: Real-time alerts for critical security events
+
+#### Data Protection & Privacy
+- **Medical Data Encryption**: Specialized encryption service for sensitive medical information
+- **Privacy Control Service**: User-configurable privacy settings and data sharing controls
+- **Location Privacy**: Granular controls for location sharing and GPS coordinate access
+- **Contact Privacy**: Secure friend request system with email verification
+- **Data Retention Policies**: Automatic cleanup of old security events and temporary data
 
 ### Security Services
 
@@ -345,13 +417,34 @@ This project is licensed under the GPL v3 License - see the [LICENSE](LICENSE) f
 
 ## Emergency Features Summary
 
-- **Real-time alerts** with Socket.io
-- **Location sharing** with privacy controls
-- **Geofencing** for safe zone monitoring
-- **Push notifications** for background alerts
-- **Voice calling** via WebRTC
-- **Accessibility** features for all users
-- **Enterprise security** with comprehensive monitoring
-- **Error handling** with graceful fallbacks
-- **Rate limiting** to prevent abuse
-- **Audit logging** for compliance
+### Core Emergency Capabilities
+- **Dual Alert System** - HELP (instant) and DANGER (3-second hold) buttons with intelligent contact targeting
+- **Real-Time Delivery** - Instant Socket.io notifications plus persistent Firebase storage for offline contacts
+- **Location Integration** - Automatic GPS coordinate inclusion with user privacy controls
+- **Emergency Chat** - Direct messaging and group communication during crisis situations
+- **Voice Call Signaling** - WebRTC integration for emergency voice communication
+
+### Contact & Presence Management
+- **Friend Request System** - Secure contact addition with email verification
+- **Live Presence Tracking** - Real-time online/offline status with automatic state management
+- **Contact Customization** - Relationship categorization and nickname assignment
+- **Response Monitoring** - Alert acknowledgment tracking and response time metrics
+
+### Safety & Location Features
+- **Geofencing Service** - Custom safe zone creation with enter/exit notifications
+- **High-Accuracy GPS** - Precise location tracking with coordinate validation and privacy controls
+- **Safe Zone Types** - Predefined categories (home, work, school, hospital) and custom zones
+- **Location Privacy** - Granular user controls for GPS sharing and coordinate precision
+
+### Security & Compliance
+- **Enterprise-Grade Security** - Multi-layer input sanitization, XSS protection, and injection prevention
+- **Real-Time Monitoring** - Comprehensive security event logging with automated risk scoring
+- **Rate Limiting Protection** - Operation-specific limits to prevent abuse and ensure system stability
+- **Accessibility Compliance** - WCAG 2.1 AA support with screen reader compatibility and keyboard navigation
+- **Data Protection** - Medical data encryption, privacy controls, and secure contact management
+
+### Technical Infrastructure
+- **Progressive Web App** - App-like experience with offline capabilities and push notifications
+- **Responsive Design** - Optimized experience across desktop, tablet, and mobile devices
+- **Error Resilience** - Graceful error boundaries with user-friendly recovery options
+- **Performance Optimization** - Efficient real-time subscriptions and optimized Firebase SDK usage
