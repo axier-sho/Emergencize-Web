@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { AlertTriangle, Shield, Users, Zap, Github, Info, ArrowRight, LogIn, UserPlus, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import AuthModal from '@/components/AuthModal'
@@ -9,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useClient, useWindowSize } from '@/hooks/useClient'
 
 export default function LandingPage() {
+  const router = useRouter()
   const [showContent, setShowContent] = useState(false)
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login')
@@ -238,16 +240,22 @@ export default function LandingPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.7 }}
             >
-              <Link href="/dashboard">
-                <motion.button
-                  className="group flex items-center space-x-3 px-8 py-4 bg-white text-blue-600 rounded-full font-semibold text-lg shadow-xl hover:shadow-2xl transition-all"
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <span>Get Started</span>
-                  <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                </motion.button>
-              </Link>
+              <motion.button
+                onClick={() => {
+                  if (user) {
+                    router.push('/dashboard')
+                  } else {
+                    setAuthMode('login')
+                    setAuthModalOpen(true)
+                  }
+                }}
+                className="group flex items-center space-x-3 px-8 py-4 bg-white text-blue-600 rounded-full font-semibold text-lg shadow-xl hover:shadow-2xl transition-all"
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <span>Get Started</span>
+                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+              </motion.button>
 
               <Link href="/about">
                 <motion.button
