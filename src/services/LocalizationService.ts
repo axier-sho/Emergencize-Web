@@ -207,16 +207,18 @@ export class LocalizationService {
         this.currentLanguage = browserLanguage
       }
       
-      securityMonitoringService.logSecurityEvent({
-        type: 'admin_action',
-        severity: 'low',
-        details: {
-          detectedLanguage: browserLanguage,
-          selectedLanguage: this.currentLanguage,
-          browserLanguages: navigator.languages
-        },
-        userId: 'system'
-      })
+      securityMonitoringService
+        .logSecurityEvent({
+          type: 'admin_action',
+          severity: 'low',
+          details: {
+            detectedLanguage: browserLanguage,
+            selectedLanguage: this.currentLanguage,
+            browserLanguages: navigator.languages,
+          },
+          userId: 'system',
+        })
+        .catch(() => {})
     } catch (error) {
       console.warn('Failed to detect browser language:', error)
     }
@@ -248,16 +250,20 @@ export class LocalizationService {
         localStorage.setItem('emergencize_language', languageCode)
       }
 
-      securityMonitoringService.logSecurityEvent({
-        type: 'admin_action',
-        severity: 'low',
-        details: {
-          previousLanguage,
-          newLanguage: languageCode,
-          userAgent: navigator.userAgent
-        },
-        userId: 'current_user'
-      })
+      try {
+        await securityMonitoringService.logSecurityEvent({
+          type: 'admin_action',
+          severity: 'low',
+          details: {
+            previousLanguage,
+            newLanguage: languageCode,
+            userAgent: navigator.userAgent,
+          },
+          userId: 'current_user',
+        })
+      } catch (_) {
+        // ignore logging failures
+      }
 
       return true
     } catch (error) {

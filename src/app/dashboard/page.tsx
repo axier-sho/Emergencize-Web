@@ -110,8 +110,13 @@ export default function DashboardPage() {
       : 'I need help, please respond when you can.'
 
     // Get contact user IDs for the alert
-    const contactIds = contacts.map(contact => contact.contactUserId).filter(Boolean)
-    const onlineContactIds = contacts.filter(c => c.isOnline).map(c => c.contactUserId)
+    const contactIds = contacts
+      .map(contact => contact.contactUserId)
+      .filter((id): id is string => typeof id === 'string' && id.length > 0)
+    const onlineContactIds = contacts
+      .filter(c => c.isOnline)
+      .map(c => c.contactUserId)
+      .filter((id): id is string => typeof id === 'string' && id.length > 0)
 
     const alertData = {
       type,

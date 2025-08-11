@@ -80,9 +80,10 @@ self.addEventListener('push', (event) => {
   const notificationTitle = type === 'danger' ? '🚨 EMERGENCY ALERT' : '💙 HELP REQUEST'
   const notificationOptions = {
     body: `From: ${fromUser}\n${message}${location ? '\n📍 Location included' : ''}`,
-    icon: '/icon-192x192.png',
-    badge: '/badge-72x72.png',
-    image: type === 'danger' ? '/emergency-banner.png' : '/help-banner.png',
+    icon: '/icon-192x192.svg',
+    // Optional assets commented out until provided
+    // badge: '/badge-72x72.png',
+    // image: type === 'danger' ? '/emergency-banner.png' : '/help-banner.png',
     tag: `alert-${alertId}`,
     renotify: true,
     requireInteraction: type === 'danger', // Keep emergency alerts visible
@@ -302,9 +303,9 @@ self.addEventListener('fetch', (event) => {
           })
       })
       .catch(() => {
-        // Return offline page for navigation requests
+        // If offline.html is not present, simply fail silently
         if (event.request.mode === 'navigate') {
-          return caches.match('/offline.html')
+          return new Response('', { status: 204 })
         }
       })
   )

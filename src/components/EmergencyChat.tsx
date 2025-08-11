@@ -177,14 +177,18 @@ export default function EmergencyChat({
     if (socket) {
       socket.emit('typing-group', {
         userId: currentUserId,
-        userName: currentUserName
+        userName: currentUserName,
+        recipients: contacts.map(c => c.userId),
       })
     }
   }
 
   const handleStopTyping = () => {
     if (socket) {
-      socket.emit('stop-typing-group', { userId: currentUserId })
+      socket.emit('stop-typing-group', {
+        userId: currentUserId,
+        recipients: contacts.map(c => c.userId),
+      })
     }
   }
 

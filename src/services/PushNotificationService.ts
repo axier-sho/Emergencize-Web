@@ -107,6 +107,11 @@ class PushNotificationService {
         return null
       }
 
+      if (!this.vapidPublicKey) {
+        console.warn('VAPID public key not configured. Skipping push subscription.')
+        return null
+      }
+
       // Check for existing subscription
       let subscription = await this.serviceWorkerRegistration.pushManager.getSubscription()
 
@@ -282,6 +287,9 @@ class PushNotificationService {
 
   // Utility methods
   private urlBase64ToUint8Array(base64String: string): Uint8Array {
+    if (!base64String) {
+      return new Uint8Array()
+    }
     const padding = '='.repeat((4 - base64String.length % 4) % 4)
     const base64 = (base64String + padding)
       .replace(/\-/g, '+')

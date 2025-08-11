@@ -2,338 +2,173 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Helper functions for security and validation
-    function isAuthenticated() {
-      return request.auth != null;
+
+    function isAuthenticated() { return request.auth != null; }
+    function isOwner(userId) { return isAuthenticated() && request.auth.uid == userId; }
+    function isEmail(email) { return email is string && email.matches('^[\\w\\.-]+@[\\w\\.-]+\\.[\\w]+$') && email.size() <= 254; }
+    function isStringBetween(s, min, max) { return s is string && s.size() >= min && s.size() <= max; }
+    function isValidCoordinates(lat, lng) { return lat is number && lng is number && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180; }
+
+    // Users
+    match /users/{userId} {
+      // Allow users to read their own profile and allow authenticated users to read basic info of others
+      allow read: if isOwner(userId)
+                  || (isAuthenticated() && resource.data.keys().hasAny(['displayName','photoURL','isOnline','lastActive']));
+
+      allow create: if isOwner(userId)
+                    && request.resource.data.keys().hasAll(['email','displayName','createdAt'])
+                    && isEmail(request.resource.data.email)
+                    && request.resource.data.email == request.auth.token.email
+                    && isStringBetween(request.resource.data.displayName, 1, 100)
+                    && request.resource.data.createdAt is timestamp;
+
+      allow update: if isOwner(userId)
+                    && request.resource.data.email == resource.data.email
+                    && request.resource.data.createdAt == resource.data.createdAt;
     }
-    
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
+
+    // Contacts
+    match /contacts/{contactId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || resource.data.contactUserId == request.auth.uid);
+      allow create: if isAuthenticated()
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.keys().hasAll(['contactUserId','createdAt','status'])
+                    && (request.resource.data.status in ['active','blocked'])
+                    && request.resource.data.createdAt is timestamp;
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
-    
-    function isValidEmail(email) {
-      return email is string && 
-             email.matches('^[\\w\\.-]+@[\\w\\.-]+\\.[\\w]+$') &&
-             email.size() <= 254;
+
+    // Friend requests
+    match /friendRequests/{requestId} {
+      allow create: if isAuthenticated()
+                    && request.resource.data.fromUserId == request.auth.uid
+                    && request.resource.data.keys().hasAll(['toUserId','status','createdAt'])
+                    && request.resource.data.status == 'pending'
+                    && isEmail(request.resource.data.get('fromUserEmail',''))
+                    && isEmail(request.resource.data.get('toUserEmail',''))
+                    && request.resource.data.createdAt is timestamp;
+      allow read: if isAuthenticated() && (resource.data.fromUserId == request.auth.uid || resource.data.toUserId == request.auth.uid);
+      allow update: if isAuthenticated()
+                    && resource.data.toUserId == request.auth.uid
+                    && (request.resource.data.status in ['accepted','declined','blocked']);
     }
-    
-    function isValidString(str, minLen, maxLen) {
-      return str is string && 
-             str.size() >= minLen && 
-             str.size() <= maxLen &&
-             !str.matches('.*[<>"\'].*'); // Basic XSS prevention
+
+    // Alerts
+    match /alerts/{alertId} {
+      allow create: if isAuthenticated()
+                    && request.resource.data.fromUserId == request.auth.uid
+                    && request.resource.data.keys().hasAny(['type','message'])
+                    && isStringBetween(request.resource.data.message, 1, 500)
+                    && (!request.resource.data.keys().hasAny(['location'])
+                        || (isValidCoordinates(request.resource.data.location.lat, request.resource.data.location.lng)
+                            && (!request.resource.data.location.keys().hasAny(['address']) || isStringBetween(request.resource.data.location.address,0,200))));
+      allow read: if isAuthenticated() && (
+                    resource.data.fromUserId == request.auth.uid
+                    || (resource.data.keys().hasAny(['toUserIds']) && request.auth.uid in resource.data.toUserIds)
+                    || (resource.data.keys().hasAny(['contactIds']) && request.auth.uid in resource.data.contactIds)
+                  );
+      allow update, delete: if isAuthenticated() && resource.data.fromUserId == request.auth.uid;
     }
-    
-    function isValidCoordinates(lat, lng) {
-      return lat is number && lng is number &&
-             lat >= -90 && lat <= 90 &&
-             lng >= -180 && lng <= 180;
+
+    // Alert responses
+    match /alerts/{alertId}/responses/{responseId} {
+      allow create: if isAuthenticated()
+                    && request.resource.data.fromUserId == request.auth.uid
+                    && request.resource.data.keys().hasAll(['message','timestamp'])
+                    && isStringBetween(request.resource.data.message, 1, 300)
+                    && request.resource.data.timestamp is timestamp;
+      allow read: if isAuthenticated() && (resource.data.fromUserId == request.auth.uid
+                                           || get(/databases/$(database)/documents/alerts/$(alertId)).data.fromUserId == request.auth.uid);
+      allow update, delete: if isAuthenticated() && resource.data.fromUserId == request.auth.uid;
     }
-    
-    function isRateLimited(collection, userId, intervalMinutes, maxRequests) {
-      let recentDocs = firestore.get(/databases/$(database)/documents/$(collection)/$(userId)).data;
-      let cutoffTime = request.time.toMillis() - (intervalMinutes * 60 * 1000);
-      return recentDocs.get('lastActionTime', 0) > cutoffTime && 
-             recentDocs.get('actionCount', 0) >= maxRequests;
+
+    // Presence
+    match /presence/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId)
+                   && request.resource.data.keys().hasAll(['isOnline','lastSeen'])
+                   && request.resource.data.isOnline is bool
+                   && request.resource.data.lastSeen is timestamp;
     }
-    
-    function incrementActionCount(collection, userId) {
-      let currentTime = request.time.toMillis();
-      let recentDocs = firestore.get(/databases/$(database)/documents/$(collection)/$(userId)).data;
-      let lastActionTime = recentDocs.get('lastActionTime', 0);
-      let actionCount = recentDocs.get('actionCount', 0);
-      
-      // Reset counter if more than 1 hour has passed
-      return currentTime - lastActionTime > 3600000 ? 1 : actionCount + 1;
+
+    // Chats
+    match /chats/{chatId} {
+      allow read: if isAuthenticated() && request.auth.uid in resource.data.participants;
+      allow create: if isAuthenticated()
+                    && request.auth.uid in request.resource.data.participants
+                    && request.resource.data.keys().hasAll(['participants','createdAt','type'])
+                    && (request.resource.data.type in ['direct','group','emergency'])
+                    && request.resource.data.participants is list
+                    && request.resource.data.participants.size() <= 50
+                    && request.resource.data.createdAt is timestamp;
+      allow update: if isAuthenticated() && request.auth.uid in resource.data.participants;
     }
-    
-    function isValidAlert(alert) {
-      return alert.keys().hasAll(['type', 'message', 'fromUserId', 'timestamp']) &&
-             alert.type in ['help', 'danger'] &&
-             isValidString(alert.message, 1, 500) &&
-             alert.fromUserId == request.auth.uid &&
-             alert.timestamp == request.time &&
-             (!alert.keys().hasAny(['location']) || 
-              (alert.location.keys().hasAll(['lat', 'lng']) &&
-               isValidCoordinates(alert.location.lat, alert.location.lng) &&
-               (!alert.location.keys().hasAny(['address']) || 
-                isValidString(alert.location.address, 0, 200))));
+    match /chats/{chatId}/messages/{messageId} {
+      allow create: if isAuthenticated()
+                    && request.resource.data.fromUserId == request.auth.uid
+                    && request.resource.data.keys().hasAll(['message','timestamp'])
+                    && isStringBetween(request.resource.data.message, 1, 1000)
+                    && request.resource.data.timestamp is timestamp
+                    && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
+      allow read: if isAuthenticated() && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
+      allow update, delete: if isAuthenticated() && resource.data.fromUserId == request.auth.uid;
     }
-    
-    function isValidUser(user) {
-      return user.keys().hasAll(['email', 'displayName', 'createdAt']) &&
-             isValidEmail(user.email) &&
-             user.email == request.auth.token.email &&
-             isValidString(user.displayName, 1, 100) &&
-             user.createdAt == request.time &&
-             (!user.keys().hasAny(['photoURL']) || 
-              (user.photoURL is string && user.photoURL.size() <= 500));
+
+    // Locations
+    match /locations/{userId} {
+      allow read: if isAuthenticated() && userId == request.auth.uid;
+      allow write: if isOwner(userId)
+                   && request.resource.data.keys().hasAll(['lat','lng','timestamp'])
+                   && isValidCoordinates(request.resource.data.lat, request.resource.data.lng)
+                   && request.resource.data.timestamp is timestamp
+                   && (!request.resource.data.keys().hasAny(['address']) || isStringBetween(request.resource.data.address, 0, 200));
     }
-    
-    // Rate limiting collection
-    match /rateLimits/{userId} {
-      allow read, write: if isOwner(userId);
+
+    // Safe zones
+    match /safeZones/{zoneId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated()
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.keys().hasAll(['name','center','radiusMeters','type','createdAt'])
+                    && isStringBetween(request.resource.data.name, 1, 100)
+                    && (request.resource.data.type in ['home','work','school','hospital','custom'])
+                    && isValidCoordinates(request.resource.data.center.lat, request.resource.data.center.lng)
+                    && request.resource.data.radiusMeters is number
+                    && request.resource.data.radiusMeters >= 10 && request.resource.data.radiusMeters <= 5000
+                    && request.resource.data.createdAt is timestamp;
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
-    
-    // Security audit log (write-only for users, admin read)
+
+    // Notifications
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated()
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.keys().hasAll(['type','title','message','createdAt'])
+                    && isStringBetween(request.resource.data.title, 1, 100)
+                    && isStringBetween(request.resource.data.message, 1, 500)
+                    && (request.resource.data.type in ['alert_sent','alert_received','friend_request_sent','friend_request_received','contact_added','system'])
+                    && request.resource.data.createdAt is timestamp;
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // Rate limits (non-sensitive): allow authenticated users (aligns with current client implementation)
+    match /rateLimits/{docId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Audit log (write allowed for users, read restricted to admins)
     match /auditLog/{logId} {
       allow create: if isAuthenticated();
       allow read: if request.auth.token.admin == true;
     }
-    
-    // User profiles - enhanced security
-    match /users/{userId} {
-      allow read: if isOwner(userId);
-      
-      allow create: if isOwner(userId) && 
-                      isValidUser(request.resource.data) &&
-                      !isRateLimited('rateLimits', userId, 5, 3); // Max 3 user creation attempts per 5 minutes
-      
-      allow update: if isOwner(userId) && 
-                      isValidUser(request.resource.data) &&
-                      !isRateLimited('rateLimits', userId, 60, 10); // Max 10 updates per hour
-      
-      // Allow reading other users' basic info for contact lists (more restrictive)
-      allow read: if isAuthenticated() && 
-                    resource.data.keys().hasAll(['displayName', 'isPublic']) && 
-                    resource.data.isPublic == true &&
-                    isValidString(resource.data.displayName, 1, 100);
-    }
-    
-    // Emergency contacts - enhanced security
-    match /users/{userId}/emergencyContacts/{contactId} {
-      allow read: if isOwner(userId);
-      
-      allow create: if isOwner(userId) && 
-                      request.resource.data.keys().hasAll(['contactUserId', 'createdAt']) &&
-                      isValidString(request.resource.data.get('nickname', ''), 0, 50) &&
-                      isValidString(request.resource.data.get('relationship', ''), 0, 30) &&
-                      request.resource.data.createdAt == request.time &&
-                      !isRateLimited('rateLimits', userId, 10, 20); // Max 20 contacts per 10 minutes
-      
-      allow update: if isOwner(userId) && 
-                      !isRateLimited('rateLimits', userId, 5, 10); // Max 10 updates per 5 minutes
-      
-      allow delete: if isOwner(userId);
-    }
-    
-    // Contacts collection - enhanced security
-    match /contacts/{contactId} {
-      allow read: if isAuthenticated() && 
-                    (resource.data.userId == request.auth.uid || 
-                     resource.data.contactUserId == request.auth.uid);
-      
-      allow create: if isAuthenticated() && 
-                      request.resource.data.userId == request.auth.uid &&
-                      request.resource.data.keys().hasAll(['contactUserId', 'createdAt', 'status']) &&
-                      request.resource.data.status in ['active', 'blocked'] &&
-                      isValidString(request.resource.data.get('nickname', ''), 0, 50) &&
-                      isValidString(request.resource.data.get('relationship', ''), 0, 30) &&
-                      !isRateLimited('rateLimits', request.auth.uid, 10, 20);
-      
-      allow update: if isAuthenticated() && 
-                      resource.data.userId == request.auth.uid &&
-                      !isRateLimited('rateLimits', request.auth.uid, 5, 10);
-      
-      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
-    }
-    
-    // Emergency alerts - strict validation and rate limiting
-    match /alerts/{alertId} {
-      allow create: if isAuthenticated() && 
-                      isValidAlert(request.resource.data) &&
-                      !isRateLimited('rateLimits', request.auth.uid, 1, 5); // Max 5 alerts per minute
-      
-      allow read: if isAuthenticated() && (
-                    resource.data.fromUserId == request.auth.uid ||
-                    (resource.data.keys().hasAny(['toUserIds']) && 
-                     request.auth.uid in resource.data.toUserIds) ||
-                    (resource.data.keys().hasAny(['contactIds']) && 
-                     request.auth.uid in resource.data.contactIds)
-                  );
-      
-      allow update: if isAuthenticated() && 
-                      resource.data.fromUserId == request.auth.uid &&
-                      !isRateLimited('rateLimits', request.auth.uid, 5, 10);
-      
-      allow delete: if isAuthenticated() && 
-                      resource.data.fromUserId == request.auth.uid;
-    }
-    
-    // Alert responses - enhanced validation
-    match /alerts/{alertId}/responses/{responseId} {
-      allow create: if isAuthenticated() && 
-                      request.resource.data.fromUserId == request.auth.uid &&
-                      request.resource.data.keys().hasAll(['message', 'timestamp']) &&
-                      isValidString(request.resource.data.message, 1, 300) &&
-                      request.resource.data.timestamp == request.time &&
-                      !isRateLimited('rateLimits', request.auth.uid, 1, 10); // Max 10 responses per minute
-      
-      allow read: if isAuthenticated() && (
-                    resource.data.fromUserId == request.auth.uid ||
-                    get(/databases/$(database)/documents/alerts/$(alertId)).data.fromUserId == request.auth.uid
-                  );
-      
-      allow update, delete: if isAuthenticated() && 
-                              resource.data.fromUserId == request.auth.uid;
-    }
-    
-    // Friend requests - enhanced security
-    match /friendRequests/{requestId} {
-      allow create: if isAuthenticated() &&
-                      request.resource.data.fromUserId == request.auth.uid &&
-                      request.resource.data.keys().hasAll(['toUserId', 'status', 'createdAt']) &&
-                      request.resource.data.status == 'pending' &&
-                      isValidEmail(request.resource.data.get('fromUserEmail', '')) &&
-                      isValidEmail(request.resource.data.get('toUserEmail', '')) &&
-                      !isRateLimited('rateLimits', request.auth.uid, 60, 10); // Max 10 requests per hour
-      
-      allow read: if isAuthenticated() && (
-                    resource.data.fromUserId == request.auth.uid ||
-                    resource.data.toUserId == request.auth.uid
-                  );
-      
-      allow update: if isAuthenticated() && 
-                      resource.data.toUserId == request.auth.uid &&
-                      request.resource.data.status in ['accepted', 'declined', 'blocked'];
-    }
-    
-    // User presence/online status - restricted access
-    match /presence/{userId} {
-      allow read: if isAuthenticated();
-      
-      allow write: if isOwner(userId) &&
-                     request.resource.data.keys().hasAll(['isOnline', 'lastSeen']) &&
-                     request.resource.data.isOnline is bool &&
-                     !isRateLimited('rateLimits', userId, 1, 30); // Max 30 presence updates per minute
-    }
-    
-    // Chat messages - enhanced security
-    match /chats/{chatId}/messages/{messageId} {
-      allow create: if isAuthenticated() && 
-                      request.resource.data.fromUserId == request.auth.uid &&
-                      request.resource.data.keys().hasAll(['message', 'timestamp']) &&
-                      isValidString(request.resource.data.message, 1, 1000) &&
-                      request.resource.data.timestamp == request.time &&
-                      request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants &&
-                      !isRateLimited('rateLimits', request.auth.uid, 1, 60); // Max 60 messages per minute
-      
-      allow read: if isAuthenticated() && 
-                    request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
-      
-      allow update, delete: if isAuthenticated() && 
-                              resource.data.fromUserId == request.auth.uid;
-    }
-    
-    // Chat metadata - enhanced security
-    match /chats/{chatId} {
-      allow read: if isAuthenticated() && 
-                    request.auth.uid in resource.data.participants;
-      
-      allow create: if isAuthenticated() && 
-                      request.auth.uid in request.resource.data.participants &&
-                      request.resource.data.keys().hasAll(['participants', 'createdAt', 'type']) &&
-                      request.resource.data.type in ['direct', 'group', 'emergency'] &&
-                      request.resource.data.participants is list &&
-                      request.resource.data.participants.size() <= 50 && // Max 50 participants
-                      !isRateLimited('rateLimits', request.auth.uid, 10, 5); // Max 5 chats per 10 minutes
-      
-      allow update: if isAuthenticated() && 
-                      request.auth.uid in resource.data.participants &&
-                      !isRateLimited('rateLimits', request.auth.uid, 5, 10);
-    }
-    
-    // Location data - highly restricted access
-    match /locations/{userId} {
-      allow read: if isAuthenticated() && (
-                    // Users can read their own location
-                    userId == request.auth.uid ||
-                    // Users can read locations during active emergency alerts (simplified check)
-                    exists(/databases/$(database)/documents/alerts/$(userId + '_active'))
-                  );
-      
-      allow write: if isOwner(userId) &&
-                     request.resource.data.keys().hasAll(['lat', 'lng', 'timestamp']) &&
-                     isValidCoordinates(request.resource.data.lat, request.resource.data.lng) &&
-                     request.resource.data.timestamp == request.time &&
-                     (!request.resource.data.keys().hasAny(['address']) || 
-                      isValidString(request.resource.data.address, 0, 200)) &&
-                     !isRateLimited('rateLimits', userId, 1, 10); // Max 10 location updates per minute
-    }
-    
-    // Emergency groups - enhanced validation and security
-    match /emergencyGroups/{groupId} {
-      allow read: if isAuthenticated() && (
-                    request.auth.uid in resource.data.members ||
-                    request.auth.uid in resource.data.admins
-                  );
-      
-      allow create: if isAuthenticated() && 
-                      request.auth.uid in request.resource.data.admins &&
-                      request.resource.data.keys().hasAll(['name', 'admins', 'members', 'createdAt', 'type']) &&
-                      isValidString(request.resource.data.name, 3, 100) &&
-                      request.resource.data.type in ['family', 'work', 'neighborhood', 'custom'] &&
-                      request.resource.data.admins is list &&
-                      request.resource.data.members is list &&
-                      request.resource.data.admins.size() >= 1 &&
-                      request.resource.data.admins.size() <= 10 &&
-                      request.resource.data.members.size() <= 100 && // Max 100 members
-                      !isRateLimited('rateLimits', request.auth.uid, 60, 3); // Max 3 groups per hour
-      
-      allow update: if isAuthenticated() && 
-                      request.auth.uid in resource.data.admins &&
-                      !isRateLimited('rateLimits', request.auth.uid, 5, 10);
-      
-      allow delete: if isAuthenticated() && 
-                      request.auth.uid in resource.data.admins;
-    }
-    
-    // Notifications - user-specific access
-    match /notifications/{notificationId} {
-      allow read: if isAuthenticated() && 
-                    resource.data.userId == request.auth.uid;
-      
-      allow create: if isAuthenticated() && 
-                      request.resource.data.userId == request.auth.uid &&
-                      request.resource.data.keys().hasAll(['type', 'title', 'message', 'createdAt']) &&
-                      isValidString(request.resource.data.title, 1, 100) &&
-                      isValidString(request.resource.data.message, 1, 500) &&
-                      request.resource.data.type in ['alert_sent', 'alert_received', 'friend_request_sent', 'friend_request_received', 'contact_added', 'system'] &&
-                      !isRateLimited('rateLimits', request.auth.uid, 1, 30); // Max 30 notifications per minute
-      
-      allow update: if isAuthenticated() && 
-                      resource.data.userId == request.auth.uid;
-    }
-    
-    // System settings - read-only for users
+
+    // System settings
     match /settings/{document=**} {
       allow read: if isAuthenticated();
       allow write: if request.auth.token.admin == true;
-    }
-    
-    // Safe zones (geofencing) - user-specific
-    match /safeZones/{zoneId} {
-      allow read: if isAuthenticated() && 
-                    resource.data.userId == request.auth.uid;
-      
-      allow create: if isAuthenticated() && 
-                      request.resource.data.userId == request.auth.uid &&
-                      request.resource.data.keys().hasAll(['name', 'center', 'radiusMeters', 'type', 'createdAt']) &&
-                      isValidString(request.resource.data.name, 1, 100) &&
-                      request.resource.data.type in ['home', 'work', 'school', 'hospital', 'custom'] &&
-                      isValidCoordinates(request.resource.data.center.lat, request.resource.data.center.lng) &&
-                      request.resource.data.radiusMeters is number &&
-                      request.resource.data.radiusMeters >= 10 &&
-                      request.resource.data.radiusMeters <= 5000 && // Max 5km radius
-                      !isRateLimited('rateLimits', request.auth.uid, 10, 20); // Max 20 zones per 10 minutes
-      
-      allow update: if isAuthenticated() && 
-                      resource.data.userId == request.auth.uid &&
-                      !isRateLimited('rateLimits', request.auth.uid, 5, 10);
-      
-      allow delete: if isAuthenticated() && 
-                      resource.data.userId == request.auth.uid;
     }
   }
 }

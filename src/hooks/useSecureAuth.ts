@@ -249,9 +249,20 @@ export const makeAuthenticatedRequest = async (
   options: RequestInit = {},
   authUser?: AuthUser | null
 ): Promise<Response> => {
-  const { getValidToken } = useSecureAuth()
-  
-  const token = await getValidToken()
+  // Avoid using React hooks here to prevent invalid hook call errors.
+  // Prefer a provided authUser; otherwise fall back to firebase auth currentUser.
+  let token: string | null = null
+
+  try {
+    if (authUser) {
+      token = await getIdToken(authUser, false)
+    } else if (auth.currentUser) {
+      token = await getIdToken(auth.currentUser, false)
+    }
+  } catch (e) {
+    // ignore; handled below
+  }
+
   if (!token) {
     throw new Error('No valid authentication token')
   }
@@ -259,12 +270,12 @@ export const makeAuthenticatedRequest = async (
   const headers = {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${token}`,
-    ...options.headers
+    ...options.headers,
   }
 
   return fetch(url, {
     ...options,
-    headers
+    headers,
   })
 }
 

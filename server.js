@@ -407,21 +407,42 @@ io.on('connection', (socket) => {
     const fromUserId = userSockets.get(socket.id)
     if (!fromUserId) return
 
-    // Broadcast typing indicator to all other users
-    socket.broadcast.emit('user-typing-group', {
-      userId: fromUserId,
-      userName: data.userName
-    })
+    // Broadcast typing indicator only to intended recipients when provided
+    if (Array.isArray(data?.recipients) && data.recipients.length > 0) {
+      data.recipients.forEach((recipientId) => {
+        if (onlineUsers.has(recipientId) && recipientId !== fromUserId) {
+          io.to(recipientId).emit('user-typing-group', {
+            userId: fromUserId,
+            userName: data.userName,
+          })
+        }
+      })
+    } else {
+      // fallback to broadcast
+      socket.broadcast.emit('user-typing-group', {
+        userId: fromUserId,
+        userName: data.userName,
+      })
+    }
   })
 
   socket.on('stop-typing-group', (data) => {
     const fromUserId = userSockets.get(socket.id)
     if (!fromUserId) return
 
-    // Broadcast stop typing indicator to all other users
-    socket.broadcast.emit('user-stopped-typing-group', {
-      userId: fromUserId
-    })
+    if (Array.isArray(data?.recipients) && data.recipients.length > 0) {
+      data.recipients.forEach((recipientId) => {
+        if (onlineUsers.has(recipientId) && recipientId !== fromUserId) {
+          io.to(recipientId).emit('user-stopped-typing-group', {
+            userId: fromUserId,
+          })
+        }
+      })
+    } else {
+      socket.broadcast.emit('user-stopped-typing-group', {
+        userId: fromUserId,
+      })
+    }
   })
 
   // Handle user status updates
