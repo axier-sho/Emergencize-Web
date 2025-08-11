@@ -272,7 +272,7 @@ export default function AboutPage() {
                     whileHover={{ scale: 1.1, rotate: 5 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center shadow-xl mx-auto mb-4">
+                    <div className="w-20 h-20 bg-[rgb(145,170,210)] rounded-full flex items-center justify-center shadow-xl mx-auto mb-4">
                       <span className="text-white text-2xl font-bold">S</span>
                     </div>
                   </motion.div>
