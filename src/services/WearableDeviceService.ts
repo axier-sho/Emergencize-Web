@@ -178,7 +178,7 @@ export class WearableDeviceService {
   private async initializeBluetoothDetection(): Promise<void> {
     try {
       // Check if Web Bluetooth is available
-      if (!navigator.bluetooth) {
+      if (!(navigator as any).bluetooth) {
         console.log('Web Bluetooth not supported')
         return
       }
@@ -223,7 +223,7 @@ export class WearableDeviceService {
       console.log('Wearable device monitoring started')
       
       SecurityMonitoringService.getInstance().logSecurityEvent({
-        type: 'wearable_monitoring_started',
+        type: 'authentication_success',
         severity: 'low',
         details: {
           deviceCount: this.devices.size,
@@ -231,9 +231,7 @@ export class WearableDeviceService {
             .filter(d => d.isConnected)
             .map(d => ({ id: d.id, type: d.type, brand: d.brand }))
         },
-        userId: 'system',
-        timestamp: new Date(),
-        riskScore: 5
+        userId: 'system'
       })
 
       return true
@@ -266,14 +264,12 @@ export class WearableDeviceService {
   }): Promise<WearableDevice | null> {
     try {
       // Check rate limiting
-      const canRegister = await RateLimitService.getInstance().checkRateLimit(
+      const rateLimitResult = await rateLimitService.checkRateLimit(
         deviceConfig.userId,
-        'device_registration',
-        5, // 5 device registrations per hour
-        3600000
+        'device_registration'
       )
 
-      if (!canRegister) {
+      if (!rateLimitResult.allowed) {
         throw new Error('Rate limit exceeded for device registration')
       }
 
@@ -344,7 +340,7 @@ export class WearableDeviceService {
       await this.initializeDeviceConnection(device)
 
       SecurityMonitoringService.getInstance().logSecurityEvent({
-        type: 'wearable_device_registered',
+        type: 'authentication_success',
         severity: 'medium',
         details: {
           deviceId,
@@ -353,9 +349,7 @@ export class WearableDeviceService {
           model: device.model,
           capabilities: device.capabilities.map(c => c.type)
         },
-        userId: deviceConfig.userId,
-        timestamp: new Date(),
-        riskScore: 15
+        userId: deviceConfig.userId
       })
 
       console.log('Wearable device registered:', device.name)
@@ -449,16 +443,14 @@ export class WearableDeviceService {
       this.saveDevices()
 
       SecurityMonitoringService.getInstance().logSecurityEvent({
-        type: 'wearable_device_removed',
+        type: 'authentication_success',
         severity: 'medium',
         details: {
           deviceId,
           deviceName: device.name,
           deviceType: device.type
         },
-        userId: device.userId,
-        timestamp: new Date(),
-        riskScore: 20
+        userId: device.userId
       })
 
       console.log('Device removed:', device.name)
@@ -563,7 +555,7 @@ export class WearableDeviceService {
     if (!device) return
 
     SecurityMonitoringService.getInstance().logSecurityEvent({
-      type: 'wearable_emergency_detected',
+      type: 'suspicious_activity',
       severity: 'critical',
       details: {
         emergencyId: emergencyEvent.id,
@@ -573,9 +565,7 @@ export class WearableDeviceService {
         confidence: emergencyEvent.confidence,
         autoConfirmed: emergencyEvent.autoConfirmed
       },
-      userId: device.userId,
-      timestamp: new Date(),
-      riskScore: 90
+      userId: device.userId
     })
 
     console.log('Emergency event triggered:', emergencyEvent.type)

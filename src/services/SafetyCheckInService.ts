@@ -281,15 +281,13 @@ export class SafetyCheckInService {
       })
 
       SecurityMonitoringService.getInstance().logSecurityEvent({
-        type: 'safety_checkin_monitoring_started',
+        type: 'authentication_success',
         severity: 'low',
         details: {
           activeSchedules: Array.from(this.schedules.values()).filter(s => s.isActive).length,
           totalSchedules: this.schedules.size
         },
-        userId: 'system',
-        timestamp: new Date(),
-        riskScore: 5
+        userId: 'system'
       })
 
       console.log('Safety check-in monitoring started')
@@ -330,14 +328,12 @@ export class SafetyCheckInService {
   }): Promise<CheckInSchedule | null> {
     try {
       // Check rate limiting
-      const canCreate = await RateLimitService.getInstance().checkRateLimit(
+      const rateLimitResult = await rateLimitService.checkRateLimit(
         config.userId,
-        'checkin_schedule_creation',
-        10, // 10 schedules per day
-        24 * 60 * 60 * 1000
+        'checkin_schedule_creation'
       )
 
-      if (!canCreate) {
+      if (!rateLimitResult.allowed) {
         throw new Error('Rate limit exceeded for schedule creation')
       }
 
@@ -388,7 +384,7 @@ export class SafetyCheckInService {
       }
 
       SecurityMonitoringService.getInstance().logSecurityEvent({
-        type: 'safety_checkin_schedule_created',
+        type: 'authentication_success',
         severity: 'medium',
         details: {
           scheduleId,
@@ -397,9 +393,7 @@ export class SafetyCheckInService {
           frequency: schedule.frequency,
           escalationLevels: schedule.escalation.escalationLevels.length
         },
-        userId: config.userId,
-        timestamp: new Date(),
-        riskScore: 15
+        userId: config.userId
       })
 
       console.log('Safety check-in schedule created:', schedule.name)
@@ -475,7 +469,7 @@ export class SafetyCheckInService {
       this.scheduleNextCheckIn(schedule)
 
       SecurityMonitoringService.getInstance().logSecurityEvent({
-        type: 'safety_checkin_completed',
+        type: 'authentication_success',
         severity: checkIn.verification.isVerified ? 'low' : 'medium',
         details: {
           checkInId,
@@ -486,9 +480,7 @@ export class SafetyCheckInService {
           anomalies: checkIn.verification.anomalies,
           method: data.method
         },
-        userId: checkIn.userId,
-        timestamp: new Date(),
-        riskScore: checkIn.verification.isVerified ? 5 : 25
+        userId: checkIn.userId
       })
 
       console.log('Safety check-in completed:', checkInId)
@@ -676,7 +668,7 @@ export class SafetyCheckInService {
     this.executeEscalationLevel(escalation, schedule, 1)
 
     SecurityMonitoringService.getInstance().logSecurityEvent({
-      type: 'safety_checkin_escalation_triggered',
+      type: 'suspicious_activity',
       severity: 'high',
       details: {
         escalationId,
@@ -685,9 +677,7 @@ export class SafetyCheckInService {
         scheduleName: schedule.name,
         missedTime: checkIn.scheduledTime
       },
-      userId: schedule.userId,
-      timestamp: new Date(),
-      riskScore: 70
+      userId: schedule.userId
     })
 
     console.log(`Safety check-in escalation triggered for ${schedule.name}`)

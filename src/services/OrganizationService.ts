@@ -560,14 +560,12 @@ export class OrganizationService {
   }): Promise<Organization | null> {
     try {
       // Check rate limiting
-      const canCreate = await RateLimitService.getInstance().checkRateLimit(
+      const rateLimitResult = await rateLimitService.checkRateLimit(
         config.createdBy,
-        'organization_creation',
-        3, // 3 organizations per month
-        30 * 24 * 60 * 60 * 1000
+        'organization_creation'
       )
 
-      if (!canCreate) {
+      if (!rateLimitResult.allowed) {
         throw new Error('Rate limit exceeded for organization creation')
       }
 
@@ -612,7 +610,7 @@ export class OrganizationService {
       this.saveData()
 
       SecurityMonitoringService.getInstance().logSecurityEvent({
-        type: 'organization_created',
+        type: 'authentication_success',
         severity: 'medium',
         details: {
           organizationId: orgId,
@@ -620,9 +618,7 @@ export class OrganizationService {
           organizationType: organization.type,
           organizationSize: organization.size
         },
-        userId: config.createdBy,
-        timestamp: new Date(),
-        riskScore: 20
+        userId: config.createdBy
       })
 
       console.log('Organization created:', organization.name)
@@ -755,7 +751,7 @@ export class OrganizationService {
       this.saveData()
 
       SecurityMonitoringService.getInstance().logSecurityEvent({
-        type: 'organization_group_created',
+        type: 'authentication_success',
         severity: 'low',
         details: {
           organizationId: config.organizationId,
@@ -765,9 +761,7 @@ export class OrganizationService {
           parentGroupId: config.parentGroupId,
           level
         },
-        userId: config.createdBy,
-        timestamp: new Date(),
-        riskScore: 10
+        userId: config.createdBy
       })
 
       console.log('Organization group created:', group.name)
@@ -856,7 +850,7 @@ export class OrganizationService {
       this.saveData()
 
       SecurityMonitoringService.getInstance().logSecurityEvent({
-        type: 'organization_users_invited',
+        type: 'authentication_success',
         severity: 'medium',
         details: {
           organizationId: config.organizationId,
@@ -864,9 +858,7 @@ export class OrganizationService {
           role: config.role,
           groupIds: config.groupIds
         },
-        userId: config.invitedBy,
-        timestamp: new Date(),
-        riskScore: 15
+        userId: config.invitedBy
       })
 
       console.log(`Sent ${invitations.length} organization invitations`)
