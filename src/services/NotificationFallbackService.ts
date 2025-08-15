@@ -1,6 +1,6 @@
 import { ValidationService } from './ValidationService'
 import { SecurityMonitoringService } from './SecurityMonitoringService'
-import { RateLimitService } from './RateLimitService'
+import { rateLimitService } from './RateLimitService'
 
 export interface FallbackNotificationConfig {
   smsEnabled: boolean
@@ -95,14 +95,12 @@ export class NotificationFallbackService {
       const attempts: NotificationAttempt[] = []
 
       // Check rate limiting
-      const canSend = await RateLimitService.getInstance().checkRateLimit(
+      const rateLimitResult = await rateLimitService.checkRateLimit(
         alert.fromUserId,
-        'fallback_notification',
-        5, // 5 fallback notifications per minute
-        60000
+        'fallback_notification'
       )
 
-      if (!canSend && !this.shouldOverrideForEmergency(alert)) {
+      if (!rateLimitResult.allowed && !this.shouldOverrideForEmergency(alert)) {
         throw new Error('Rate limit exceeded for fallback notifications')
       }
 
@@ -145,9 +143,10 @@ export class NotificationFallbackService {
 
       // Log fallback notification attempts
       SecurityMonitoringService.getInstance().logSecurityEvent({
-        type: 'fallback_notification_sent',
+        type: 'authentication_success',
         severity: alert.urgency === 'critical' ? 'high' : 'medium',
         details: {
+          action: 'fallback_notification_sent',
           alertId: alert.id,
           fromUserId: alert.fromUserId,
           contactId,
@@ -156,9 +155,7 @@ export class NotificationFallbackService {
           failedAttempts: attempts.filter(a => a.status === 'failed').length,
           emergencyOverride: this.shouldOverrideForEmergency(alert)
         },
-        userId: alert.fromUserId,
-        timestamp: new Date(),
-        riskScore: 10
+        userId: alert.fromUserId
       })
 
       return attempts

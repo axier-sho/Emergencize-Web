@@ -1,6 +1,6 @@
 import { ValidationService } from './ValidationService'
 import { SecurityMonitoringService } from './SecurityMonitoringService'
-import { RateLimitService } from './RateLimitService'
+import { rateLimitService } from './RateLimitService'
 import { geofencingService } from './GeofencingService'
 
 export interface CheckInSchedule {
