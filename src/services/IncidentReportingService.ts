@@ -1,6 +1,6 @@
 import { ValidationService } from './ValidationService'
 import { SecurityMonitoringService } from './SecurityMonitoringService'
-import { RateLimitService } from './RateLimitService'
+import { rateLimitService } from './RateLimitService'
 
 export interface Incident {
   id: string
@@ -409,14 +409,12 @@ export class IncidentReportingService {
   }): Promise<Incident | null> {
     try {
       // Check rate limiting
-      const canCreate = await RateLimitService.getInstance().checkRateLimit(
+      const rateLimitResult = await rateLimitService.checkRateLimit(
         config.reportedBy,
-        'incident_creation',
-        20, // 20 incidents per day
-        24 * 60 * 60 * 1000
+        'incident_creation'
       )
 
-      if (!canCreate) {
+      if (!rateLimitResult.allowed) {
         throw new Error('Rate limit exceeded for incident creation')
       }
 
@@ -508,9 +506,10 @@ export class IncidentReportingService {
       this.saveData()
 
       SecurityMonitoringService.getInstance().logSecurityEvent({
-        type: 'incident_created',
+        type: 'suspicious_activity',
         severity: this.mapIncidentSeverityToSecuritySeverity(config.severity),
         details: {
+          action: 'incident_created',
           incidentId,
           incidentType: incident.type,
           incidentSeverity: incident.severity,
@@ -518,9 +517,7 @@ export class IncidentReportingService {
           organizationId: config.organizationId,
           groupId: config.groupId
         },
-        userId: config.reportedBy,
-        timestamp: new Date(),
-        riskScore: this.calculateRiskScore(incident)
+        userId: config.reportedBy
       })
 
       console.log('Incident created:', incident.title)
@@ -654,17 +651,16 @@ export class IncidentReportingService {
       this.saveData()
 
       SecurityMonitoringService.getInstance().logSecurityEvent({
-        type: 'incident_resolved',
+        type: 'authentication_success',
         severity: 'low',
         details: {
+          action: 'incident_resolved',
           incidentId,
           incidentType: incident.type,
           resolutionMethod: resolution.resolutionMethod,
           resolutionTime: this.calculateResolutionTime(incident)
         },
-        userId: resolution.resolvedBy,
-        timestamp: new Date(),
-        riskScore: 5
+        userId: resolution.resolvedBy
       })
 
       console.log('Incident resolved:', incidentId)

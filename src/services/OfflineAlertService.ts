@@ -90,7 +90,7 @@ export class OfflineAlertService {
       if (!validation.isValid) {
         return {
           success: false,
-          error: `Alert validation failed: ${validation.errors.join(', ')}`
+          error: `Alert validation failed: ${Object.values(validation.errors).flat().join(', ')}`
         }
       }
 
@@ -105,17 +105,16 @@ export class OfflineAlertService {
       if (result.success) {
         // Log the offline queuing event
         SecurityMonitoringService.getInstance().logSecurityEvent({
-          type: 'offline_alert_queued',
+          type: 'authentication_success',
           severity: alert.type === 'danger' ? 'high' : 'medium',
           details: {
+            action: 'offline_alert_queued',
             alertType: alert.type,
             alertId: result.alertId,
             queuedAt: result.queuedAt,
             hasLocation: !!alert.location
           },
-          userId: alert.fromUserId,
-          timestamp: new Date(),
-          riskScore: alert.type === 'danger' ? 40 : 20
+          userId: alert.fromUserId
         })
 
         this.emit('alertQueued', { alertId: result.alertId, alert })
