@@ -1,6 +1,6 @@
 import { ValidationService } from './ValidationService'
 import { SecurityMonitoringService } from './SecurityMonitoringService'
-import { RateLimitService } from './RateLimitService'
+import { rateLimitService } from './RateLimitService'
 
 export interface VoiceCommand {
   id: string
@@ -42,10 +42,29 @@ export interface VoiceFeedback {
   volume?: number
 }
 
+// --- Minimal Web Speech API shims (remove if full types added) ---
+// These prevent TS errors in strict mode when libs lack definitions.
+interface SpeechRecognition extends EventTarget {
+  lang: string
+  continuous: boolean
+  interimResults: boolean
+  maxAlternatives: number
+  start(): void
+  stop(): void
+  onstart: ((ev: Event) => any) | null
+  onresult: ((ev: SpeechRecognitionEvent) => any) | null
+  onerror: ((ev: SpeechRecognitionErrorEvent) => any) | null
+  onend: ((ev: Event) => any) | null
+}
+interface SpeechRecognitionResultItem { transcript: string; confidence: number }
+interface SpeechRecognitionResult { 0: SpeechRecognitionResultItem; isFinal: boolean; length: number }
+interface SpeechRecognitionResultList { length: number; [index: number]: SpeechRecognitionResult }
+interface SpeechRecognitionEvent extends Event { results: SpeechRecognitionResultList; resultIndex: number }
+interface SpeechRecognitionErrorEvent extends Event { error: string; message: string }
 declare global {
   interface Window {
-    SpeechRecognition: typeof SpeechRecognition
-    webkitSpeechRecognition: typeof SpeechRecognition
+    SpeechRecognition: { new(): SpeechRecognition }
+    webkitSpeechRecognition: { new(): SpeechRecognition }
   }
 }
 
@@ -168,24 +187,24 @@ export class VoiceCommandService {
 
     this.recognition.onstart = () => {
       this.isListening = true
+      // Log as generic system event since custom type not in union
       SecurityMonitoringService.getInstance().logSecurityEvent({
-        type: 'voice_recognition_started',
+        type: 'system_error',
         severity: 'low',
         details: {
+          category: 'voice_recognition_started',
           sessionId: this.currentSession?.id,
           language: this.config.language
         },
-        userId: this.currentSession?.userId || 'unknown',
-        timestamp: new Date(),
-        riskScore: 5
+        userId: this.currentSession?.userId || 'unknown'
       })
     }
 
-    this.recognition.onresult = (event) => {
+    this.recognition.onresult = (event: SpeechRecognitionEvent) => {
       this.handleRecognitionResult(event)
     }
 
-    this.recognition.onerror = (event) => {
+    this.recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       this.handleRecognitionError(event)
     }
 
@@ -205,16 +224,8 @@ export class VoiceCommandService {
       }
 
       // Check rate limiting
-      const canStart = await RateLimitService.getInstance().checkRateLimit(
-        userId,
-        'voice_command',
-        10, // 10 voice sessions per minute
-        60000
-      )
-
-      if (!canStart) {
-        throw new Error('Rate limit exceeded for voice commands')
-      }
+  const limit = await rateLimitService.checkRateLimit(userId, 'voice_command', { intervalMinutes: 1, maxRequests: 10 })
+  if (!limit.allowed) throw new Error('Rate limit exceeded for voice commands')
 
       // Stop any existing session
       if (this.isListening) {
@@ -316,16 +327,15 @@ export class VoiceCommandService {
     }
 
     SecurityMonitoringService.getInstance().logSecurityEvent({
-      type: 'voice_recognition_error',
+      type: 'system_error',
       severity: 'medium',
       details: {
+        category: 'voice_recognition_error',
         error: event.error,
         message: event.message,
         sessionId: this.currentSession?.id
       },
-      userId: this.currentSession?.userId || 'unknown',
-      timestamp: new Date(),
-      riskScore: 30
+      userId: this.currentSession?.userId || 'unknown'
     })
 
     // Provide user feedback
@@ -358,17 +368,16 @@ export class VoiceCommandService {
 
       // Log the command
       SecurityMonitoringService.getInstance().logSecurityEvent({
-        type: 'voice_command_executed',
+        type: 'system_error',
         severity: command.action.includes('danger') ? 'high' : 'medium',
         details: {
+          category: 'voice_command_executed',
           command: command.action,
           phrase: command.phrase,
           confidence: command.confidence,
           sessionId: this.currentSession?.id
         },
-        userId: command.userId || 'unknown',
-        timestamp: new Date(),
-        riskScore: command.action.includes('emergency') ? 50 : 20
+        userId: command.userId || 'unknown'
       })
     } catch (error) {
       console.error('Failed to process voice command:', error)
@@ -577,13 +586,13 @@ export class VoiceCommandService {
   }
 
   // Emergency activation methods
-  async activateEmergencyMode(userId: string): Promise<void> {
+  async activateEmergencyMode(userId: string): Promise<VoiceSession> {
     try {
       // Start listening with lower confidence threshold for emergency situations
       const originalThreshold = this.config.confidenceThreshold
       this.config.confidenceThreshold = 0.5 // Lower threshold for emergency
       
-      await this.startListening(userId, true)
+      const session = await this.startListening(userId, true)
       
       this.provideFeedback({
         text: "Emergency voice mode activated. Say 'help me' or 'danger alert' clearly.",
@@ -594,6 +603,8 @@ export class VoiceCommandService {
       setTimeout(() => {
         this.config.confidenceThreshold = originalThreshold
       }, this.config.timeoutMs)
+
+      return session
     } catch (error) {
       console.error('Failed to activate emergency voice mode:', error)
       throw error
