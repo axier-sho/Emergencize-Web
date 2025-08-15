@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Mail, Lock, User, Eye, EyeOff } from 'lucide-react'
+import { X, Mail, Lock, User, Eye, EyeOff, ExternalLink } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import Link from 'next/link'
 
 interface AuthModalProps {
   isOpen: boolean
@@ -19,6 +20,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
 
   const { login, register } = useAuth()
 
@@ -26,6 +28,13 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
     e.preventDefault()
     setLoading(true)
     setError('')
+
+    // Check Terms of Service acceptance for signup
+    if (mode === 'signup' && !acceptedTerms) {
+      setError('You must accept the Terms of Service to create an account.')
+      setLoading(false)
+      return
+    }
 
     try {
       if (mode === 'login') {
@@ -38,6 +47,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
       setEmail('')
       setPassword('')
       setName('')
+      setAcceptedTerms(false)
     } catch (err: any) {
       setError(err.message || 'An error occurred')
     } finally {
@@ -48,6 +58,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
   const toggleMode = () => {
     setMode(mode === 'login' ? 'signup' : 'login')
     setError('')
+    setAcceptedTerms(false)
   }
 
   return (
@@ -164,10 +175,41 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                   </div>
                 </div>
 
+                {/* Terms of Service Checkbox (signup only) */}
+                {mode === 'signup' && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="flex items-start space-x-3"
+                  >
+                    <input
+                      type="checkbox"
+                      id="acceptTerms"
+                      checked={acceptedTerms}
+                      onChange={(e) => setAcceptedTerms(e.target.checked)}
+                      className="mt-1 w-4 h-4 text-blue-600 bg-transparent border-2 border-white border-opacity-30 rounded focus:ring-blue-500 focus:ring-2"
+                      required
+                    />
+                    <label htmlFor="acceptTerms" className="text-sm text-gray-300 leading-relaxed">
+                      I have read, understood, and agree to be bound by the{' '}
+                      <Link 
+                        href="/terms" 
+                        target="_blank"
+                        className="text-blue-400 hover:text-blue-300 underline inline-flex items-center gap-1 transition-colors"
+                      >
+                        Terms of Service
+                        <ExternalLink size={12} />
+                      </Link>
+                      {' '}and acknowledge the platform's emergency disclaimers and limitations.
+                    </label>
+                  </motion.div>
+                )}
+
                 {/* Submit Button */}
                 <motion.button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || (mode === 'signup' && !acceptedTerms)}
                   className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white rounded-lg font-medium transition-colors flex items-center justify-center"
                   whileHover={{ scale: loading ? 1 : 1.02 }}
                   whileTap={{ scale: loading ? 1 : 0.98 }}

@@ -1,0 +1,299 @@
+Comprehensive Terms of Service
+Emergencize (sho1228.com)
+
+Effective Date: August 15, 2025
+Organization: Axiom (a non-profit organization incorporated under the laws of Japan)
+Principal Place of Organization: Tokyo, Japan
+Domain: sho1228.com
+
+1. Preamble and Acceptance of Terms
+1.1 Binding Agreement. These Terms of Service (the “Terms,” “Agreement,” or “ToS”) constitute a legally binding agreement between you (“you,” “your,” or “User”) and Axiom (“Axiom,” “we,” “us,” or “our”) governing your access to and use of the Emergencize platform located at sho1228.com and all associated services, subdomains, applications, interfaces, and tools (collectively, the “Platform” or “Emergencize”).
+
+1.2 Affirmative Acceptance. You must affirmatively accept these Terms (e.g., by clicking “I Agree,” checking a box, or taking equivalent action) before creating an account or accessing non-public features. If you do not agree, do not access or use the Platform.
+
+1.3 Incorporated Policies. Our Privacy Policy and any posted guidelines, community standards, or supplemental terms (collectively, “Policies”) are incorporated by reference and form part of this Agreement. If there is any conflict, these Terms control unless a Policy expressly states otherwise.
+
+1.4 Capacity and Authority. By accepting these Terms, you represent and warrant that you are of the legal age of majority or digital consent in your jurisdiction, or you have verifiable parental/guardian consent, and you have the authority to enter into this Agreement. If you accept on behalf of an entity, you represent you have authority to bind that entity.
+
+1.5 Non-Transferable Consent. Your acceptance is personal to you and may not be assigned or transferred except as expressly permitted herein.
+
+1.6 Non-Medical/Non-Professional Premise. The Platform provides informational, community, and supportive resources only. It does not provide medical, legal, financial, therapeutic, or other professional advice or services. Do not rely on the Platform for professional or emergency needs.
+
+2. Definitions and Interpretations
+2.1 Key Terms.
+- “Platform,” “Service,” “Website,” or “Emergencize”: The site at sho1228.com and all related subdomains, applications (including mobile), APIs, features, tools, content, and infrastructure.
+- “Axiom,” “we,” “us,” “our”: Axiom, a non-profit entity under Japanese law, including affiliates, directors, officers, employees, agents, volunteers, contractors, successors, and assigns.
+- “User,” “you,” “your”: Any individual or entity accessing or using the Platform, including registered and guest users.
+- “Content”: Any text, images, audio, video, data, code, posts, messages, comments, profiles, metadata, or other materials available on or through the Platform.
+- “User Content”: Content submitted, posted, uploaded, transmitted, or otherwise provided by Users (e.g., forum posts, comments, messages, uploads).
+- “Axiom Content”: Content owned or controlled by Axiom or its licensors (e.g., software, features, site design, UI, informational materials).
+- “Community Features”: Forums, groups, messaging tools, discussion areas, or other interactive functionality enabling User communication or collaboration.
+- “Tools”: Assistive and informational features provided by the Platform (e.g., accessibility settings, resource locators, calculators), not professional tools.
+- “Personal Data” or “Personal Information”: Information that identifies or could reasonably identify an individual (e.g., name, email, disability-related information, usage data).
+- “Third-Party Services”: External sites, services, applications, or integrations not operated by Axiom.
+- “Intellectual Property Rights”: All copyrights, patents, trademarks, trade secrets, moral rights, publicity rights, and other proprietary rights.
+- “Disability”: Any physical, mental, cognitive, sensory, or developmental impairment recognized under applicable law.
+- “Force Majeure Event”: Circumstances beyond a party’s reasonable control, including acts of God, disasters, pandemics, governmental actions, war, cyber-attacks, outages, or similar events.
+- “Beta Features”: Features labeled as beta, experimental, or preview that may change or be discontinued.
+
+2.2 Interpretations.
+- Headings are for convenience and do not affect construction.
+- Singular includes plural and vice versa; references to a gender include all genders.
+- References to laws include amendments, consolidations, and re-enactments.
+- “Writing” includes electronic communications and durable digital records.
+- Ambiguities are interpreted consistent with the Platform’s non-profit and supportive mission.
+
+3. Purpose, Nature, and Scope of the Platform
+3.1 Mission. Emergencize is designed to support people with disabilities by providing access to informational resources, peer-to-peer community features, and tools aimed at empowerment, connection, and self-education.
+
+3.2 No Professional Services; No Reliance. Axiom is not a healthcare provider, therapist, counselor, lawyer, or financial advisor. Nothing on the Platform constitutes professional advice, diagnosis, or treatment. No physician-patient, therapist-client, attorney-client, fiduciary, or similar relationship is formed.
+
+3.3 Not for Emergencies. The Platform is not designed for emergencies. If you or others are in danger or experiencing an emergency, call local emergency services and/or contact qualified professionals immediately.
+
+3.4 Service Description. The Platform may provide:
+- Resource libraries with disability-related information and external references;
+- Community features enabling respectful discussion and peer support;
+- Tools and utilities to assist with organization and access (provided “as is”).
+
+3.5 Limitations. The Platform is provided without service-level commitments. Information may not be complete, current, or accurate. Features may be modified, suspended, or discontinued at any time.
+
+4. Eligibility; Users with Disabilities; Minors
+4.1 Eligibility. You must be able to form a legally binding contract and meet age-of-consent requirements in your jurisdiction. If local law permits, minors may use the Platform only with parental/guardian consent and supervision.
+
+4.2 Users with Disabilities. The Platform is intended to support users with disabilities. Accessibility may vary by device, browser, assistive technology, network, or third-party integrations. Accessibility is an ongoing effort; perfect accessibility is not guaranteed.
+
+4.3 Representations. You represent and warrant that your registration information is accurate and updated, your use complies with law, you are not barred from the Platform, and you will not use the Platform for unlawful or harmful purposes.
+
+5. Account Registration and Security
+5.1 Registration. Certain features require an account with accurate, current, and complete information. You must accept these Terms during registration.
+
+5.2 Credentials and Responsibility. You are solely responsible for safeguarding credentials and for all activity under your account, whether authorized or not. Notify us promptly of suspected unauthorized use.
+
+5.3 One Account; Non-Transferability. You may not sell, transfer, or share your account or rights, except as permitted for a parent/guardian supervising a minor under these Terms.
+
+5.4 Verification and Enforcement. We may require identity or eligibility verification and may refuse, suspend, or terminate accounts at our discretion without liability.
+
+6. Availability; Modifications; Beta Features
+6.1 Availability. The Platform may experience downtime or errors. Axiom provides no uptime guarantees.
+
+6.2 Modifications. We may add, modify, limit, or discontinue features or content at any time without liability.
+
+6.3 Beta and Experimental Features. Beta features may be incomplete, unstable, or changed/removed at any time and are provided “as is” without warranties.
+
+7. Acceptable Use; Community Standards
+7.1 Prohibited Conduct. You will not:
+- Engage in unlawful, abusive, harassing, discriminatory, hateful, exploitative, or harmful behavior;
+- Post violent, pornographic, sexually explicit, or otherwise inappropriate content;
+- Provide or solicit medical/clinical/professional advice, claim unverified credentials, or encourage self-treatment or risky activities without professional oversight;
+- Disseminate harmful misinformation;
+- Impersonate others or misrepresent affiliation or qualifications;
+- Infringe or misappropriate intellectual property, privacy, or publicity rights;
+- Upload malware; probe, breach, or disrupt security or networks; interfere with others’ use;
+- Scrape, crawl, or harvest data except as allowed by robots.txt or explicit written authorization;
+- Advertise, fundraise, or solicit without express written permission;
+- Circumvent access controls or use unauthorized automated means.
+
+7.2 Community Conduct. Participate respectfully, considering the sensitive nature of disability-related topics. Do not issue directives that could jeopardize another user’s safety or well-being.
+
+7.3 Reporting and Enforcement. You may report violations via Platform mechanisms. We may investigate, remove content, limit features, suspend/terminate accounts, and cooperate with authorities at our discretion. Reporting does not create a duty to act.
+
+8. User Content; License; Representations; Moral Rights
+8.1 Ownership. You retain ownership of your User Content.
+
+8.2 License to Axiom. You grant Axiom a worldwide, non-exclusive, transferable, sublicensable, royalty-free, perpetual and irrevocable license to host, store, display, perform, reproduce, modify, adapt, translate, publish, distribute, and use your User Content (in whole or part) to operate, secure, improve, and promote the Platform and related initiatives.
+
+8.3 Representations. You represent and warrant you have all necessary rights, your Content complies with law and these Terms, and it does not infringe third-party rights.
+
+8.4 Moral Rights and Confidentiality. To the extent permitted by law, you waive moral rights and agree User Content is non-confidential. We may, but are not obligated to, monitor, edit, or remove User Content.
+
+9. Intellectual Property; Platform License; Feedback
+9.1 Axiom Property. The Platform, Axiom Content, look-and-feel, trademarks, logos, and trade dress are owned by Axiom or its licensors and protected by IP laws.
+
+9.2 Your License. Subject to these Terms, you receive a limited, revocable, non-exclusive, non-transferable license to access and use the Platform for lawful, personal, non-commercial purposes.
+
+9.3 Restrictions. You may not copy, modify, distribute, sell, lease, reverse engineer (except as permitted by mandatory law), or create derivative works from the Platform or Axiom Content without prior written authorization.
+
+9.4 Feedback. If you provide ideas or suggestions, you grant Axiom a perpetual, irrevocable, worldwide, royalty-free license to use them without restriction or compensation.
+
+10. Third-Party Services; Assistive Technologies; External Links
+10.1 External Services. The Platform may link to or integrate with Third-Party Services (including assistive technologies). Those offerings are governed by their own terms and policies.
+
+10.2 No Endorsement or Control. We do not endorse or control Third-Party Services and assume no responsibility for their content, availability, policies, or actions.
+
+10.3 Compatibility. Compatibility with third-party devices, browsers, screen readers, or utilities is not guaranteed and may change without notice.
+
+10.4 External Links. Links to external resources are for informational purposes and do not constitute endorsement. Use is at your own risk.
+
+11. Privacy; Data; Security
+11.1 Privacy Policy. Our Privacy Policy (incorporated here) describes how we collect, use, disclose, and protect personal data in accordance with applicable law, including Japan’s APPI, the GDPR, and the CCPA (as applicable).
+
+11.2 Data Collection and Processing. We may collect account information, usage and device data, location data, communications, and other information you provide or that your use generates.
+
+11.3 Security. We employ reasonable technical, administrative, and physical safeguards; however, no method of transmission or storage is perfectly secure. We do not guarantee security.
+
+11.4 Data Rights. Subject to law and verification, you may have rights to access, correct, delete, restrict, object, and data portability, and to withdraw consent.
+
+11.5 Sensitive Information and Visibility. Content shared in community spaces may be visible to others. Do not post information you wish to keep private.
+
+11.6 International Transfers. We may process and store data in countries where we or our providers operate, subject to applicable law.
+
+11.7 Incident Response. If a security incident may affect your personal information, we will notify you as required by law and follow our incident response procedures.
+
+12. Data Management; Retention; Deletion
+12.1 Retention. We may retain Content and data for operational, security, backup, analytics, or legal compliance purposes consistent with our practices and law.
+
+12.2 Deletion Requests. Where available, you may request deletion of certain data via Platform controls. We will process requests as required by law and subject to operational constraints.
+
+12.3 Backups and Residual Copies. Deleted data may persist in backups or logs for a reasonable period and may be retained where required by law.
+
+13. Fees; Donations; Refunds; Taxes
+13.1 Non-Profit Status. Axiom operates as a non-profit. While many features may be free, optional donations or paid features may be available.
+
+13.2 Donations. Donations are generally non-refundable, unless required by law. We may request reasonable verification for refunds mandated by law.
+
+13.3 Fees and Billing. If paid features are offered, you agree to pay disclosed fees. Prices and billing terms may change upon notice.
+
+13.4 Taxes. You are responsible for taxes associated with your transactions unless we are legally required to collect them.
+
+14. Electronic Communications; Notices; E‑Sign Consent
+14.1 Electronic Delivery. You consent to receive communications electronically (e.g., Platform notices, emails) including updates to these Terms.
+
+14.2 E‑Sign. Your affirmative acceptance constitutes your electronic signature with the same force as a handwritten signature to the extent permitted by law.
+
+14.3 Method of Notices. Notices may be provided by in-Platform messages, email to your registered address, postings, or other electronic means. Maintain accurate contact information.
+
+15. Open Source; Third-Party Licenses
+15.1 Open Source. The Platform may include open-source components governed by their licenses, which may supersede certain provisions of these Terms for those components.
+
+15.2 Notices. Required attributions and license notices may be provided within the Platform.
+
+16. Export Controls; Sanctions; Compliance; Anti-Corruption
+16.1 Export/Sanctions. You represent you are not located in, under the control of, or a national/resident of a sanctioned or embargoed jurisdiction and agree to comply with applicable export control and sanctions laws.
+
+16.2 Anti-Corruption. You will comply with applicable anti-bribery and anti-corruption laws and not offer or accept improper advantages.
+
+17. Disclaimers of Warranties; Non-Medical and Emergency Disclaimers
+17.1 “As Is” and “As Available.” The Platform, all Content (including User Content), Tools, and features are provided “as is” and “as available,” with all faults and without warranties of any kind (express, implied, statutory, or otherwise), including merchantability, fitness for a particular purpose, title, non-infringement, accuracy, availability, or reliability.
+
+17.2 No Outcomes or Availability Warranties. We do not warrant the Platform will meet your requirements, be uninterrupted, timely, secure, or error-free, that any defects will be corrected, or that content will be accurate, reliable, complete, or current.
+
+17.3 No Professional Advice. All information is general, informational, and peer-driven. Always seek qualified professional advice for health, legal, safety, financial, or other specialized matters.
+
+17.4 Emergencies. The Platform is not intended for emergency communications. If you are in crisis or danger, contact local emergency services immediately.
+
+18. Limitation of Liability; Allocation of Risk; Post‑Acceptance Disclaimer
+18.1 Exclusions. To the fullest extent permitted by law, Axiom and its affiliates, officers, directors, employees, volunteers, contractors, agents, licensors, and suppliers are not liable for indirect, incidental, special, consequential, exemplary, punitive, or enhanced damages; lost profits, goodwill, or data; business interruption; or the cost of substitute services, even if advised of the possibility.
+
+18.2 Cap. To the fullest extent permitted by law, Axiom’s aggregate liability for all claims arising out of or relating to these Terms or the Platform shall not exceed the greater of: (a) the total amount you paid (if any) to Axiom for use of the Platform in the twelve (12) months preceding the event giving rise to liability; or (b) USD $50.
+
+18.3 Essential Purpose. The foregoing limitations apply even if any remedy fails its essential purpose and regardless of legal theory.
+
+18.4 Consumer Protections. Some jurisdictions do not allow certain exclusions or limitations. In such cases, limitations apply to the maximum extent permitted by law.
+
+18.5 Explicit Post‑Acceptance Disclaimer. After you accept these Terms, and to the maximum extent permitted by law, Axiom disclaims responsibility and liability for any events, outcomes, decisions, actions, injuries, losses, or consequences arising in connection with or following your acceptance and your use or attempted use of the Platform. Nothing herein excludes liability that cannot be excluded by law (e.g., certain cases of gross negligence, willful misconduct, or death/personal injury caused by proven negligence).
+
+19. Indemnification and Hold Harmless
+19.1 Your Obligations. To the fullest extent permitted by law, you agree to defend, indemnify, and hold harmless Axiom and its affiliates, officers, directors, employees, volunteers, contractors, agents, licensors, and suppliers from and against claims, demands, actions, proceedings, damages, losses, liabilities, costs, and expenses (including reasonable attorneys’ fees) arising out of or relating to: (a) your access to or use of the Platform; (b) your User Content; (c) your violation of these Terms or law; (d) your infringement or misappropriation of any third-party right; or (e) disputes between you and another user or third party.
+
+19.2 Defense and Settlement. Axiom may assume the exclusive defense and control of any matter subject to indemnification at its option. You will not settle any claim without Axiom’s prior written consent.
+
+19.3 User-to-User Release. To the fullest extent permitted by law, you release Axiom from claims and damages arising out of disputes between users.
+
+20. Governing Law; Venue; Dispute Resolution; Class Waiver
+20.1 Governing Law. These Terms and any dispute or claim arising out of or relating to them or the Platform are governed by the laws of Japan, without regard to conflict-of-law principles.
+
+20.2 Informal Resolution. Before formal proceedings, you agree to attempt to resolve disputes informally by notifying Axiom via the Platform’s notice mechanism and allowing a reasonable opportunity to resolve.
+
+20.3 Arbitration (Primary Mechanism). Except where prohibited by law, disputes shall be resolved by binding, individual arbitration administered by the Japan Commercial Arbitration Association (JCAA) under its then-current rules. The seat of arbitration is Tokyo, Japan; proceedings shall be in English unless the parties agree otherwise. Judgment on an award may be entered in any court of competent jurisdiction.
+
+20.4 Class Action Waiver. To the fullest extent permitted by law, claims must be brought individually, not as a plaintiff or class member in any class, collective, consolidated, or representative proceeding.
+
+20.5 Small Claims and Injunctive Relief. Nothing herein limits either party’s right to seek relief in small claims court (where available) or to seek temporary or preliminary injunctive relief to protect IP, confidentiality, or platform integrity in any court of competent jurisdiction, including courts in Japan.
+
+20.6 Consumers in Certain Jurisdictions. If you are a consumer residing in a jurisdiction that prohibits mandatory arbitration or class waivers, the mandatory parts of this Section do not apply. In such cases, the laws and courts of your habitual residence may apply, and you retain any non-waivable consumer rights.
+
+20.7 Court Jurisdiction for Enforcement. You consent to the jurisdiction of courts in Japan to compel arbitration, enforce arbitral awards, or grant injunctive relief.
+
+21. International Use; Region-Specific Terms
+21.1 International Use. The Platform is controlled from Japan and may not be appropriate in other locations. You are responsible for local law compliance.
+
+21.2 EU/EEA/UK Consumers. Nothing in these Terms excludes or limits rights that cannot be excluded under applicable consumer protection laws. If mandatory consumer rules of your country of residence provide more favorable rights, those rights remain unaffected.
+
+21.3 United States Residents and Other Jurisdictions. Certain state or national laws may grant additional non-waivable consumer rights. The limitations herein apply to the maximum extent permitted.
+
+21.4 Language. These Terms are written in English. Any translations are for convenience only; the English version controls.
+
+22. Accessibility; Limitations; Accommodation
+22.1 Commitment. We strive to improve accessibility and to align with applicable standards (e.g., WCAG) where feasible. Accessibility is an ongoing effort.
+
+22.2 No Accessibility Warranty. We do not warrant conformance with any specific standard or that all features, content, or third-party integrations are accessible to every user at all times.
+
+22.3 Reasonable Accommodations. Users requiring accommodations may contact us. We will make reasonable efforts, subject to technical feasibility and resource constraints, and may offer alternative methods providing substantially equivalent access.
+
+22.4 Feedback and Improvement. We welcome accessibility feedback and consider it in our development priorities.
+
+23. Moderation; Enforcement; Crisis-Related Content
+23.1 No Duty to Monitor. We are not obligated to monitor Content or behavior but may do so at our discretion and take actions we deem appropriate.
+
+23.2 Discretionary Actions. We may remove content, restrict features, suspend/terminate accounts, or escalate issues to protect users or enforce these Terms without liability.
+
+23.3 Crisis-Related Content. We may limit visibility of or remove content suggesting a risk of harm, but we have no duty to do so. Users remain responsible for seeking immediate professional help in emergencies.
+
+24. Intellectual Property Claims
+24.1 Reporting. If you believe Content infringes your IP rights, submit a report via the Platform mechanisms described in our IP policy (available upon request).
+
+24.2 Response. We may remove or disable access to allegedly infringing material and may terminate repeat infringers’ accounts at our discretion. We do not commit to specific timelines or outcomes.
+
+25. Platform Integrity; Security Research
+25.1 Integrity. You agree not to interfere with the Platform’s proper operation, including circumventing access restrictions or performance controls.
+
+25.2 Good-Faith Testing. Any security testing requires our prior written authorization and must be conducted to avoid harm to users or the Platform. Unapproved testing is prohibited.
+
+26. Changes to Terms; Services; Sunset; Version Control
+26.1 Terms Updates. We may revise these Terms from time to time, effective upon posting or as otherwise communicated. Your continued use signifies acceptance. If you do not agree, discontinue use and delete your account where applicable.
+
+26.2 Services Evolution. We may add, modify, suspend, or discontinue features with or without notice and without liability. We may sunset legacy features or content libraries.
+
+26.3 Historical Versions. We may maintain historical versions for record-keeping but are not obligated to provide access. The current posted version governs.
+
+27. Termination; Suspension; Survival
+27.1 By Axiom. We may suspend or terminate access at any time, with or without cause and with or without notice, including for violations of these Terms or law.
+
+27.2 By You. You may cease using the Platform at any time and may request account deletion where available.
+
+27.3 Effects. Upon termination, your rights to use the Platform cease immediately. We may delete or retain Content and data consistent with our policies and law. Sections intended to survive (including IP, licenses, disclaimers, limitations, indemnities, and dispute resolution) will survive.
+
+28. Assignment
+28.1 By Axiom. We may assign, delegate, or transfer our rights and obligations, in whole or in part, to any affiliate or successor (e.g., merger, acquisition, reorganization).
+
+28.2 By You. You may not assign or transfer these Terms without our prior written consent. Any attempted assignment in violation of this Section is void.
+
+29. Notices; Communications; No Professional or Emergency Channels
+29.1 Methods. Notices may be provided through in-Platform banners, prompts, inbox messages, email to your registered address, or other electronic means.
+
+29.2 No Professional/Emergency Communications. The Platform is not a conduit for professional, time-sensitive, or emergency communications. Do not rely on the Platform to contact professionals or authorities.
+
+29.3 Contact Information. Maintain current contact details in your account settings and promptly update changes.
+
+30. Entire Agreement; Severability; Waiver; No Third-Party Beneficiaries; Headings; Construction
+30.1 Entire Agreement. These Terms, together with incorporated Policies, constitute the entire agreement between you and Axiom and supersede prior or contemporaneous understandings.
+
+30.2 Severability. If any provision is held invalid or unenforceable, the remaining provisions remain in full force and effect. The parties will endeavor to replace invalid provisions with enforceable terms reflecting the original intent.
+
+30.3 Waiver. No waiver of any breach constitutes a waiver of any subsequent breach. Waivers must be in writing.
+
+30.4 No Third-Party Beneficiaries. Except as expressly stated, no person or entity other than the parties has rights or remedies under these Terms.
+
+30.5 Headings and No Strict Construction. Headings are for convenience only and do not affect interpretation. These Terms shall not be construed against the drafter.
+
+31. Acknowledgments; Independent Responsibility
+31.1 Your Acknowledgments. You acknowledge: (a) the Platform is informational and community-oriented, not professional or medical; (b) Axiom cannot vet all Content or users; (c) you are solely responsible for your decisions and actions; and (d) Axiom makes no promises about outcomes or fitness for your purposes.
+
+31.2 Independent Responsibility. You are responsible for complying with all laws applicable to your conduct, Content, and use of the Platform.
+
+32. Effective Date; Acceptance and Final Affirmations
+32.1 Effective Date. These Terms are effective on the date listed at the top of this Agreement.
+
+32.2 Acceptance Required. By clicking “I Agree,” checking a box, or otherwise affirmatively consenting, you acknowledge that you have read, understood, and agree to be bound by these Terms and the incorporated Policies. You further acknowledge and agree to Axiom’s explicit disclaimers, limitations of liability, arbitration and class waiver provisions (as applicable), and other allocations of risk to the maximum extent permitted by law.
+
+— End of Comprehensive Terms of Service —
