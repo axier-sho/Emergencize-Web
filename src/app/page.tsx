@@ -14,6 +14,7 @@ export default function LandingPage() {
   const [showContent, setShowContent] = useState(false)
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login')
+  const [lockAuthMode, setLockAuthMode] = useState(false)
   const windowSize = useWindowSize()
   const isClient = useClient()
   const { user, logout } = useAuth()
@@ -138,6 +139,7 @@ export default function LandingPage() {
               <motion.button
                 onClick={() => {
                   setAuthMode('login')
+                  setLockAuthMode(false)
                   setAuthModalOpen(true)
                 }}
                 className="flex items-center space-x-2 px-4 py-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors"
@@ -151,6 +153,7 @@ export default function LandingPage() {
               <motion.button
                 onClick={() => {
                   setAuthMode('signup')
+                  setLockAuthMode(true)
                   setAuthModalOpen(true)
                 }}
                 className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
@@ -246,6 +249,7 @@ export default function LandingPage() {
                     router.push('/dashboard')
                   } else {
                     setAuthMode('login')
+                    setLockAuthMode(false)
                     setAuthModalOpen(true)
                   }
                 }}
@@ -279,6 +283,7 @@ export default function LandingPage() {
                 <motion.button
                   onClick={() => {
                     setAuthMode('login')
+                    setLockAuthMode(false)
                     setAuthModalOpen(true)
                   }}
                   className="flex items-center justify-center space-x-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
@@ -291,6 +296,7 @@ export default function LandingPage() {
                 <motion.button
                   onClick={() => {
                     setAuthMode('signup')
+                    setLockAuthMode(true)
                     setAuthModalOpen(true)
                   }}
                   className="flex items-center justify-center space-x-2 px-6 py-3 border border-white border-opacity-30 text-white rounded-lg font-medium hover:bg-white hover:bg-opacity-10 transition-colors"
@@ -399,6 +405,7 @@ export default function LandingPage() {
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
         initialMode={authMode}
+        lockMode={lockAuthMode}
       />
     </div>
   )

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useId } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, FileText, ExternalLink, Calendar, Building2 } from 'lucide-react'
 import Link from 'next/link'
@@ -19,6 +19,23 @@ export function TermsOfServiceModal({
   showAcceptButton = false 
 }: TermsOfServiceModalProps) {
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null)
+  const modalRef = useRef<HTMLDivElement>(null)
+  const headingId = useId()
+  const [activeSection, setActiveSection] = useState<string>('section-1')
+  // TOC container ref for auto-scrolling active item
+  const tocContainerRef = useRef<HTMLUListElement | null>(null)
+
+  // Table of contents sections
+  const toc = [
+    { id: 'section-1', label: '1. Preamble' },
+    { id: 'section-7', label: '7. Acceptable Use' },
+    { id: 'section-17', label: '17. Warranties' },
+    { id: 'section-18', label: '18. Liability' },
+    { id: 'section-22', label: '22. Accessibility' },
+    { id: 'section-32', label: '32. Acceptance' }
+  ]
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget
@@ -29,25 +46,126 @@ export function TermsOfServiceModal({
   useEffect(() => {
     if (isOpen) {
       setHasScrolledToBottom(false)
+      // Save previously focused element
+      previouslyFocusedRef.current = document.activeElement as HTMLElement
+      // Delay to ensure content measured
+      requestAnimationFrame(() => {
+        const el = contentRef.current
+        if (el) {
+          // If not scrollable, mark as bottom already
+            if (el.scrollHeight <= el.clientHeight + 2) {
+              setHasScrolledToBottom(true)
+            }
+        }
+        // Focus first focusable element (close button or accept button)
+        const focusable = modalRef.current?.querySelector<HTMLElement>(
+          'button, [href], [tabindex]:not([tabindex="-1"])'
+        )
+        focusable?.focus()
+      })
+      // Lock body scroll
+      const originalOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => { document.body.style.overflow = originalOverflow }
     }
   }, [isOpen])
+
+  // Escape key & focus trap
+  useEffect(() => {
+    if (!isOpen) {
+      // Restore focus
+      previouslyFocusedRef.current?.focus()
+      return
+    }
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation()
+        onClose()
+      } else if (e.key === 'Tab') {
+        // Basic focus trap
+        const focusables = modalRef.current?.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )
+        if (!focusables || focusables.length === 0) return
+        const first = focusables[0]
+        const last = focusables[focusables.length - 1]
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault(); last.focus()
+        } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault(); first.focus()
+        }
+      }
+    }
+    window.addEventListener('keydown', handleKey, true)
+    return () => window.removeEventListener('keydown', handleKey, true)
+  }, [isOpen, onClose])
+
+  // Observe headings within scroll container to sync active section
+  useEffect(() => {
+    if (!isOpen) return
+    const root = contentRef.current
+    if (!root) return
+    const headings = Array.from(root.querySelectorAll<HTMLHeadingElement>('h3[id]'))
+    if (!headings.length) return
+
+    const observer = new IntersectionObserver(
+      entries => {
+        // Sort entries by boundingClientRect top to pick the nearest visible
+        const visible = entries
+          .filter(e => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+        if (visible.length) {
+          setActiveSection(visible[0].target.id)
+        } else {
+          // Fallback: find the last heading above the viewport
+          const scrollTop = root.scrollTop
+          let current = headings[0].id
+            headings.forEach(h => {
+              if (h.offsetTop - 16 <= scrollTop) current = h.id
+            })
+          setActiveSection(current)
+        }
+      },
+      { root, threshold: 0.4 }
+    )
+    headings.forEach(h => observer.observe(h))
+    return () => observer.disconnect()
+  }, [isOpen])
+
+  // Auto-scroll TOC so active item stays visible (simplified pattern provided by user)
+  useEffect(() => {
+    if (!isOpen) return
+    const container = tocContainerRef.current
+    if (!container) return
+    const activeEl = container.querySelector<HTMLAnchorElement>('.toc-item.active')
+    if (activeEl) {
+      activeEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    }
+  }, [activeSection, isOpen])
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          aria-hidden={!isOpen}
+        >
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="w-full max-w-4xl h-[90vh] bg-white dark:bg-gray-800 rounded-lg shadow-2xl flex flex-col overflow-hidden"
+            ref={modalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={headingId}
+            className="w-full max-w-4xl h-[90vh] bg-white dark:bg-gray-800 rounded-lg shadow-2xl flex flex-col overflow-hidden focus:outline-none"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
               <div className="flex items-center space-x-3">
                 <FileText className="w-6 h-6" />
                 <div>
-                  <h2 className="text-xl font-bold">Terms of Service</h2>
+                  <h2 id={headingId} className="text-xl font-bold">Terms of Service</h2>
                   <p className="text-blue-100 text-sm">Please read carefully before proceeding</p>
                 </div>
               </div>
@@ -56,7 +174,8 @@ export function TermsOfServiceModal({
                 <Link
                   href="/terms"
                   target="_blank"
-                  className="flex items-center space-x-2 px-3 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg transition-colors text-sm"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-2 px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white/60"
                 >
                   <ExternalLink size={16} />
                   <span>Open in New Tab</span>
@@ -64,7 +183,8 @@ export function TermsOfServiceModal({
                 
                 <button
                   onClick={onClose}
-                  className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors"
+                  className="p-2 hover:bg-white/20 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white/60"
+                  aria-label="Close terms of service"
                 >
                   <X size={24} />
                 </button>
@@ -92,15 +212,48 @@ export function TermsOfServiceModal({
             </div>
 
             {/* Content */}
-            <div 
-              className="flex-1 overflow-y-auto p-6"
+            <div
+              ref={contentRef}
+              className="flex-1 overflow-y-auto p-6 outline-none"
               onScroll={handleScroll}
+              tabIndex={0}
             >
-              <div className="prose prose-gray dark:prose-invert max-w-none">
-                <div className="mb-8">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-                    1. Preamble and Acceptance of Terms
-                  </h3>
+              <div className="flex gap-8 w-full">
+                {/* Sidebar TOC */}
+                <nav aria-label="Terms sections" className="hidden md:block w-56 flex-shrink-0">
+                  <ul
+                    ref={tocContainerRef}
+                    className="space-y-1 sticky top-0 max-h-[calc(90vh-12rem)] overflow-auto pr-2"
+                  >
+                    {toc.map(item => {
+                      const active = activeSection === item.id
+                      return (
+                        <li key={item.id}>
+                          <a
+                            href={`#${item.id}`}
+                            onClick={(e) => {
+                              e.preventDefault()
+                              const el = contentRef.current?.querySelector<HTMLElement>(`#${item.id}`)
+                              if (el) {
+                                contentRef.current?.scrollTo({ top: el.offsetTop - 16, behavior: 'smooth' })
+                              }
+                            }}
+                            className={`toc-item block rounded-md px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/60 ${active ? 'active bg-blue-600 text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-200'}`}
+                            aria-current={active ? 'true' : undefined}
+                          >
+                            {item.label}
+                          </a>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </nav>
+                {/* Main Article */}
+                <div className="prose prose-gray dark:prose-invert max-w-none flex-1">
+                  <div className="mb-8" id="section-1">
+                    <h3 id="section-1" className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                      1. Preamble and Acceptance of Terms
+                    </h3>
                   
                   <div className="mb-4">
                     <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">1.1 Binding Agreement</h4>
@@ -124,8 +277,8 @@ export function TermsOfServiceModal({
                   </div>
                 </div>
 
-                <div className="mb-8">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                <div className="mb-8" id="section-7">
+                  <h3 id="section-7" className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                     7. Acceptable Use; Community Standards
                   </h3>
                   
@@ -143,8 +296,8 @@ export function TermsOfServiceModal({
                   </div>
                 </div>
 
-                <div className="mb-8">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                <div className="mb-8" id="section-17">
+                  <h3 id="section-17" className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                     17. Disclaimers of Warranties
                   </h3>
                   
@@ -163,8 +316,8 @@ export function TermsOfServiceModal({
                   </div>
                 </div>
 
-                <div className="mb-8">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                <div className="mb-8" id="section-18">
+                  <h3 id="section-18" className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                     18. Limitation of Liability
                   </h3>
                   <p className="text-gray-700 dark:text-gray-300 text-sm">
@@ -172,8 +325,8 @@ export function TermsOfServiceModal({
                   </p>
                 </div>
 
-                <div className="mb-8">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                <div className="mb-8" id="section-22">
+                  <h3 id="section-22" className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                     22. Accessibility
                   </h3>
                   <p className="text-gray-700 dark:text-gray-300 text-sm">
@@ -181,8 +334,8 @@ export function TermsOfServiceModal({
                   </p>
                 </div>
 
-                <div className="mb-8">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                <div className="mb-8" id="section-32">
+                  <h3 id="section-32" className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                     32. Acceptance and Final Affirmations
                   </h3>
                   <p className="text-gray-700 dark:text-gray-300 text-sm">
@@ -201,7 +354,8 @@ export function TermsOfServiceModal({
                     — End of Terms Summary —
                   </p>
                 </div>
-              </div>
+                </div>{/* end article */}
+              </div>{/* end flex */}
             </div>
 
             {/* Footer */}
@@ -226,15 +380,16 @@ export function TermsOfServiceModal({
                     </button>
                     
                     <button
-                      onClick={onAccept}
+                      onClick={hasScrolledToBottom ? onAccept : undefined}
                       disabled={!hasScrolledToBottom}
-                      className={`
-                        px-6 py-2 rounded-lg font-medium transition-all
+                      className={`px-6 py-2 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:focus:ring-0
                         ${hasScrolledToBottom
                           ? 'bg-blue-600 hover:bg-blue-700 text-white'
                           : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-                        }
-                      `}
+                        }`
+                      }
+                      aria-disabled={!hasScrolledToBottom}
+                      aria-describedby={!hasScrolledToBottom ? `${headingId}-scrollhint` : undefined}
                     >
                       I Accept These Terms
                     </button>
