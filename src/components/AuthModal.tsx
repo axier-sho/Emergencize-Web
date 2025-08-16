@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Mail, Lock, User, Eye, EyeOff, ExternalLink } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
@@ -10,9 +10,10 @@ interface AuthModalProps {
   isOpen: boolean
   onClose: () => void
   initialMode?: 'login' | 'signup'
+  lockMode?: boolean // When true, prevents toggling between modes
 }
 
-export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalProps) {
+export default function AuthModal({ isOpen, onClose, initialMode = 'login', lockMode = false }: AuthModalProps) {
   const [mode, setMode] = useState<'login' | 'signup'>(initialMode)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -23,6 +24,11 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
   const [acceptedTerms, setAcceptedTerms] = useState(false)
 
   const { login, register } = useAuth()
+
+  // Update mode when initialMode prop changes
+  useEffect(() => {
+    setMode(initialMode)
+  }, [initialMode])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -56,6 +62,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
   }
 
   const toggleMode = () => {
+    if (lockMode) return // Prevent toggling when locked
     setMode(mode === 'login' ? 'signup' : 'login')
     setError('')
     setAcceptedTerms(false)
@@ -194,7 +201,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                     <label htmlFor="acceptTerms" className="text-sm text-gray-300 leading-relaxed">
                       I have read, understood, and agree to be bound by the{' '}
                       <Link 
-                        href="/terms" 
+                        href="/tos" 
                         target="_blank"
                         className="text-blue-400 hover:text-blue-300 underline inline-flex items-center gap-1 transition-colors"
                       >
@@ -223,17 +230,19 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
               </form>
 
               {/* Toggle Mode */}
-              <div className="mt-6 text-center">
-                <span className="text-gray-300">
-                  {mode === 'login' ? "Don't have an account? " : "Already have an account? "}
-                </span>
-                <button
-                  onClick={toggleMode}
-                  className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
-                >
-                  {mode === 'login' ? 'Sign up' : 'Sign in'}
-                </button>
-              </div>
+              {!lockMode && (
+                <div className="mt-6 text-center">
+                  <span className="text-gray-300">
+                    {mode === 'login' ? "Don't have an account? " : "Already have an account? "}
+                  </span>
+                  <button
+                    onClick={toggleMode}
+                    className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                  >
+                    {mode === 'login' ? 'Sign up' : 'Sign in'}
+                  </button>
+                </div>
+              )}
             </motion.div>
           </motion.div>
         </>

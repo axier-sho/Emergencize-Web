@@ -44,7 +44,11 @@ export default function TermsOfServicePage() {
   ]
 
   useEffect(() => {
+    let isScrolling = false
+    
     const handleScroll = () => {
+      if (isScrolling) return
+      
       const scrollPosition = window.scrollY + 200
 
       for (const section of sections) {
@@ -54,7 +58,36 @@ export default function TermsOfServicePage() {
           const offsetBottom = offsetTop + element.offsetHeight
 
           if (scrollPosition >= offsetTop && scrollPosition < offsetBottom) {
-            setActiveSection(section.id)
+            if (activeSection !== section.id) {
+              setActiveSection(section.id)
+              
+              // Auto-scroll sidebar to keep active section visible
+              const sidebarNav = document.querySelector('nav.space-y-1')
+              const sidebarButton = document.querySelector(`button[data-section-id="${section.id}"]`)
+              
+              if (sidebarNav && sidebarButton) {
+                const navRect = sidebarNav.getBoundingClientRect()
+                const buttonRect = sidebarButton.getBoundingClientRect()
+                
+                // Check if button is outside the visible area
+                if (buttonRect.top < navRect.top || buttonRect.bottom > navRect.bottom) {
+                  isScrolling = true
+                  
+                  // Calculate scroll position to center the button
+                  const scrollTop = sidebarNav.scrollTop + (buttonRect.top - navRect.top) - (navRect.height / 2) + (buttonRect.height / 2)
+                  
+                  sidebarNav.scrollTo({
+                    top: scrollTop,
+                    behavior: 'smooth'
+                  })
+                  
+                  // Reset scrolling flag after animation
+                  setTimeout(() => {
+                    isScrolling = false
+                  }, 500)
+                }
+              }
+            }
             break
           }
         }
@@ -64,7 +97,7 @@ export default function TermsOfServicePage() {
     handleScroll() // Set initial active section
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  }, [activeSection])
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId)
@@ -119,6 +152,7 @@ export default function TermsOfServicePage() {
                 {sections.map((section) => (
                   <motion.button
                     key={section.id}
+                    data-section-id={section.id}
                     onClick={() => scrollToSection(section.id)}
                     className={`
                       w-full text-left px-3 py-2 rounded-md text-sm transition-all duration-200

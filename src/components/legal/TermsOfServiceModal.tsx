@@ -23,6 +23,19 @@ export function TermsOfServiceModal({
   const previouslyFocusedRef = useRef<HTMLElement | null>(null)
   const modalRef = useRef<HTMLDivElement>(null)
   const headingId = useId()
+  const [activeSection, setActiveSection] = useState<string>('section-1')
+  // TOC container ref for auto-scrolling active item
+  const tocContainerRef = useRef<HTMLUListElement | null>(null)
+
+  // Table of contents sections
+  const toc = [
+    { id: 'section-1', label: '1. Preamble' },
+    { id: 'section-7', label: '7. Acceptable Use' },
+    { id: 'section-17', label: '17. Warranties' },
+    { id: 'section-18', label: '18. Liability' },
+    { id: 'section-22', label: '22. Accessibility' },
+    { id: 'section-32', label: '32. Acceptance' }
+  ]
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget
@@ -86,6 +99,49 @@ export function TermsOfServiceModal({
     window.addEventListener('keydown', handleKey, true)
     return () => window.removeEventListener('keydown', handleKey, true)
   }, [isOpen, onClose])
+
+  // Observe headings within scroll container to sync active section
+  useEffect(() => {
+    if (!isOpen) return
+    const root = contentRef.current
+    if (!root) return
+    const headings = Array.from(root.querySelectorAll<HTMLHeadingElement>('h3[id]'))
+    if (!headings.length) return
+
+    const observer = new IntersectionObserver(
+      entries => {
+        // Sort entries by boundingClientRect top to pick the nearest visible
+        const visible = entries
+          .filter(e => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+        if (visible.length) {
+          setActiveSection(visible[0].target.id)
+        } else {
+          // Fallback: find the last heading above the viewport
+          const scrollTop = root.scrollTop
+          let current = headings[0].id
+            headings.forEach(h => {
+              if (h.offsetTop - 16 <= scrollTop) current = h.id
+            })
+          setActiveSection(current)
+        }
+      },
+      { root, threshold: 0.4 }
+    )
+    headings.forEach(h => observer.observe(h))
+    return () => observer.disconnect()
+  }, [isOpen])
+
+  // Auto-scroll TOC so active item stays visible (simplified pattern provided by user)
+  useEffect(() => {
+    if (!isOpen) return
+    const container = tocContainerRef.current
+    if (!container) return
+    const activeEl = container.querySelector<HTMLAnchorElement>('.toc-item.active')
+    if (activeEl) {
+      activeEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    }
+  }, [activeSection, isOpen])
 
   return (
     <AnimatePresence>
@@ -162,11 +218,42 @@ export function TermsOfServiceModal({
               onScroll={handleScroll}
               tabIndex={0}
             >
-              <div className="prose prose-gray dark:prose-invert max-w-none">
-                <div className="mb-8">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-                    1. Preamble and Acceptance of Terms
-                  </h3>
+              <div className="flex gap-8 w-full">
+                {/* Sidebar TOC */}
+                <nav aria-label="Terms sections" className="hidden md:block w-56 flex-shrink-0">
+                  <ul
+                    ref={tocContainerRef}
+                    className="space-y-1 sticky top-0 max-h-[calc(90vh-12rem)] overflow-auto pr-2"
+                  >
+                    {toc.map(item => {
+                      const active = activeSection === item.id
+                      return (
+                        <li key={item.id}>
+                          <a
+                            href={`#${item.id}`}
+                            onClick={(e) => {
+                              e.preventDefault()
+                              const el = contentRef.current?.querySelector<HTMLElement>(`#${item.id}`)
+                              if (el) {
+                                contentRef.current?.scrollTo({ top: el.offsetTop - 16, behavior: 'smooth' })
+                              }
+                            }}
+                            className={`toc-item block rounded-md px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/60 ${active ? 'active bg-blue-600 text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-200'}`}
+                            aria-current={active ? 'true' : undefined}
+                          >
+                            {item.label}
+                          </a>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </nav>
+                {/* Main Article */}
+                <div className="prose prose-gray dark:prose-invert max-w-none flex-1">
+                  <div className="mb-8" id="section-1">
+                    <h3 id="section-1" className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                      1. Preamble and Acceptance of Terms
+                    </h3>
                   
                   <div className="mb-4">
                     <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">1.1 Binding Agreement</h4>
@@ -190,8 +277,8 @@ export function TermsOfServiceModal({
                   </div>
                 </div>
 
-                <div className="mb-8">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                <div className="mb-8" id="section-7">
+                  <h3 id="section-7" className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                     7. Acceptable Use; Community Standards
                   </h3>
                   
@@ -209,8 +296,8 @@ export function TermsOfServiceModal({
                   </div>
                 </div>
 
-                <div className="mb-8">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                <div className="mb-8" id="section-17">
+                  <h3 id="section-17" className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                     17. Disclaimers of Warranties
                   </h3>
                   
@@ -229,8 +316,8 @@ export function TermsOfServiceModal({
                   </div>
                 </div>
 
-                <div className="mb-8">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                <div className="mb-8" id="section-18">
+                  <h3 id="section-18" className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                     18. Limitation of Liability
                   </h3>
                   <p className="text-gray-700 dark:text-gray-300 text-sm">
@@ -238,8 +325,8 @@ export function TermsOfServiceModal({
                   </p>
                 </div>
 
-                <div className="mb-8">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                <div className="mb-8" id="section-22">
+                  <h3 id="section-22" className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                     22. Accessibility
                   </h3>
                   <p className="text-gray-700 dark:text-gray-300 text-sm">
@@ -247,8 +334,8 @@ export function TermsOfServiceModal({
                   </p>
                 </div>
 
-                <div className="mb-8">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                <div className="mb-8" id="section-32">
+                  <h3 id="section-32" className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                     32. Acceptance and Final Affirmations
                   </h3>
                   <p className="text-gray-700 dark:text-gray-300 text-sm">
@@ -267,7 +354,8 @@ export function TermsOfServiceModal({
                     — End of Terms Summary —
                   </p>
                 </div>
-              </div>
+                </div>{/* end article */}
+              </div>{/* end flex */}
             </div>
 
             {/* Footer */}
