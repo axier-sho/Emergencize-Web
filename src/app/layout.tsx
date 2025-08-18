@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import ErrorBoundary from '@/components/error-handling/ErrorBoundary'
 import { AccessibilityProvider } from '@/components/accessibility/AccessibilityProvider'
+import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 export const metadata: Metadata = {
   title: 'Emergencize - Emergency Alert System',
@@ -35,6 +37,8 @@ export default function RootLayout({
             {children}
           </AccessibilityProvider>
         </ErrorBoundary>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
