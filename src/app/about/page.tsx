@@ -277,7 +277,7 @@ export default function AboutPage() {
                   </motion.div>
 
                   <h2 className="text-3xl font-bold text-white mb-2">Sho𓆑</h2>
-                  <p className="text-blue-200 mb-6">Full-Stack Developer & Emergency System Designer</p>
+                  <p className="text-blue-200 mb-6">Developer & Emergency System Designer</p>
                   
                   <motion.a
                     href="https://github.com/Sho1228"
