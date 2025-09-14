@@ -1,0 +1,92 @@
+name: Capture Build Logs
+
+on:
+  push:
+    branches: [main, deploy]
+  pull_request:
+    branches: [main, deploy]
+
+jobs:
+  build-logs:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: |
+          echo "=== Installing Dependencies ===" | tee install.log
+          npm install 2>&1 | tee -a install.log
+          
+      - name: Run linting
+        run: |
+          echo "=== Running ESLint ===" | tee lint.log
+          npm run lint 2>&1 | tee -a lint.log || true
+          
+      - name: Build application
+        run: |
+          echo "=== Building Application ===" | tee build.log
+          echo "Build started at: $(date)" | tee -a build.log
+          npm run build 2>&1 | tee -a build.log
+          echo "Build completed at: $(date)" | tee -a build.log
+          
+      - name: Generate build summary
+        run: |
+          echo "=== Build Summary ===" | tee build-summary.log
+          echo "Repository: ${{ github.repository }}" | tee -a build-summary.log
+          echo "Branch: ${{ github.ref_name }}" | tee -a build-summary.log
+          echo "Commit: ${{ github.sha }}" | tee -a build-summary.log
+          echo "Workflow: ${{ github.workflow }}" | tee -a build-summary.log
+          echo "Run ID: ${{ github.run_id }}" | tee -a build-summary.log
+          echo "Timestamp: $(date)" | tee -a build-summary.log
+          echo "" | tee -a build-summary.log
+          
+          # Check if build was successful
+          if [ -f ".next/BUILD_ID" ]; then
+            echo "✅ Build Status: SUCCESS" | tee -a build-summary.log
+            echo "Build ID: $(cat .next/BUILD_ID)" | tee -a build-summary.log
+          else
+            echo "❌ Build Status: FAILED" | tee -a build-summary.log
+          fi
+          
+          # Add file sizes
+          echo "" | tee -a build-summary.log
+          echo "=== Build Output Size ===" | tee -a build-summary.log
+          if [ -d ".next" ]; then
+            du -sh .next | tee -a build-summary.log
+          fi
+          
+      - name: Commit build logs
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "GitHub Actions"
+          
+          # Add log files
+          git add *.log
+          
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No build log changes to commit"
+          else
+            git commit -m "📝 Add build logs for commit ${{ github.sha }}"
+            git push
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Upload logs as artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build-logs-${{ github.run_id }}
+          path: "*.log"
+          retention-days: 30

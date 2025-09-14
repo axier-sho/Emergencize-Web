@@ -32,8 +32,13 @@ dist/
 ehthumbs.db
 Thumbs.db
 
-# Logs
-*.log
+# Logs (but allow build logs)
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+!build*.log
+!install.log
+!lint.log
 
 # Runtime data
 pids
