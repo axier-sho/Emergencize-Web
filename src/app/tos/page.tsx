@@ -97,7 +97,7 @@ export default function TermsOfServicePage() {
     handleScroll() // Set initial active section
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [activeSection])
+  }, [sections])
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId)
@@ -212,7 +212,7 @@ export default function TermsOfServicePage() {
                 
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">1.1 Binding Agreement</h3>
                 <p className="text-gray-700 dark:text-gray-300 mb-4">
-                  These Terms of Service (the "Terms," "Agreement," or "ToS") constitute a legally binding agreement between you ("you," "your," or "User") and Axiom ("Axiom," "we," "us," or "our") governing your access to and use of the Emergencize platform located at sho1228.com and all associated services, subdomains, applications, interfaces, and tools (collectively, the "Platform" or "Emergencize").
+                  These Terms of Service (the &quot;Terms,&quot; &quot;Agreement,&quot; or &quot;ToS&quot;) constitute a legally binding agreement between you (&quot;you,&quot; &quot;your,&quot; or &quot;User&quot;) and Axiom (&quot;Axiom,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) governing your access to and use of the Emergencize platform located at sho1228.com and all associated services, subdomains, applications, interfaces, and tools (collectively, the &quot;Platform&quot; or &quot;Emergencize&quot;).
                 </p>
 
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">1.2 Affirmative Acceptance</h3>

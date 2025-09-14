@@ -15,7 +15,7 @@
                !str.matches('.*[<>\"\\'].*');
       }",
       "isValidEmail": "(email) => {
-        return email != null && email.matches('^[\\\\w\\\\.-]+@[\\\\w\\\\.-]+\\\\.[\\\\w]+$') && 
+        return email != null && email.matches('^[\\w\\.-]+@[\\w\\.-]+\\.[\\w]+$') && 
                email.length <= 254;
       }",
       "isValidCoordinates": "(lat, lng) => {
@@ -138,9 +138,9 @@
                       newData.child('status').val() === 'declined' ||
                       newData.child('status').val() === 'blocked') &&
                      (!newData.child('fromUserEmail').exists() || 
-                      newData.child('fromUserEmail').val().matches('^[\\\\w\\\\.-]+@[\\\\w\\\\.-]+\\\\.[\\\\w]+$')) &&
+                      newData.child('fromUserEmail').val().matches('^[\\w\\.-]+@[\\w\\.-]+\\.[\\w]+$')) &&
                      (!newData.child('toUserEmail').exists() || 
-                      newData.child('toUserEmail').val().matches('^[\\\\w\\\\.-]+@[\\\\w\\\\.-]+\\\\.[\\\\w]+$'))"
+                      newData.child('toUserEmail').val().matches('^[\\w\\.-]+@[\\w\\.-]+\\.[\\w]+$'))"
       }
     },
     
