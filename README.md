@@ -4,6 +4,17 @@
 
 A sophisticated, real-time emergency alert system built with Next.js, Socket.io, and Firebase. Features enterprise-grade security, comprehensive monitoring, accessibility compliance, and intelligent emergency response capabilities.
 
+**🚨 What does it do?** Send instant emergency alerts to your emergency contacts with your GPS location. Works like a panic button that notifies your trusted contacts immediately when you need help.
+
+**⚡ Key Features:**
+- **HELP & DANGER buttons** - Two alert types for different emergency levels
+- **Real-time notifications** - Instant alerts via Socket.io when contacts are online  
+- **GPS location sharing** - Automatic location inclusion in emergency alerts
+- **Offline support** - Alerts queue and send when connection restored
+- **Contact management** - Add emergency contacts via email invitation
+- **Emergency chat** - Group messaging during emergencies
+- **3 Connection modes** - Works with full features, basic features, or offline
+
 ## Features
 
 ### Emergency Alert System
@@ -49,24 +60,24 @@ A sophisticated, real-time emergency alert system built with Next.js, Socket.io,
 
 ## Quick Start
 
-### 1. Install Dependencies
+### 1. Clone and Install
 
 ```bash
-# Install frontend dependencies
-npm install
+# Clone the repository
+git clone <repository-url>
+cd emergencize-web
 
-# Install server dependencies (in a separate terminal)
-npm install express socket.io cors nodemon
+# Install all dependencies
+npm install
 ```
 
-### 2. Set Up Firebase
+### 2. Set Up Firebase (Required)
 
 1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
-2. Enable Authentication and Firestore
-3. **Important**: Copy the provided security rules to your Firebase project:
-   - Update `firestore.rules` for Firestore security
-   - Update `database.rules.json` for Realtime Database security
-4. Copy your Firebase config to `.env.local`:
+2. Enable **Authentication** > Sign-in method > **Email/Password**
+3. Enable **Firestore Database** in test mode
+4. Enable **Realtime Database** in test mode
+5. Copy your Firebase config and create `.env.local`:
 
 ```env
 NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
@@ -80,15 +91,47 @@ NEXT_PUBLIC_SOCKET_URL=http://localhost:3001
 
 ### 3. Run the Application
 
+**Recommended (starts both servers):**
 ```bash
-# Start the Socket.io server (Terminal 1)
-node server.js
-
-# Start the Next.js app (Terminal 2)
-npm run dev
+npm run dev:all
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in multiple browser windows to test real-time functionality.
+**Alternative (separate terminals):**
+```bash
+# Terminal 1 - Next.js frontend
+npm run dev
+
+# Terminal 2 - Socket.io server
+npm run dev:server
+```
+
+### 4. Open and Test
+
+1. Open [http://localhost:3000](http://localhost:3000)
+2. Create an account with email/password
+3. Open in multiple browser windows to test real-time features
+4. The app works in three modes:
+   - **Real-time Mode**: Both servers running (full features)
+   - **Standard Mode**: Only frontend running (database alerts)
+   - **Offline Mode**: No internet (queued alerts)
+
+### 5. Deploy Firebase Security Rules (Important!)
+
+For production or to prevent authentication errors:
+
+```bash
+# Install Firebase CLI
+npm install -g firebase-tools
+
+# Login to Firebase
+firebase login
+
+# Initialize project (choose existing project)
+firebase init
+
+# Deploy security rules
+firebase deploy --only firestore:rules,database
+```
 
 ## Project Structure
 
@@ -362,12 +405,146 @@ await securityMonitoringService.logSecurityEvent({
 - **Secure Channels**: Encrypted emergency communication
 - **Audit Compliance**: Full audit trail for emergency events
 
+## Basic Usage
+
+### Emergency Alert System
+
+Once your app is running and you've created an account:
+
+1. **Add Emergency Contacts**:
+   - Click the "Contacts" button in the dashboard
+   - Enter a friend's email address
+   - They'll receive an invitation to join your emergency network
+
+2. **Send Emergency Alerts**:
+   - **HELP Button** (Blue): For non-urgent assistance
+     - Instant send to online contacts only
+     - "I need help, please respond when you can"
+   - **DANGER Button** (Red): For critical emergencies
+     - Hold for 3 seconds to prevent accidental activation
+     - Sends to ALL contacts (online and offline)
+     - "Emergency! I need immediate assistance!"
+
+3. **Location Sharing**:
+   - Allow location access when prompted
+   - Your GPS coordinates are automatically included in alerts
+   - Contacts see your exact location on the map
+
+### Real-time Features
+
+```javascript
+// The app automatically detects your connection status:
+// 🟢 Real-time Mode: Instant notifications, live presence
+// 🔵 Standard Mode: Database alerts, delayed notifications  
+// 🔴 Offline Mode: Queued alerts, sync when back online
+```
+
+### Emergency Chat
+
+- Click the chat icon to open group emergency chat
+- All emergency contacts can participate
+- Messages work in real-time when Socket.io server is running
+- Automatic message history and offline message queuing
+
+## Troubleshooting
+
+### Common Installation Issues
+
+**❌ Firebase setup errors**
+```bash
+# Check your .env.local file exists and has correct values
+cat .env.local
+
+# Verify Firebase project is properly configured:
+# 1. Authentication enabled with Email/Password
+# 2. Firestore Database created
+# 3. Realtime Database created
+```
+
+**❌ Socket.io server won't start**
+```bash
+# Check if port 3001 is in use
+lsof -i :3001
+
+# Kill any process using port 3001
+kill -9 $(lsof -t -i:3001)
+
+# Try starting with the helper script
+./start-socket-server.sh
+```
+
+**❌ App shows "Connecting..." forever**
+```
+Solution: This is normal if Socket.io server isn't running
+- App automatically switches to "Standard Mode"
+- All emergency features still work via Firebase
+- Start Socket.io server for real-time features
+```
+
+### Connection Status Issues
+
+**"Offline Mode" showing despite internet connection**
+```bash
+# Check your browser's network settings
+# Disable ad blockers temporarily
+# Try in incognito/private mode
+# Check browser console for Firebase errors
+```
+
+**Firebase "Failed to load resource" errors**
+```
+Usually caused by:
+- Ad blockers blocking Firebase requests
+- Incorrect Firebase configuration
+- Missing Firebase security rules
+- Network firewall restrictions
+
+Solution: Check browser console, verify Firebase config
+```
+
+### Performance Issues
+
+**Browser becomes slow/laggy on dashboard**
+```
+Fixed in recent updates:
+- Memory usage limited to prevent 2GB+ RAM usage
+- Alert history capped at 50 items
+- Chat messages limited to 100 per conversation
+- Refresh page if issues persist
+```
+
+**Emergency alerts not sending**
+```bash
+# Check these in order:
+1. Do you have emergency contacts added?
+2. Is the Firebase connection working?
+3. Check browser console for errors
+4. Try in a different browser/incognito mode
+```
+
+### Development Debugging
+
+**Enable debug logging**
+```javascript
+// Open browser console and run:
+localStorage.setItem('debug', 'emergencize:*')
+// Refresh page to see detailed logs
+```
+
+**Test Socket.io connection**
+```bash
+# Check Socket.io server status
+curl http://localhost:3001/socket.io/
+
+# Should return: {"sid":"...","upgrades":["websocket"],"pingTimeout":...}
+```
+
 ## Browser Compatibility
 
-- Chrome/Edge 88+ (recommended)
-- Firefox 85+
-- Safari 14+
-- Mobile browsers with WebSocket support
+- **Recommended**: Chrome/Edge 88+, Firefox 85+, Safari 14+
+- **Required**: WebSocket support, Geolocation API, Local Storage
+- **Mobile**: iOS Safari 14+, Android Chrome 88+
+- **Note**: Real-time features require WebSocket support
 
 ## Development & Production
 
