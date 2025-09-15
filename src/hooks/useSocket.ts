@@ -35,7 +35,9 @@ export function useSocket({
   const [socket, setSocket] = useState<Socket | null>(null)
   const [isConnected, setIsConnected] = useState(false)
   const [onlineUsers, setOnlineUsers] = useState<string[]>([])
+  const [connectionAttempted, setConnectionAttempted] = useState(false)
   const socketRef = useRef<Socket | null>(null)
+  const connectionTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Store callback refs to avoid recreation
   const callbackRefs = useRef({
@@ -72,26 +74,41 @@ export function useSocket({
   useEffect(() => {
     if (!userId) return
 
-    // Connect to Socket.io server with fallback transports and better error handling
+    setConnectionAttempted(true)
+
+    // Try to connect to Socket.io server with timeout
     const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001'
     console.log('Attempting to connect to socket server:', socketUrl)
     
     const newSocket = io(socketUrl, {
-      transports: ['websocket', 'polling'], // Allow fallback to polling if websocket fails
+      transports: ['websocket', 'polling'],
       autoConnect: true,
-      timeout: 5000,
+      timeout: 3000, // Shorter timeout
       reconnection: true,
-      reconnectionAttempts: 3,
-      reconnectionDelay: 1000
+      reconnectionAttempts: 2, // Fewer attempts
+      reconnectionDelay: 2000
     })
 
     socketRef.current = newSocket
     setSocket(newSocket)
 
+    // Set a timeout to stop trying after 10 seconds
+    connectionTimeoutRef.current = setTimeout(() => {
+      if (!newSocket.connected) {
+        console.log('🔄 Socket connection timeout - switching to offline mode')
+        newSocket.disconnect()
+        setIsConnected(false)
+        setConnectionAttempted(true)
+      }
+    }, 10000)
+
     // Connection events
     newSocket.on('connect', () => {
       setIsConnected(true)
       console.log('✅ Connected to socket server successfully')
+      if (connectionTimeoutRef.current) {
+        clearTimeout(connectionTimeoutRef.current)
+      }
       // Join user to their personal room after successful connection
       newSocket.emit('user-join', userId)
     })
@@ -103,16 +120,16 @@ export function useSocket({
 
     newSocket.on('connect_error', (error) => {
       setIsConnected(false)
-      console.error('❌ Socket connection error:', error)
-      console.log('💡 Make sure the Socket.io server is running on', socketUrl)
+      console.log('⚠️ Socket server unavailable - running in offline mode')
+      console.log('💡 This is normal if the Socket.io server is not running')
     })
 
     newSocket.on('reconnect_attempt', (attemptNumber) => {
-      console.log(`🔄 Reconnection attempt ${attemptNumber}`)
+      console.log(`🔄 Reconnection attempt ${attemptNumber}/2`)
     })
 
     newSocket.on('reconnect_failed', () => {
-      console.error('❌ All reconnection attempts failed')
+      console.log('📱 Running in offline mode - emergency alerts will be saved to database')
       setIsConnected(false)
     })
 
@@ -173,6 +190,9 @@ export function useSocket({
 
     // Cleanup on unmount
     return () => {
+      if (connectionTimeoutRef.current) {
+        clearTimeout(connectionTimeoutRef.current)
+      }
       newSocket.disconnect()
       socketRef.current = null
     }

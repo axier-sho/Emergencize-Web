@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useSocket } from '@/hooks/useSocket'
 import { useContacts } from '@/hooks/useContacts'
 import { useFriendRequests } from '@/hooks/useFriendRequests'
+import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 import { saveAlert } from '@/lib/database'
 import LoadingAnimation from '@/components/LoadingAnimation'
 import EmergencyButton from '@/components/EmergencyButton'
@@ -76,6 +77,8 @@ export default function DashboardPage() {
     userId: user?.uid,
     onEmergencyAlert: handleEmergencyAlertReceived
   })
+  
+  const networkStatus = useNetworkStatus(isConnected)
 
   // Get user location
   useEffect(() => {
@@ -125,14 +128,20 @@ export default function DashboardPage() {
       contactIds: type === 'danger' ? contactIds : onlineContactIds // DANGER alerts ALL contacts, HELP alerts only online
     }
 
-    // Send via socket for real-time delivery (if connected)
-    if (isConnected) {
+    // Handle alert based on connection type
+    if (networkStatus.connectionType === 'online') {
+      // Real-time mode: Send via socket AND save to database
       sendEmergencyAlert(alertData)
+      console.log('🚀 Alert sent via real-time connection')
+    } else if (networkStatus.connectionType === 'browser-only') {
+      // Standard mode: Save to database only
+      console.log('📱 Sending alert in standard mode (database only)')
     } else {
-      console.log('Socket not connected, alert will be saved to database only')
+      // Offline: Queue for when back online
+      console.log('📴 Device offline - alert will be queued')
     }
 
-    // Save to database for persistence and offline delivery
+    // Always try to save to database (Firebase works offline)
     try {
       await saveAlert({
         fromUserId: user.uid,
@@ -141,20 +150,31 @@ export default function DashboardPage() {
         location: location || undefined
       })
       
-      if (!isConnected) {
-        console.log('Alert saved to database - contacts will be notified when they come online')
+      if (networkStatus.connectionType !== 'online') {
+        console.log('💾 Alert saved locally - will sync when online')
       }
     } catch (error) {
-      console.error('Failed to save alert to database:', error)
+      console.error('Failed to save alert:', error)
+      // Even if database save fails, show confirmation to user
     }
 
-    // Show confirmation
+    // Show confirmation based on connection type
     const targetCount = type === 'danger' ? contacts.length : contacts.filter(c => c.isOnline).length
+    let confirmationMessage = ''
+    
+    if (networkStatus.connectionType === 'online') {
+      confirmationMessage = `${type.toUpperCase()} alert sent to ${targetCount} contact${targetCount !== 1 ? 's' : ''} (real-time)`
+    } else if (networkStatus.connectionType === 'browser-only') {
+      confirmationMessage = `${type.toUpperCase()} alert saved for ${targetCount} contact${targetCount !== 1 ? 's' : ''} (will notify when they're online)`
+    } else {
+      confirmationMessage = `${type.toUpperCase()} alert queued (will send when back online)`
+    }
+    
     const confirmationAlert: Alert = {
       id: Date.now().toString(),
       type,
       fromUser: 'You',
-      message: `${type.toUpperCase()} alert sent to ${targetCount} contact${targetCount !== 1 ? 's' : ''}${type === 'danger' ? ' (including offline)' : ' (online only)'}`,
+      message: confirmationMessage,
       timestamp: new Date()
     }
     setAlerts(prev => [confirmationAlert, ...prev.slice(0, 49)]) // Keep max 50 alerts
@@ -254,20 +274,30 @@ export default function DashboardPage() {
                 </Link>
                 
                 <div className="flex items-center space-x-2 text-sm">
-                  {isConnected ? (
+                  {networkStatus.connectionType === 'online' ? (
                     <div className="flex items-center text-green-200">
                       <Wifi size={16} className="mr-1" />
-                      <span className="hidden sm:inline">Connected</span>
+                      <span className="hidden sm:inline">Real-time Mode</span>
+                    </div>
+                  ) : networkStatus.connectionType === 'browser-only' ? (
+                    <div className="flex items-center text-blue-200">
+                      <Wifi size={16} className="mr-1" />
+                      <span className="hidden sm:inline">Standard Mode</span>
                     </div>
                   ) : (
-                    <div className="flex items-center text-yellow-200">
+                    <div className="flex items-center text-red-200">
                       <WifiOff size={16} className="mr-1" />
-                      <span className="hidden sm:inline">Offline Mode</span>
+                      <span className="hidden sm:inline">Offline</span>
                     </div>
                   )}
-                  {!isConnected && (
-                    <div className="hidden sm:block text-xs text-yellow-300">
-                      (Emergency buttons still work)
+                  {networkStatus.connectionType !== 'online' && networkStatus.isOnline && (
+                    <div className="hidden sm:block text-xs text-blue-300">
+                      (Emergency alerts work)
+                    </div>
+                  )}
+                  {!networkStatus.isOnline && (
+                    <div className="hidden sm:block text-xs text-red-300">
+                      (Check your internet)
                     </div>
                   )}
                 </div>
@@ -383,7 +413,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Status Messages */}
-                {!isConnected && contacts.length > 0 && (
+                {networkStatus.connectionType === 'browser-only' && contacts.length > 0 && (
                   <motion.div
                     className="bg-blue-500 bg-opacity-20 border border-blue-400 border-opacity-50 rounded-xl p-4 text-center"
                     initial={{ opacity: 0, scale: 0.95 }}
@@ -391,13 +421,27 @@ export default function DashboardPage() {
                     transition={{ duration: 0.3, delay: 1 }}
                   >
                     <Bell className="w-6 h-6 text-blue-400 mx-auto mb-2" />
-                    <p className="text-blue-200 font-medium mb-1">Offline Mode</p>
+                    <p className="text-blue-200 font-medium mb-1">Standard Mode</p>
                     <p className="text-blue-300 text-sm">
-                      Emergency alerts will be saved and sent when your contacts come online.
+                      Emergency alerts work normally. Contacts will be notified when they check the app.
                     </p>
                   </motion.div>
                 )}
-                {isConnected && contacts.filter(c => c.isOnline).length === 0 && contacts.length > 0 && (
+                {!networkStatus.isOnline && (
+                  <motion.div
+                    className="bg-red-500 bg-opacity-20 border border-red-400 border-opacity-50 rounded-xl p-4 text-center"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, delay: 1 }}
+                  >
+                    <Bell className="w-6 h-6 text-red-400 mx-auto mb-2" />
+                    <p className="text-red-200 font-medium mb-1">No Internet Connection</p>
+                    <p className="text-red-300 text-sm">
+                      Alerts will be queued and sent when your connection is restored.
+                    </p>
+                  </motion.div>
+                )}
+                {networkStatus.connectionType === 'online' && contacts.filter(c => c.isOnline).length === 0 && contacts.length > 0 && (
                   <motion.div
                     className="bg-yellow-500 bg-opacity-20 border border-yellow-400 border-opacity-50 rounded-xl p-4 text-center"
                     initial={{ opacity: 0, scale: 0.95 }}
@@ -407,7 +451,7 @@ export default function DashboardPage() {
                     <Bell className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
                     <p className="text-yellow-200 font-medium mb-1">No contacts online</p>
                     <p className="text-yellow-300 text-sm">
-                      Emergency alerts will only be sent to contacts who are currently online.
+                      Emergency alerts will be delivered instantly when your contacts come online.
                     </p>
                   </motion.div>
                 )}
