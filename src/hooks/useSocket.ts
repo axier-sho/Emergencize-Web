@@ -72,27 +72,48 @@ export function useSocket({
   useEffect(() => {
     if (!userId) return
 
-    // Connect to Socket.io server
-    const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001', {
-      transports: ['websocket'],
-      autoConnect: true
+    // Connect to Socket.io server with fallback transports and better error handling
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001'
+    console.log('Attempting to connect to socket server:', socketUrl)
+    
+    const newSocket = io(socketUrl, {
+      transports: ['websocket', 'polling'], // Allow fallback to polling if websocket fails
+      autoConnect: true,
+      timeout: 5000,
+      reconnection: true,
+      reconnectionAttempts: 3,
+      reconnectionDelay: 1000
     })
 
     socketRef.current = newSocket
     setSocket(newSocket)
 
-    // Join user to their personal room
-    newSocket.emit('user-join', userId)
-
     // Connection events
     newSocket.on('connect', () => {
       setIsConnected(true)
-      console.log('Connected to server')
+      console.log('✅ Connected to socket server successfully')
+      // Join user to their personal room after successful connection
+      newSocket.emit('user-join', userId)
     })
 
-    newSocket.on('disconnect', () => {
+    newSocket.on('disconnect', (reason) => {
       setIsConnected(false)
-      console.log('Disconnected from server')
+      console.log('❌ Disconnected from server, reason:', reason)
+    })
+
+    newSocket.on('connect_error', (error) => {
+      setIsConnected(false)
+      console.error('❌ Socket connection error:', error)
+      console.log('💡 Make sure the Socket.io server is running on', socketUrl)
+    })
+
+    newSocket.on('reconnect_attempt', (attemptNumber) => {
+      console.log(`🔄 Reconnection attempt ${attemptNumber}`)
+    })
+
+    newSocket.on('reconnect_failed', () => {
+      console.error('❌ All reconnection attempts failed')
+      setIsConnected(false)
     })
 
     // User presence events

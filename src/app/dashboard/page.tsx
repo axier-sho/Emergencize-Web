@@ -125,8 +125,12 @@ export default function DashboardPage() {
       contactIds: type === 'danger' ? contactIds : onlineContactIds // DANGER alerts ALL contacts, HELP alerts only online
     }
 
-    // Send via socket for real-time delivery
-    sendEmergencyAlert(alertData)
+    // Send via socket for real-time delivery (if connected)
+    if (isConnected) {
+      sendEmergencyAlert(alertData)
+    } else {
+      console.log('Socket not connected, alert will be saved to database only')
+    }
 
     // Save to database for persistence and offline delivery
     try {
@@ -136,6 +140,10 @@ export default function DashboardPage() {
         message,
         location: location || undefined
       })
+      
+      if (!isConnected) {
+        console.log('Alert saved to database - contacts will be notified when they come online')
+      }
     } catch (error) {
       console.error('Failed to save alert to database:', error)
     }
@@ -252,9 +260,14 @@ export default function DashboardPage() {
                       <span className="hidden sm:inline">Connected</span>
                     </div>
                   ) : (
-                    <div className="flex items-center text-red-200">
+                    <div className="flex items-center text-yellow-200">
                       <WifiOff size={16} className="mr-1" />
-                      <span className="hidden sm:inline">Connecting...</span>
+                      <span className="hidden sm:inline">Offline Mode</span>
+                    </div>
+                  )}
+                  {!isConnected && (
+                    <div className="hidden sm:block text-xs text-yellow-300">
+                      (Emergency buttons still work)
                     </div>
                   )}
                 </div>
@@ -360,17 +373,31 @@ export default function DashboardPage() {
                   <EmergencyButton
                     type="help"
                     onClick={() => handleEmergencyAlert('help')}
-                    disabled={contacts.filter(c => c.isOnline).length === 0}
+                    disabled={isConnected ? contacts.filter(c => c.isOnline).length === 0 : contacts.length === 0}
                   />
                   <EmergencyButton
                     type="danger"
                     onClick={() => handleEmergencyAlert('danger')}
-                    disabled={contacts.filter(c => c.isOnline).length === 0}
+                    disabled={contacts.length === 0}
                   />
                 </div>
 
                 {/* Status Messages */}
-                {contacts.filter(c => c.isOnline).length === 0 && (
+                {!isConnected && contacts.length > 0 && (
+                  <motion.div
+                    className="bg-blue-500 bg-opacity-20 border border-blue-400 border-opacity-50 rounded-xl p-4 text-center"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, delay: 1 }}
+                  >
+                    <Bell className="w-6 h-6 text-blue-400 mx-auto mb-2" />
+                    <p className="text-blue-200 font-medium mb-1">Offline Mode</p>
+                    <p className="text-blue-300 text-sm">
+                      Emergency alerts will be saved and sent when your contacts come online.
+                    </p>
+                  </motion.div>
+                )}
+                {isConnected && contacts.filter(c => c.isOnline).length === 0 && contacts.length > 0 && (
                   <motion.div
                     className="bg-yellow-500 bg-opacity-20 border border-yellow-400 border-opacity-50 rounded-xl p-4 text-center"
                     initial={{ opacity: 0, scale: 0.95 }}
@@ -381,6 +408,20 @@ export default function DashboardPage() {
                     <p className="text-yellow-200 font-medium mb-1">No contacts online</p>
                     <p className="text-yellow-300 text-sm">
                       Emergency alerts will only be sent to contacts who are currently online.
+                    </p>
+                  </motion.div>
+                )}
+                {contacts.length === 0 && (
+                  <motion.div
+                    className="bg-orange-500 bg-opacity-20 border border-orange-400 border-opacity-50 rounded-xl p-4 text-center"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, delay: 1 }}
+                  >
+                    <Bell className="w-6 h-6 text-orange-400 mx-auto mb-2" />
+                    <p className="text-orange-200 font-medium mb-1">No emergency contacts</p>
+                    <p className="text-orange-300 text-sm">
+                      Add contacts to start sending emergency alerts.
                     </p>
                   </motion.div>
                 )}
