@@ -57,7 +57,7 @@ export default function EmergencyChat({
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const { socket } = useSocket({
-    userId: currentUserId,
+    userId: isOpen ? currentUserId : undefined, // Only create socket when modal is open
     onGroupMessage: handleReceiveMessage,
     onUserTyping: handleUserTyping,
     onUserStoppedTyping: handleUserStoppedTyping
@@ -66,9 +66,9 @@ export default function EmergencyChat({
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  }, [messages.length])
 
-  // System message when chat opens
+  // System message when chat opens, cleanup when closed
   useEffect(() => {
     if (isOpen && messages.length === 0) {
       const systemMessage: Message = {
@@ -80,11 +80,19 @@ export default function EmergencyChat({
         type: 'system'
       }
       setMessages([systemMessage])
+    } else if (!isOpen) {
+      // Clear messages when chat is closed to free memory
+      setMessages([])
+      setIsTyping([])
     }
-  }, [isOpen])
+  }, [isOpen, messages.length])
 
   function handleReceiveMessage(message: Message) {
-    setMessages(prev => [...prev, message])
+    setMessages(prev => {
+      const newMessages = [...prev, message]
+      // Keep only the last 100 messages to prevent memory buildup
+      return newMessages.length > 100 ? newMessages.slice(-100) : newMessages
+    })
   }
 
   function handleUserTyping(data: { userId: string; userName: string }) {
@@ -115,7 +123,10 @@ export default function EmergencyChat({
       recipients: contacts.map(c => c.userId)
     })
 
-    setMessages(prev => [...prev, message])
+    setMessages(prev => {
+      const newMessages = [...prev, message]
+      return newMessages.length > 100 ? newMessages.slice(-100) : newMessages
+    })
     setNewMessage('')
     
     // Stop typing indicator
@@ -145,7 +156,10 @@ export default function EmergencyChat({
           recipients: contacts.map(c => c.userId)
         })
 
-        setMessages(prev => [...prev, locationMessage])
+        setMessages(prev => {
+          const newMessages = [...prev, locationMessage]
+          return newMessages.length > 100 ? newMessages.slice(-100) : newMessages
+        })
       },
       (error) => {
         console.error('Error getting location:', error)
@@ -170,7 +184,10 @@ export default function EmergencyChat({
       recipients: contacts.map(c => c.userId)
     })
 
-    setMessages(prev => [...prev, alertMessage])
+    setMessages(prev => {
+      const newMessages = [...prev, alertMessage]
+      return newMessages.length > 100 ? newMessages.slice(-100) : newMessages
+    })
   }
 
   const handleTyping = () => {

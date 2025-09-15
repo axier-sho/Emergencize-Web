@@ -62,10 +62,43 @@ export default function AlertNotification({
     }
   }
 
+  // Shared AudioContext to prevent memory leaks
+  const audioContextRef = useRef<AudioContext | null>(null)
+  
+  // Get or create AudioContext
+  const getAudioContext = () => {
+    if (!audioContextRef.current) {
+      try {
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
+      } catch (error) {
+        console.error('Failed to create AudioContext:', error)
+        return null
+      }
+    }
+    
+    // Resume if suspended
+    if (audioContextRef.current.state === 'suspended') {
+      audioContextRef.current.resume()
+    }
+    
+    return audioContextRef.current
+  }
+
+  // Cleanup AudioContext on unmount
+  useEffect(() => {
+    return () => {
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close()
+      }
+    }
+  }, [])
+
   // Play alert sound
   const playAlertSound = (type: 'help' | 'danger') => {
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const audioContext = getAudioContext()
+      if (!audioContext) return
+      
       const oscillator = audioContext.createOscillator()
       const gainNode = audioContext.createGain()
       
@@ -81,14 +114,17 @@ export default function AlertNotification({
         oscillator.stop(audioContext.currentTime + 0.1)
         
         setTimeout(() => {
-          const osc2 = audioContext.createOscillator()
-          const gain2 = audioContext.createGain()
+          const audioCtx = getAudioContext()
+          if (!audioCtx) return
+          
+          const osc2 = audioCtx.createOscillator()
+          const gain2 = audioCtx.createGain()
           osc2.connect(gain2)
-          gain2.connect(audioContext.destination)
-          osc2.frequency.setValueAtTime(800, audioContext.currentTime)
-          gain2.gain.setValueAtTime(0.1, audioContext.currentTime)
+          gain2.connect(audioCtx.destination)
+          osc2.frequency.setValueAtTime(800, audioCtx.currentTime)
+          gain2.gain.setValueAtTime(0.1, audioCtx.currentTime)
           osc2.start()
-          osc2.stop(audioContext.currentTime + 0.1)
+          osc2.stop(audioCtx.currentTime + 0.1)
         }, 150)
       } else {
         // Single gentle tone for help

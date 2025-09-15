@@ -37,6 +37,38 @@ export function useSocket({
   const [onlineUsers, setOnlineUsers] = useState<string[]>([])
   const socketRef = useRef<Socket | null>(null)
 
+  // Store callback refs to avoid recreation
+  const callbackRefs = useRef({
+    onUserOnline,
+    onUserOffline,
+    onEmergencyAlert,
+    onChatMessage,
+    onGroupMessage,
+    onUserTyping,
+    onUserStoppedTyping,
+    onVoiceCallOffer,
+    onVoiceCallAnswer,
+    onVoiceCallEnd,
+    onIceCandidate
+  })
+
+  // Update callback refs when they change
+  useEffect(() => {
+    callbackRefs.current = {
+      onUserOnline,
+      onUserOffline,
+      onEmergencyAlert,
+      onChatMessage,
+      onGroupMessage,
+      onUserTyping,
+      onUserStoppedTyping,
+      onVoiceCallOffer,
+      onVoiceCallAnswer,
+      onVoiceCallEnd,
+      onIceCandidate
+    }
+  })
+
   useEffect(() => {
     if (!userId) return
 
@@ -66,12 +98,12 @@ export function useSocket({
     // User presence events
     newSocket.on('user-online', (onlineUserId: string) => {
       setOnlineUsers(prev => [...prev.filter(id => id !== onlineUserId), onlineUserId])
-      onUserOnline?.(onlineUserId)
+      callbackRefs.current.onUserOnline?.(onlineUserId)
     })
 
     newSocket.on('user-offline', (offlineUserId: string) => {
       setOnlineUsers(prev => prev.filter(id => id !== offlineUserId))
-      onUserOffline?.(offlineUserId)
+      callbackRefs.current.onUserOffline?.(offlineUserId)
     })
 
     newSocket.on('online-users', (users: string[]) => {
@@ -80,42 +112,42 @@ export function useSocket({
 
     // Emergency alert events
     newSocket.on('emergency-alert', (alert: any) => {
-      onEmergencyAlert?.(alert)
+      callbackRefs.current.onEmergencyAlert?.(alert)
     })
 
     // Chat message events
     newSocket.on('chat-message', (message: any) => {
-      onChatMessage?.(message)
+      callbackRefs.current.onChatMessage?.(message)
     })
 
     // Group chat events
     newSocket.on('group-message', (message: any) => {
-      onGroupMessage?.(message)
+      callbackRefs.current.onGroupMessage?.(message)
     })
 
     newSocket.on('user-typing-group', (data: any) => {
-      onUserTyping?.(data)
+      callbackRefs.current.onUserTyping?.(data)
     })
 
     newSocket.on('user-stopped-typing-group', (data: any) => {
-      onUserStoppedTyping?.(data)
+      callbackRefs.current.onUserStoppedTyping?.(data)
     })
 
     // Voice call events
     newSocket.on('voice-call-offer', (data: any) => {
-      onVoiceCallOffer?.(data)
+      callbackRefs.current.onVoiceCallOffer?.(data)
     })
 
     newSocket.on('voice-call-answer', (data: any) => {
-      onVoiceCallAnswer?.(data)
+      callbackRefs.current.onVoiceCallAnswer?.(data)
     })
 
     newSocket.on('voice-call-end', (data: any) => {
-      onVoiceCallEnd?.(data)
+      callbackRefs.current.onVoiceCallEnd?.(data)
     })
 
     newSocket.on('ice-candidate', (data: any) => {
-      onIceCandidate?.(data)
+      callbackRefs.current.onIceCandidate?.(data)
     })
 
     // Cleanup on unmount
@@ -123,7 +155,7 @@ export function useSocket({
       newSocket.disconnect()
       socketRef.current = null
     }
-  }, [userId, onUserOnline, onUserOffline, onEmergencyAlert, onChatMessage, onGroupMessage, onUserTyping, onUserStoppedTyping, onVoiceCallOffer, onVoiceCallAnswer, onVoiceCallEnd, onIceCandidate])
+  }, [userId]) // Only depend on userId to prevent constant reconnections
 
   const sendEmergencyAlert = (alert: {
     type: 'help' | 'danger'

@@ -69,7 +69,7 @@ export default function DashboardPage() {
       timestamp: new Date(alert.timestamp),
       fromUser: alert.fromUserId || 'Unknown User'
     }
-    setAlerts(prev => [newAlert, ...prev])
+    setAlerts(prev => [newAlert, ...prev.slice(0, 49)]) // Keep max 50 alerts
   }, [])
 
   const { isConnected, onlineUsers, sendEmergencyAlert } = useSocket({
@@ -149,7 +149,7 @@ export default function DashboardPage() {
       message: `${type.toUpperCase()} alert sent to ${targetCount} contact${targetCount !== 1 ? 's' : ''}${type === 'danger' ? ' (including offline)' : ' (online only)'}`,
       timestamp: new Date()
     }
-    setAlerts(prev => [confirmationAlert, ...prev])
+    setAlerts(prev => [confirmationAlert, ...prev.slice(0, 49)]) // Keep max 50 alerts
   }
 
   const dismissAlert = (alertId: string) => {
