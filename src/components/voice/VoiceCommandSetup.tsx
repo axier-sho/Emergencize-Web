@@ -135,7 +135,7 @@ export function VoiceCommandSetup({ onSetupComplete, className = '' }: VoiceComm
           </h3>
         </div>
         <p className="text-yellow-700 dark:text-yellow-300 mb-4">
-          Your browser doesn't support voice recognition or speech synthesis. Voice commands will not be available.
+          Your browser doesn&apos;t support voice recognition or speech synthesis. Voice commands will not be available.
         </p>
         <p className="text-sm text-yellow-600 dark:text-yellow-400">
           Supported browsers include Chrome, Edge, and Safari (iOS 14.5+).
@@ -230,7 +230,7 @@ export function VoiceCommandSetup({ onSetupComplete, className = '' }: VoiceComm
           </select>
           
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Choose the language you'll use for voice commands
+            Choose the language you&apos;ll use for voice commands
           </p>
         </div>
       )}
@@ -253,7 +253,7 @@ export function VoiceCommandSetup({ onSetupComplete, className = '' }: VoiceComm
               >
                 <Mic className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
                 <span className="text-gray-900 dark:text-gray-100 font-medium">
-                  "{command}"
+                  &quot;{command}&quot;
                 </span>
               </motion.div>
             ))}
@@ -267,7 +267,7 @@ export function VoiceCommandSetup({ onSetupComplete, className = '' }: VoiceComm
                 <ul className="space-y-1">
                   <li>• Speak clearly and at normal volume</li>
                   <li>• Wait for voice feedback confirmation</li>
-                  <li>• Use "cancel alert" to stop false alarms</li>
+                  <li>• Use &quot;cancel alert&quot; to stop false alarms</li>
                   <li>• Voice commands work even when screen is locked</li>
                 </ul>
               </div>

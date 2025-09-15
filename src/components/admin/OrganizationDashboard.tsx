@@ -568,7 +568,7 @@ export function OrganizationDashboard({ organizationId, className = '' }: Organi
                       <Building2 className="w-5 h-5 text-blue-500" />
                       <div>
                         <p className="text-sm text-gray-900 dark:text-gray-100">
-                          New group "IT Department" created
+                          New group &quot;IT Department&quot; created
                         </p>
                         <p className="text-xs text-gray-500">1 day ago</p>
                       </div>
@@ -681,7 +681,7 @@ export function OrganizationDashboard({ organizationId, className = '' }: Organi
                               </p>
                               {invitation.message && (
                                 <p className="text-xs text-gray-400 mt-1">
-                                  "{invitation.message}"
+                                  &quot;{invitation.message}&quot;
                                 </p>
                               )}
                             </div>

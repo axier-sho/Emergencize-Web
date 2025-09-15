@@ -217,12 +217,12 @@ export default function TermsOfServicePage() {
 
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">1.2 Affirmative Acceptance</h3>
                 <p className="text-gray-700 dark:text-gray-300 mb-4">
-                  You must affirmatively accept these Terms (e.g., by clicking "I Agree," checking a box, or taking equivalent action) before creating an account or accessing non-public features. If you do not agree, do not access or use the Platform.
+                  You must affirmatively accept these Terms (e.g., by clicking &quot;I Agree,&quot; checking a box, or taking equivalent action) before creating an account or accessing non-public features. If you do not agree, do not access or use the Platform.
                 </p>
 
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">1.3 Incorporated Policies</h3>
                 <p className="text-gray-700 dark:text-gray-300 mb-4">
-                  Our Privacy Policy and any posted guidelines, community standards, or supplemental terms (collectively, "Policies") are incorporated by reference and form part of this Agreement. If there is any conflict, these Terms control unless a Policy expressly states otherwise.
+                  Our Privacy Policy and any posted guidelines, community standards, or supplemental terms (collectively, &quot;Policies&quot;) are incorporated by reference and form part of this Agreement. If there is any conflict, these Terms control unless a Policy expressly states otherwise.
                 </p>
 
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">1.4 Capacity and Authority</h3>
@@ -246,20 +246,20 @@ export default function TermsOfServicePage() {
                 
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">2.1 Key Terms</h3>
                 <ul className="text-gray-700 dark:text-gray-300 mb-4 space-y-2">
-                  <li><strong>"Platform," "Service," "Website," or "Emergencize":</strong> The site at sho1228.com and all related subdomains, applications (including mobile), APIs, features, tools, content, and infrastructure.</li>
-                  <li><strong>"Axiom," "we," "us," "our":</strong> Axiom, a non-profit entity under Japanese law, including affiliates, directors, officers, employees, agents, volunteers, contractors, successors, and assigns.</li>
-                  <li><strong>"User," "you," "your":</strong> Any individual or entity accessing or using the Platform, including registered and guest users.</li>
-                  <li><strong>"Content":</strong> Any text, images, audio, video, data, code, posts, messages, comments, profiles, metadata, or other materials available on or through the Platform.</li>
-                  <li><strong>"User Content":</strong> Content submitted, posted, uploaded, transmitted, or otherwise provided by Users (e.g., forum posts, comments, messages, uploads).</li>
-                  <li><strong>"Axiom Content":</strong> Content owned or controlled by Axiom or its licensors (e.g., software, features, site design, UI, informational materials).</li>
-                  <li><strong>"Community Features":</strong> Forums, groups, messaging tools, discussion areas, or other interactive functionality enabling User communication or collaboration.</li>
-                  <li><strong>"Tools":</strong> Assistive and informational features provided by the Platform (e.g., accessibility settings, resource locators, calculators), not professional tools.</li>
-                  <li><strong>"Personal Data" or "Personal Information":</strong> Information that identifies or could reasonably identify an individual (e.g., name, email, disability-related information, usage data).</li>
-                  <li><strong>"Third-Party Services":</strong> External sites, services, applications, or integrations not operated by Axiom.</li>
-                  <li><strong>"Intellectual Property Rights":</strong> All copyrights, patents, trademarks, trade secrets, moral rights, publicity rights, and other proprietary rights.</li>
-                  <li><strong>"Disability":</strong> Any physical, mental, cognitive, sensory, or developmental impairment recognized under applicable law.</li>
-                  <li><strong>"Force Majeure Event":</strong> Circumstances beyond a party's reasonable control, including acts of God, disasters, pandemics, governmental actions, war, cyber-attacks, outages, or similar events.</li>
-                  <li><strong>"Beta Features":</strong> Features labeled as beta, experimental, or preview that may change or be discontinued.</li>
+                  <li><strong>&quot;Platform,&quot; &quot;Service,&quot; &quot;Website,&quot; or &quot;Emergencize&quot;:</strong> The site at sho1228.com and all related subdomains, applications (including mobile), APIs, features, tools, content, and infrastructure.</li>
+                  <li><strong>&quot;Axiom,&quot; &quot;we,&quot; &quot;us,&quot; &quot;our&quot;:</strong> Axiom, a non-profit entity under Japanese law, including affiliates, directors, officers, employees, agents, volunteers, contractors, successors, and assigns.</li>
+                  <li><strong>&quot;User,&quot; &quot;you,&quot; &quot;your&quot;:</strong> Any individual or entity accessing or using the Platform, including registered and guest users.</li>
+                  <li><strong>&quot;Content&quot;:</strong> Any text, images, audio, video, data, code, posts, messages, comments, profiles, metadata, or other materials available on or through the Platform.</li>
+                  <li><strong>&quot;User Content&quot;:</strong> Content submitted, posted, uploaded, transmitted, or otherwise provided by Users (e.g., forum posts, comments, messages, uploads).</li>
+                  <li><strong>&quot;Axiom Content&quot;:</strong> Content owned or controlled by Axiom or its licensors (e.g., software, features, site design, UI, informational materials).</li>
+                  <li><strong>&quot;Community Features&quot;:</strong> Forums, groups, messaging tools, discussion areas, or other interactive functionality enabling User communication or collaboration.</li>
+                  <li><strong>&quot;Tools&quot;:</strong> Assistive and informational features provided by the Platform (e.g., accessibility settings, resource locators, calculators), not professional tools.</li>
+                  <li><strong>&quot;Personal Data&quot; or &quot;Personal Information&quot;:</strong> Information that identifies or could reasonably identify an individual (e.g., name, email, disability-related information, usage data).</li>
+                  <li><strong>&quot;Third-Party Services&quot;:</strong> External sites, services, applications, or integrations not operated by Axiom.</li>
+                  <li><strong>&quot;Intellectual Property Rights&quot;:</strong> All copyrights, patents, trademarks, trade secrets, moral rights, publicity rights, and other proprietary rights.</li>
+                  <li><strong>&quot;Disability&quot;:</strong> Any physical, mental, cognitive, sensory, or developmental impairment recognized under applicable law.</li>
+                  <li><strong>&quot;Force Majeure Event&quot;:</strong> Circumstances beyond a party&apos;s reasonable control, including acts of God, disasters, pandemics, governmental actions, war, cyber-attacks, outages, or similar events.</li>
+                  <li><strong>&quot;Beta Features&quot;:</strong> Features labeled as beta, experimental, or preview that may change or be discontinued.</li>
                 </ul>
 
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">2.2 Interpretations</h3>
@@ -267,8 +267,8 @@ export default function TermsOfServicePage() {
                   <li>• Headings are for convenience and do not affect construction.</li>
                   <li>• Singular includes plural and vice versa; references to a gender include all genders.</li>
                   <li>• References to laws include amendments, consolidations, and re-enactments.</li>
-                  <li>• "Writing" includes electronic communications and durable digital records.</li>
-                  <li>• Ambiguities are interpreted consistent with the Platform's non-profit and supportive mission.</li>
+                  <li>• &quot;Writing&quot; includes electronic communications and durable digital records.</li>
+                  <li>• Ambiguities are interpreted consistent with the Platform&apos;s non-profit and supportive mission.</li>
                 </ul>
               </section>
 
@@ -295,7 +295,7 @@ export default function TermsOfServicePage() {
                 <ul className="text-gray-700 dark:text-gray-300 mb-4 space-y-1">
                   <li>• Resource libraries with disability-related information and external references;</li>
                   <li>• Community features enabling respectful discussion and peer support;</li>
-                  <li>• Tools and utilities to assist with organization and access (provided "as is").</li>
+                  <li>• Tools and utilities to assist with organization and access (provided &quot;as is&quot;).</li>
                 </ul>
 
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">3.5 Limitations</h3>
@@ -351,7 +351,7 @@ export default function TermsOfServicePage() {
               <section id="availability" className="mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">6. Availability; Modifications; Beta Features</h2>
                 <p className="text-gray-700 dark:text-gray-300 mb-4">
-                  The Platform may experience downtime or errors. We may add, modify, limit, or discontinue features at any time. Beta features are provided "as is" without warranties.
+                  The Platform may experience downtime or errors. We may add, modify, limit, or discontinue features at any time. Beta features are provided &quot;as is&quot; without warranties.
                 </p>
               </section>
 
@@ -428,9 +428,9 @@ export default function TermsOfServicePage() {
               <section id="disclaimers" className="mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">17. Disclaimers of Warranties</h2>
                 
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">17.1 "As Is" and "As Available"</h3>
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">17.1 &quot;As Is&quot; and &quot;As Available&quot;</h3>
                 <p className="text-gray-700 dark:text-gray-300 mb-4">
-                  The Platform, all Content, Tools, and features are provided "as is" and "as available," with all faults and without warranties of any kind including merchantability, fitness for a particular purpose, or non-infringement.
+                  The Platform, all Content, Tools, and features are provided &quot;as is&quot; and &quot;as available,&quot; with all faults and without warranties of any kind including merchantability, fitness for a particular purpose, or non-infringement.
                 </p>
 
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">17.2 No Professional Advice</h3>
@@ -447,7 +447,7 @@ export default function TermsOfServicePage() {
               <section id="liability" className="mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">18. Limitation of Liability</h2>
                 <p className="text-gray-700 dark:text-gray-300 mb-4">
-                  To the fullest extent permitted by law, Axiom's liability is limited to the greater of amounts you paid us in the past 12 months or USD $50. We disclaim liability for indirect, incidental, or consequential damages.
+                  To the fullest extent permitted by law, Axiom&apos;s liability is limited to the greater of amounts you paid us in the past 12 months or USD $50. We disclaim liability for indirect, incidental, or consequential damages.
                 </p>
               </section>
 
@@ -496,7 +496,7 @@ export default function TermsOfServicePage() {
               <section id="security" className="mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">25. Platform Integrity; Security Research</h2>
                 <p className="text-gray-700 dark:text-gray-300 mb-4">
-                  Do not interfere with the Platform's operation or circumvent access restrictions. Security testing requires prior written authorization.
+                  Do not interfere with the Platform&apos;s operation or circumvent access restrictions. Security testing requires prior written authorization.
                 </p>
               </section>
 
@@ -552,7 +552,7 @@ export default function TermsOfServicePage() {
 
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">32.2 Acceptance Required</h3>
                 <p className="text-gray-700 dark:text-gray-300 mb-4">
-                  By clicking "I Agree," checking a box, or otherwise affirmatively consenting, you acknowledge that you have read, understood, and agree to be bound by these Terms and incorporated Policies. You further acknowledge and agree to Axiom's explicit disclaimers, limitations of liability, arbitration and class waiver provisions, and other allocations of risk to the maximum extent permitted by law.
+                  By clicking &quot;I Agree,&quot; checking a box, or otherwise affirmatively consenting, you acknowledge that you have read, understood, and agree to be bound by these Terms and incorporated Policies. You further acknowledge and agree to Axiom&apos;s explicit disclaimers, limitations of liability, arbitration and class waiver provisions, and other allocations of risk to the maximum extent permitted by law.
                 </p>
               </section>
 

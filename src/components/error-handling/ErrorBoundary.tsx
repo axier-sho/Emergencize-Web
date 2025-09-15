@@ -109,7 +109,7 @@ export default class ErrorBoundary extends Component<Props, State> {
             </h2>
             
             <p className="text-blue-200 mb-6">
-              We encountered an unexpected error. Don't worry, your emergency system is still working. 
+              We encountered an unexpected error. Don&apos;t worry, your emergency system is still working. 
               You can try refreshing or return to the home page.
             </p>
 
@@ -166,7 +166,7 @@ export default class ErrorBoundary extends Component<Props, State> {
             {/* Emergency Fallback */}
             <div className="mt-6 p-4 bg-red-500 bg-opacity-20 border border-red-400 border-opacity-50 rounded-lg">
               <p className="text-red-200 text-sm">
-                <strong>Emergency Access:</strong> If you're in an emergency, 
+                <strong>Emergency Access:</strong> If you&apos;re in an emergency, 
                 call emergency services directly at your local emergency number 
                 (911, 112, etc.) instead of relying on this app.
               </p>

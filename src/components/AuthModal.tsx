@@ -208,7 +208,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', lock
                         Terms of Service
                         <ExternalLink size={12} />
                       </Link>
-                      {' '}and acknowledge the platform's emergency disclaimers and limitations.
+                      {' '}and acknowledge the platform&apos;s emergency disclaimers and limitations.
                     </label>
                   </motion.div>
                 )}

@@ -553,8 +553,8 @@ export default function ContactManager({
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">Duplicate Contact Name</h3>
                 <p className="text-gray-300 text-sm">
-                  You already have a contact named "{duplicateNameModal.existingName}". 
-                  Please provide a nickname for "{duplicateNameModal.newEmail}" to avoid confusion.
+                  You already have a contact named &quot;{duplicateNameModal.existingName}&quot;. 
+                  Please provide a nickname for &quot;{duplicateNameModal.newEmail}&quot; to avoid confusion.
                 </p>
               </div>
 

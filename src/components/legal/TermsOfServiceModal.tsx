@@ -302,9 +302,9 @@ export function TermsOfServiceModal({
                   </h3>
                   
                   <div className="mb-4">
-                    <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">17.1 "As Is" Provision</h4>
+                    <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">17.1 &quot;As Is&quot; Provision</h4>
                     <p className="text-gray-700 dark:text-gray-300 text-sm">
-                      The Platform and all features are provided "as is" and "as available," without warranties of any kind, including merchantability, fitness for a particular purpose, or reliability.
+                      The Platform and all features are provided &quot;as is&quot; and &quot;as available,&quot; without warranties of any kind, including merchantability, fitness for a particular purpose, or reliability.
                     </p>
                   </div>
 
@@ -321,7 +321,7 @@ export function TermsOfServiceModal({
                     18. Limitation of Liability
                   </h3>
                   <p className="text-gray-700 dark:text-gray-300 text-sm">
-                    Axiom's aggregate liability for all claims shall not exceed the greater of: (a) the total amount you paid to Axiom in the twelve months preceding the event, or (b) USD $50.
+                    Axiom&apos;s aggregate liability for all claims shall not exceed the greater of: (a) the total amount you paid to Axiom in the twelve months preceding the event, or (b) USD $50.
                   </p>
                 </div>
 
@@ -339,7 +339,7 @@ export function TermsOfServiceModal({
                     32. Acceptance and Final Affirmations
                   </h3>
                   <p className="text-gray-700 dark:text-gray-300 text-sm">
-                    By clicking "I Agree," checking a box, or otherwise affirmatively consenting, you acknowledge that you have read, understood, and agree to be bound by these Terms and incorporated Policies. You further acknowledge Axiom's disclaimers, limitations of liability, and other risk allocations to the maximum extent permitted by law.
+                    By clicking &quot;I Agree,&quot; checking a box, or otherwise affirmatively consenting, you acknowledge that you have read, understood, and agree to be bound by these Terms and incorporated Policies. You further acknowledge Axiom&apos;s disclaimers, limitations of liability, and other risk allocations to the maximum extent permitted by law.
                   </p>
                 </div>
 
