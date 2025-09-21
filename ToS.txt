@@ -1,13 +1,13 @@
 Comprehensive Terms of Service
-Emergencize (sho1228.com)
+Emergencize (emergencize.com)
 
 Effective Date: August 15, 2025
 Organization: Axier (a non-profit organization incorporated under the laws of Japan)
 Principal Place of Organization: Tokyo, Japan
-Domain: sho1228.com
+Domain: emergencize.com
 
 1. Preamble and Acceptance of Terms
-1.1 Binding Agreement. These Terms of Service (the “Terms,” “Agreement,” or “ToS”) constitute a legally binding agreement between you (“you,” “your,” or “User”) and Axier (“Axier,” “we,” “us,” or “our”) governing your access to and use of the Emergencize platform located at sho1228.com and all associated services, subdomains, applications, interfaces, and tools (collectively, the “Platform” or “Emergencize”).
+1.1 Binding Agreement. These Terms of Service (the “Terms,” “Agreement,” or “ToS”) constitute a legally binding agreement between you (“you,” “your,” or “User”) and Axier (“Axier,” “we,” “us,” or “our”) governing your access to and use of the Emergencize platform located at emergencize.com and all associated services, subdomains, applications, interfaces, and tools (collectively, the “Platform” or “Emergencize”).
 
 1.2 Affirmative Acceptance. You must affirmatively accept these Terms (e.g., by clicking “I Agree,” checking a box, or taking equivalent action) before creating an account or accessing non-public features. If you do not agree, do not access or use the Platform.
 
@@ -21,7 +21,7 @@ Domain: sho1228.com
 
 2. Definitions and Interpretations
 2.1 Key Terms.
-- “Platform,” “Service,” “Website,” or “Emergencize”: The site at sho1228.com and all related subdomains, applications (including mobile), APIs, features, tools, content, and infrastructure.
+- “Platform,” “Service,” “Website,” or “Emergencize”: The site at axier.dev and all related subdomains, applications (including mobile), APIs, features, tools, content, and infrastructure.
 - “Axier,” “we,” “us,” “our”: Axier, a non-profit entity under Japanese law, including affiliates, directors, officers, employees, agents, volunteers, contractors, successors, and assigns.
 - “User,” “you,” “your”: Any individual or entity accessing or using the Platform, including registered and guest users.
 - “Content”: Any text, images, audio, video, data, code, posts, messages, comments, profiles, metadata, or other materials available on or through the Platform.
