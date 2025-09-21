@@ -195,7 +195,7 @@ export default function TermsOfServicePage() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <Building2 className="w-4 h-4" />
-                  <span>Organization: Axiom (Japan)</span>
+                  <span>Organization: Axier (Japan)</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Globe className="w-4 h-4" />
@@ -212,7 +212,7 @@ export default function TermsOfServicePage() {
                 
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">1.1 Binding Agreement</h3>
                 <p className="text-gray-700 dark:text-gray-300 mb-4">
-                  These Terms of Service (the &quot;Terms,&quot; &quot;Agreement,&quot; or &quot;ToS&quot;) constitute a legally binding agreement between you (&quot;you,&quot; &quot;your,&quot; or &quot;User&quot;) and Axiom (&quot;Axiom,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) governing your access to and use of the Emergencize platform located at sho1228.com and all associated services, subdomains, applications, interfaces, and tools (collectively, the &quot;Platform&quot; or &quot;Emergencize&quot;).
+                  These Terms of Service (the &quot;Terms,&quot; &quot;Agreement,&quot; or &quot;ToS&quot;) constitute a legally binding agreement between you (&quot;you,&quot; &quot;your,&quot; or &quot;User&quot;) and Axier (&quot;Axier,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) governing your access to and use of the Emergencize platform located at sho1228.com and all associated services, subdomains, applications, interfaces, and tools (collectively, the &quot;Platform&quot; or &quot;Emergencize&quot;).
                 </p>
 
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">1.2 Affirmative Acceptance</h3>
@@ -247,15 +247,15 @@ export default function TermsOfServicePage() {
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">2.1 Key Terms</h3>
                 <ul className="text-gray-700 dark:text-gray-300 mb-4 space-y-2">
                   <li><strong>&quot;Platform,&quot; &quot;Service,&quot; &quot;Website,&quot; or &quot;Emergencize&quot;:</strong> The site at sho1228.com and all related subdomains, applications (including mobile), APIs, features, tools, content, and infrastructure.</li>
-                  <li><strong>&quot;Axiom,&quot; &quot;we,&quot; &quot;us,&quot; &quot;our&quot;:</strong> Axiom, a non-profit entity under Japanese law, including affiliates, directors, officers, employees, agents, volunteers, contractors, successors, and assigns.</li>
+                  <li><strong>&quot;Axier,&quot; &quot;we,&quot; &quot;us,&quot; &quot;our&quot;:</strong> Axier, a non-profit entity under Japanese law, including affiliates, directors, officers, employees, agents, volunteers, contractors, successors, and assigns.</li>
                   <li><strong>&quot;User,&quot; &quot;you,&quot; &quot;your&quot;:</strong> Any individual or entity accessing or using the Platform, including registered and guest users.</li>
                   <li><strong>&quot;Content&quot;:</strong> Any text, images, audio, video, data, code, posts, messages, comments, profiles, metadata, or other materials available on or through the Platform.</li>
                   <li><strong>&quot;User Content&quot;:</strong> Content submitted, posted, uploaded, transmitted, or otherwise provided by Users (e.g., forum posts, comments, messages, uploads).</li>
-                  <li><strong>&quot;Axiom Content&quot;:</strong> Content owned or controlled by Axiom or its licensors (e.g., software, features, site design, UI, informational materials).</li>
+                  <li><strong>&quot;Axier Content&quot;:</strong> Content owned or controlled by Axier or its licensors (e.g., software, features, site design, UI, informational materials).</li>
                   <li><strong>&quot;Community Features&quot;:</strong> Forums, groups, messaging tools, discussion areas, or other interactive functionality enabling User communication or collaboration.</li>
                   <li><strong>&quot;Tools&quot;:</strong> Assistive and informational features provided by the Platform (e.g., accessibility settings, resource locators, calculators), not professional tools.</li>
                   <li><strong>&quot;Personal Data&quot; or &quot;Personal Information&quot;:</strong> Information that identifies or could reasonably identify an individual (e.g., name, email, disability-related information, usage data).</li>
-                  <li><strong>&quot;Third-Party Services&quot;:</strong> External sites, services, applications, or integrations not operated by Axiom.</li>
+                  <li><strong>&quot;Third-Party Services&quot;:</strong> External sites, services, applications, or integrations not operated by Axier.</li>
                   <li><strong>&quot;Intellectual Property Rights&quot;:</strong> All copyrights, patents, trademarks, trade secrets, moral rights, publicity rights, and other proprietary rights.</li>
                   <li><strong>&quot;Disability&quot;:</strong> Any physical, mental, cognitive, sensory, or developmental impairment recognized under applicable law.</li>
                   <li><strong>&quot;Force Majeure Event&quot;:</strong> Circumstances beyond a party&apos;s reasonable control, including acts of God, disasters, pandemics, governmental actions, war, cyber-attacks, outages, or similar events.</li>
@@ -282,7 +282,7 @@ export default function TermsOfServicePage() {
 
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">3.2 No Professional Services; No Reliance</h3>
                 <p className="text-gray-700 dark:text-gray-300 mb-4">
-                  Axiom is not a healthcare provider, therapist, counselor, lawyer, or financial advisor. Nothing on the Platform constitutes professional advice, diagnosis, or treatment. No physician-patient, therapist-client, attorney-client, fiduciary, or similar relationship is formed.
+                  Axier is not a healthcare provider, therapist, counselor, lawyer, or financial advisor. Nothing on the Platform constitutes professional advice, diagnosis, or treatment. No physician-patient, therapist-client, attorney-client, fiduciary, or similar relationship is formed.
                 </p>
 
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">3.3 Not for Emergencies</h3>
@@ -447,14 +447,14 @@ export default function TermsOfServicePage() {
               <section id="liability" className="mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">18. Limitation of Liability</h2>
                 <p className="text-gray-700 dark:text-gray-300 mb-4">
-                  To the fullest extent permitted by law, Axiom&apos;s liability is limited to the greater of amounts you paid us in the past 12 months or USD $50. We disclaim liability for indirect, incidental, or consequential damages.
+                  To the fullest extent permitted by law, Axier&apos;s liability is limited to the greater of amounts you paid us in the past 12 months or USD $50. We disclaim liability for indirect, incidental, or consequential damages.
                 </p>
               </section>
 
               <section id="indemnification" className="mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">19. Indemnification and Hold Harmless</h2>
                 <p className="text-gray-700 dark:text-gray-300 mb-4">
-                  You agree to defend, indemnify, and hold harmless Axiom from claims arising from your use of the Platform, your content, or your violation of these Terms or law.
+                  You agree to defend, indemnify, and hold harmless Axier from claims arising from your use of the Platform, your content, or your violation of these Terms or law.
                 </p>
               </section>
 
@@ -552,7 +552,7 @@ export default function TermsOfServicePage() {
 
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">32.2 Acceptance Required</h3>
                 <p className="text-gray-700 dark:text-gray-300 mb-4">
-                  By clicking &quot;I Agree,&quot; checking a box, or otherwise affirmatively consenting, you acknowledge that you have read, understood, and agree to be bound by these Terms and incorporated Policies. You further acknowledge and agree to Axiom&apos;s explicit disclaimers, limitations of liability, arbitration and class waiver provisions, and other allocations of risk to the maximum extent permitted by law.
+                  By clicking &quot;I Agree,&quot; checking a box, or otherwise affirmatively consenting, you acknowledge that you have read, understood, and agree to be bound by these Terms and incorporated Policies. You further acknowledge and agree to Axier&apos;s explicit disclaimers, limitations of liability, arbitration and class waiver provisions, and other allocations of risk to the maximum extent permitted by law.
                 </p>
               </section>
 

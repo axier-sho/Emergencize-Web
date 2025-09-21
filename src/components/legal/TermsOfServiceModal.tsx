@@ -203,7 +203,7 @@ export function TermsOfServiceModal({
                   <span>Effective: Aug 15, 2025</span>
                 </div>
                 <div className="text-gray-600 dark:text-gray-400">
-                  Organization: Axiom
+                  Organization: Axier
                 </div>
                 <div className="text-gray-600 dark:text-gray-400">
                   Tokyo, Japan
@@ -258,7 +258,7 @@ export function TermsOfServiceModal({
                   <div className="mb-4">
                     <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">1.1 Binding Agreement</h4>
                     <p className="text-gray-700 dark:text-gray-300 text-sm">
-                      These Terms of Service constitute a legally binding agreement between you and Axiom governing your access to and use of the Emergencize platform located at sho1228.com and all associated services.
+                      These Terms of Service constitute a legally binding agreement between you and Axier governing your access to and use of the Emergencize platform located at sho1228.com and all associated services.
                     </p>
                   </div>
 
@@ -321,7 +321,7 @@ export function TermsOfServiceModal({
                     18. Limitation of Liability
                   </h3>
                   <p className="text-gray-700 dark:text-gray-300 text-sm">
-                    Axiom&apos;s aggregate liability for all claims shall not exceed the greater of: (a) the total amount you paid to Axiom in the twelve months preceding the event, or (b) USD $50.
+                    Axier&apos;s aggregate liability for all claims shall not exceed the greater of: (a) the total amount you paid to Axier in the twelve months preceding the event, or (b) USD $50.
                   </p>
                 </div>
 
@@ -339,7 +339,7 @@ export function TermsOfServiceModal({
                     32. Acceptance and Final Affirmations
                   </h3>
                   <p className="text-gray-700 dark:text-gray-300 text-sm">
-                    By clicking &quot;I Agree,&quot; checking a box, or otherwise affirmatively consenting, you acknowledge that you have read, understood, and agree to be bound by these Terms and incorporated Policies. You further acknowledge Axiom&apos;s disclaimers, limitations of liability, and other risk allocations to the maximum extent permitted by law.
+                    By clicking &quot;I Agree,&quot; checking a box, or otherwise affirmatively consenting, you acknowledge that you have read, understood, and agree to be bound by these Terms and incorporated Policies. You further acknowledge Axier&apos;s disclaimers, limitations of liability, and other risk allocations to the maximum extent permitted by law.
                   </p>
                 </div>
 

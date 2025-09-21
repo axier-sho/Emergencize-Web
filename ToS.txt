@@ -2,12 +2,12 @@ Comprehensive Terms of Service
 Emergencize (sho1228.com)
 
 Effective Date: August 15, 2025
-Organization: Axiom (a non-profit organization incorporated under the laws of Japan)
+Organization: Axier (a non-profit organization incorporated under the laws of Japan)
 Principal Place of Organization: Tokyo, Japan
 Domain: sho1228.com
 
 1. Preamble and Acceptance of Terms
-1.1 Binding Agreement. These Terms of Service (the “Terms,” “Agreement,” or “ToS”) constitute a legally binding agreement between you (“you,” “your,” or “User”) and Axiom (“Axiom,” “we,” “us,” or “our”) governing your access to and use of the Emergencize platform located at sho1228.com and all associated services, subdomains, applications, interfaces, and tools (collectively, the “Platform” or “Emergencize”).
+1.1 Binding Agreement. These Terms of Service (the “Terms,” “Agreement,” or “ToS”) constitute a legally binding agreement between you (“you,” “your,” or “User”) and Axier (“Axier,” “we,” “us,” or “our”) governing your access to and use of the Emergencize platform located at sho1228.com and all associated services, subdomains, applications, interfaces, and tools (collectively, the “Platform” or “Emergencize”).
 
 1.2 Affirmative Acceptance. You must affirmatively accept these Terms (e.g., by clicking “I Agree,” checking a box, or taking equivalent action) before creating an account or accessing non-public features. If you do not agree, do not access or use the Platform.
 
@@ -22,15 +22,15 @@ Domain: sho1228.com
 2. Definitions and Interpretations
 2.1 Key Terms.
 - “Platform,” “Service,” “Website,” or “Emergencize”: The site at sho1228.com and all related subdomains, applications (including mobile), APIs, features, tools, content, and infrastructure.
-- “Axiom,” “we,” “us,” “our”: Axiom, a non-profit entity under Japanese law, including affiliates, directors, officers, employees, agents, volunteers, contractors, successors, and assigns.
+- “Axier,” “we,” “us,” “our”: Axier, a non-profit entity under Japanese law, including affiliates, directors, officers, employees, agents, volunteers, contractors, successors, and assigns.
 - “User,” “you,” “your”: Any individual or entity accessing or using the Platform, including registered and guest users.
 - “Content”: Any text, images, audio, video, data, code, posts, messages, comments, profiles, metadata, or other materials available on or through the Platform.
 - “User Content”: Content submitted, posted, uploaded, transmitted, or otherwise provided by Users (e.g., forum posts, comments, messages, uploads).
-- “Axiom Content”: Content owned or controlled by Axiom or its licensors (e.g., software, features, site design, UI, informational materials).
+- “Axier Content”: Content owned or controlled by Axier or its licensors (e.g., software, features, site design, UI, informational materials).
 - “Community Features”: Forums, groups, messaging tools, discussion areas, or other interactive functionality enabling User communication or collaboration.
 - “Tools”: Assistive and informational features provided by the Platform (e.g., accessibility settings, resource locators, calculators), not professional tools.
 - “Personal Data” or “Personal Information”: Information that identifies or could reasonably identify an individual (e.g., name, email, disability-related information, usage data).
-- “Third-Party Services”: External sites, services, applications, or integrations not operated by Axiom.
+- “Third-Party Services”: External sites, services, applications, or integrations not operated by Axier.
 - “Intellectual Property Rights”: All copyrights, patents, trademarks, trade secrets, moral rights, publicity rights, and other proprietary rights.
 - “Disability”: Any physical, mental, cognitive, sensory, or developmental impairment recognized under applicable law.
 - “Force Majeure Event”: Circumstances beyond a party’s reasonable control, including acts of God, disasters, pandemics, governmental actions, war, cyber-attacks, outages, or similar events.
@@ -46,7 +46,7 @@ Domain: sho1228.com
 3. Purpose, Nature, and Scope of the Platform
 3.1 Mission. Emergencize is designed to support people with disabilities by providing access to informational resources, peer-to-peer community features, and tools aimed at empowerment, connection, and self-education.
 
-3.2 No Professional Services; No Reliance. Axiom is not a healthcare provider, therapist, counselor, lawyer, or financial advisor. Nothing on the Platform constitutes professional advice, diagnosis, or treatment. No physician-patient, therapist-client, attorney-client, fiduciary, or similar relationship is formed.
+3.2 No Professional Services; No Reliance. Axier is not a healthcare provider, therapist, counselor, lawyer, or financial advisor. Nothing on the Platform constitutes professional advice, diagnosis, or treatment. No physician-patient, therapist-client, attorney-client, fiduciary, or similar relationship is formed.
 
 3.3 Not for Emergencies. The Platform is not designed for emergencies. If you or others are in danger or experiencing an emergency, call local emergency services and/or contact qualified professionals immediately.
 
@@ -74,7 +74,7 @@ Domain: sho1228.com
 5.4 Verification and Enforcement. We may require identity or eligibility verification and may refuse, suspend, or terminate accounts at our discretion without liability.
 
 6. Availability; Modifications; Beta Features
-6.1 Availability. The Platform may experience downtime or errors. Axiom provides no uptime guarantees.
+6.1 Availability. The Platform may experience downtime or errors. Axier provides no uptime guarantees.
 
 6.2 Modifications. We may add, modify, limit, or discontinue features or content at any time without liability.
 
@@ -100,20 +100,20 @@ Domain: sho1228.com
 8. User Content; License; Representations; Moral Rights
 8.1 Ownership. You retain ownership of your User Content.
 
-8.2 License to Axiom. You grant Axiom a worldwide, non-exclusive, transferable, sublicensable, royalty-free, perpetual and irrevocable license to host, store, display, perform, reproduce, modify, adapt, translate, publish, distribute, and use your User Content (in whole or part) to operate, secure, improve, and promote the Platform and related initiatives.
+8.2 License to Axier. You grant Axier a worldwide, non-exclusive, transferable, sublicensable, royalty-free, perpetual and irrevocable license to host, store, display, perform, reproduce, modify, adapt, translate, publish, distribute, and use your User Content (in whole or part) to operate, secure, improve, and promote the Platform and related initiatives.
 
 8.3 Representations. You represent and warrant you have all necessary rights, your Content complies with law and these Terms, and it does not infringe third-party rights.
 
 8.4 Moral Rights and Confidentiality. To the extent permitted by law, you waive moral rights and agree User Content is non-confidential. We may, but are not obligated to, monitor, edit, or remove User Content.
 
 9. Intellectual Property; Platform License; Feedback
-9.1 Axiom Property. The Platform, Axiom Content, look-and-feel, trademarks, logos, and trade dress are owned by Axiom or its licensors and protected by IP laws.
+9.1 Axier Property. The Platform, Axier Content, look-and-feel, trademarks, logos, and trade dress are owned by Axier or its licensors and protected by IP laws.
 
 9.2 Your License. Subject to these Terms, you receive a limited, revocable, non-exclusive, non-transferable license to access and use the Platform for lawful, personal, non-commercial purposes.
 
-9.3 Restrictions. You may not copy, modify, distribute, sell, lease, reverse engineer (except as permitted by mandatory law), or create derivative works from the Platform or Axiom Content without prior written authorization.
+9.3 Restrictions. You may not copy, modify, distribute, sell, lease, reverse engineer (except as permitted by mandatory law), or create derivative works from the Platform or Axier Content without prior written authorization.
 
-9.4 Feedback. If you provide ideas or suggestions, you grant Axiom a perpetual, irrevocable, worldwide, royalty-free license to use them without restriction or compensation.
+9.4 Feedback. If you provide ideas or suggestions, you grant Axier a perpetual, irrevocable, worldwide, royalty-free license to use them without restriction or compensation.
 
 10. Third-Party Services; Assistive Technologies; External Links
 10.1 External Services. The Platform may link to or integrate with Third-Party Services (including assistive technologies). Those offerings are governed by their own terms and policies.
@@ -147,7 +147,7 @@ Domain: sho1228.com
 12.3 Backups and Residual Copies. Deleted data may persist in backups or logs for a reasonable period and may be retained where required by law.
 
 13. Fees; Donations; Refunds; Taxes
-13.1 Non-Profit Status. Axiom operates as a non-profit. While many features may be free, optional donations or paid features may be available.
+13.1 Non-Profit Status. Axier operates as a non-profit. While many features may be free, optional donations or paid features may be available.
 
 13.2 Donations. Donations are generally non-refundable, unless required by law. We may request reasonable verification for refunds mandated by law.
 
@@ -182,27 +182,27 @@ Domain: sho1228.com
 17.4 Emergencies. The Platform is not intended for emergency communications. If you are in crisis or danger, contact local emergency services immediately.
 
 18. Limitation of Liability; Allocation of Risk; Post‑Acceptance Disclaimer
-18.1 Exclusions. To the fullest extent permitted by law, Axiom and its affiliates, officers, directors, employees, volunteers, contractors, agents, licensors, and suppliers are not liable for indirect, incidental, special, consequential, exemplary, punitive, or enhanced damages; lost profits, goodwill, or data; business interruption; or the cost of substitute services, even if advised of the possibility.
+18.1 Exclusions. To the fullest extent permitted by law, Axier and its affiliates, officers, directors, employees, volunteers, contractors, agents, licensors, and suppliers are not liable for indirect, incidental, special, consequential, exemplary, punitive, or enhanced damages; lost profits, goodwill, or data; business interruption; or the cost of substitute services, even if advised of the possibility.
 
-18.2 Cap. To the fullest extent permitted by law, Axiom’s aggregate liability for all claims arising out of or relating to these Terms or the Platform shall not exceed the greater of: (a) the total amount you paid (if any) to Axiom for use of the Platform in the twelve (12) months preceding the event giving rise to liability; or (b) USD $50.
+18.2 Cap. To the fullest extent permitted by law, Axier’s aggregate liability for all claims arising out of or relating to these Terms or the Platform shall not exceed the greater of: (a) the total amount you paid (if any) to Axier for use of the Platform in the twelve (12) months preceding the event giving rise to liability; or (b) USD $50.
 
 18.3 Essential Purpose. The foregoing limitations apply even if any remedy fails its essential purpose and regardless of legal theory.
 
 18.4 Consumer Protections. Some jurisdictions do not allow certain exclusions or limitations. In such cases, limitations apply to the maximum extent permitted by law.
 
-18.5 Explicit Post‑Acceptance Disclaimer. After you accept these Terms, and to the maximum extent permitted by law, Axiom disclaims responsibility and liability for any events, outcomes, decisions, actions, injuries, losses, or consequences arising in connection with or following your acceptance and your use or attempted use of the Platform. Nothing herein excludes liability that cannot be excluded by law (e.g., certain cases of gross negligence, willful misconduct, or death/personal injury caused by proven negligence).
+18.5 Explicit Post‑Acceptance Disclaimer. After you accept these Terms, and to the maximum extent permitted by law, Axier disclaims responsibility and liability for any events, outcomes, decisions, actions, injuries, losses, or consequences arising in connection with or following your acceptance and your use or attempted use of the Platform. Nothing herein excludes liability that cannot be excluded by law (e.g., certain cases of gross negligence, willful misconduct, or death/personal injury caused by proven negligence).
 
 19. Indemnification and Hold Harmless
-19.1 Your Obligations. To the fullest extent permitted by law, you agree to defend, indemnify, and hold harmless Axiom and its affiliates, officers, directors, employees, volunteers, contractors, agents, licensors, and suppliers from and against claims, demands, actions, proceedings, damages, losses, liabilities, costs, and expenses (including reasonable attorneys’ fees) arising out of or relating to: (a) your access to or use of the Platform; (b) your User Content; (c) your violation of these Terms or law; (d) your infringement or misappropriation of any third-party right; or (e) disputes between you and another user or third party.
+19.1 Your Obligations. To the fullest extent permitted by law, you agree to defend, indemnify, and hold harmless Axier and its affiliates, officers, directors, employees, volunteers, contractors, agents, licensors, and suppliers from and against claims, demands, actions, proceedings, damages, losses, liabilities, costs, and expenses (including reasonable attorneys’ fees) arising out of or relating to: (a) your access to or use of the Platform; (b) your User Content; (c) your violation of these Terms or law; (d) your infringement or misappropriation of any third-party right; or (e) disputes between you and another user or third party.
 
-19.2 Defense and Settlement. Axiom may assume the exclusive defense and control of any matter subject to indemnification at its option. You will not settle any claim without Axiom’s prior written consent.
+19.2 Defense and Settlement. Axier may assume the exclusive defense and control of any matter subject to indemnification at its option. You will not settle any claim without Axier’s prior written consent.
 
-19.3 User-to-User Release. To the fullest extent permitted by law, you release Axiom from claims and damages arising out of disputes between users.
+19.3 User-to-User Release. To the fullest extent permitted by law, you release Axier from claims and damages arising out of disputes between users.
 
 20. Governing Law; Venue; Dispute Resolution; Class Waiver
 20.1 Governing Law. These Terms and any dispute or claim arising out of or relating to them or the Platform are governed by the laws of Japan, without regard to conflict-of-law principles.
 
-20.2 Informal Resolution. Before formal proceedings, you agree to attempt to resolve disputes informally by notifying Axiom via the Platform’s notice mechanism and allowing a reasonable opportunity to resolve.
+20.2 Informal Resolution. Before formal proceedings, you agree to attempt to resolve disputes informally by notifying Axier via the Platform’s notice mechanism and allowing a reasonable opportunity to resolve.
 
 20.3 Arbitration (Primary Mechanism). Except where prohibited by law, disputes shall be resolved by binding, individual arbitration administered by the Japan Commercial Arbitration Association (JCAA) under its then-current rules. The seat of arbitration is Tokyo, Japan; proceedings shall be in English unless the parties agree otherwise. Judgment on an award may be entered in any court of competent jurisdiction.
 
@@ -257,14 +257,14 @@ Domain: sho1228.com
 26.3 Historical Versions. We may maintain historical versions for record-keeping but are not obligated to provide access. The current posted version governs.
 
 27. Termination; Suspension; Survival
-27.1 By Axiom. We may suspend or terminate access at any time, with or without cause and with or without notice, including for violations of these Terms or law.
+27.1 By Axier. We may suspend or terminate access at any time, with or without cause and with or without notice, including for violations of these Terms or law.
 
 27.2 By You. You may cease using the Platform at any time and may request account deletion where available.
 
 27.3 Effects. Upon termination, your rights to use the Platform cease immediately. We may delete or retain Content and data consistent with our policies and law. Sections intended to survive (including IP, licenses, disclaimers, limitations, indemnities, and dispute resolution) will survive.
 
 28. Assignment
-28.1 By Axiom. We may assign, delegate, or transfer our rights and obligations, in whole or in part, to any affiliate or successor (e.g., merger, acquisition, reorganization).
+28.1 By Axier. We may assign, delegate, or transfer our rights and obligations, in whole or in part, to any affiliate or successor (e.g., merger, acquisition, reorganization).
 
 28.2 By You. You may not assign or transfer these Terms without our prior written consent. Any attempted assignment in violation of this Section is void.
 
@@ -276,7 +276,7 @@ Domain: sho1228.com
 29.3 Contact Information. Maintain current contact details in your account settings and promptly update changes.
 
 30. Entire Agreement; Severability; Waiver; No Third-Party Beneficiaries; Headings; Construction
-30.1 Entire Agreement. These Terms, together with incorporated Policies, constitute the entire agreement between you and Axiom and supersede prior or contemporaneous understandings.
+30.1 Entire Agreement. These Terms, together with incorporated Policies, constitute the entire agreement between you and Axier and supersede prior or contemporaneous understandings.
 
 30.2 Severability. If any provision is held invalid or unenforceable, the remaining provisions remain in full force and effect. The parties will endeavor to replace invalid provisions with enforceable terms reflecting the original intent.
 
@@ -287,13 +287,13 @@ Domain: sho1228.com
 30.5 Headings and No Strict Construction. Headings are for convenience only and do not affect interpretation. These Terms shall not be construed against the drafter.
 
 31. Acknowledgments; Independent Responsibility
-31.1 Your Acknowledgments. You acknowledge: (a) the Platform is informational and community-oriented, not professional or medical; (b) Axiom cannot vet all Content or users; (c) you are solely responsible for your decisions and actions; and (d) Axiom makes no promises about outcomes or fitness for your purposes.
+31.1 Your Acknowledgments. You acknowledge: (a) the Platform is informational and community-oriented, not professional or medical; (b) Axier cannot vet all Content or users; (c) you are solely responsible for your decisions and actions; and (d) Axier makes no promises about outcomes or fitness for your purposes.
 
 31.2 Independent Responsibility. You are responsible for complying with all laws applicable to your conduct, Content, and use of the Platform.
 
 32. Effective Date; Acceptance and Final Affirmations
 32.1 Effective Date. These Terms are effective on the date listed at the top of this Agreement.
 
-32.2 Acceptance Required. By clicking “I Agree,” checking a box, or otherwise affirmatively consenting, you acknowledge that you have read, understood, and agree to be bound by these Terms and the incorporated Policies. You further acknowledge and agree to Axiom’s explicit disclaimers, limitations of liability, arbitration and class waiver provisions (as applicable), and other allocations of risk to the maximum extent permitted by law.
+32.2 Acceptance Required. By clicking “I Agree,” checking a box, or otherwise affirmatively consenting, you acknowledge that you have read, understood, and agree to be bound by these Terms and the incorporated Policies. You further acknowledge and agree to Axier’s explicit disclaimers, limitations of liability, arbitration and class waiver provisions (as applicable), and other allocations of risk to the maximum extent permitted by law.
 
 — End of Comprehensive Terms of Service —
