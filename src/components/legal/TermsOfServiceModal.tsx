@@ -203,7 +203,7 @@ export function TermsOfServiceModal({
                   <span>Effective: Aug 15, 2025</span>
                 </div>
                 <div className="text-gray-600 dark:text-gray-400">
-                  Organization: Axier
+                  Organization: Axier (a non-profit organization incorporated under the laws of Japan)
                 </div>
                 <div className="text-gray-600 dark:text-gray-400">
                   Tokyo, Japan
@@ -258,7 +258,7 @@ export function TermsOfServiceModal({
                   <div className="mb-4">
                     <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">1.1 Binding Agreement</h4>
                     <p className="text-gray-700 dark:text-gray-300 text-sm">
-                      These Terms of Service constitute a legally binding agreement between you and Axier governing your access to and use of the Emergencize platform located at sho1228.com and all associated services.
+                      These Terms of Service constitute a legally binding agreement between you and Axier governing your access to and use of the Emergencize platform located at emergencize.com and all associated services.
                     </p>
                   </div>
 

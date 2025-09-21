@@ -187,7 +187,7 @@ export default function TermsOfServicePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-blue-100">
                 <div className="flex items-center space-x-2">
                   <Building2 className="w-4 h-4" />
-                  <span>Emergencize (sho1228.com)</span>
+                  <span>Emergencize (emergencize.com)</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Calendar className="w-4 h-4" />
@@ -195,7 +195,7 @@ export default function TermsOfServicePage() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <Building2 className="w-4 h-4" />
-                  <span>Organization: Axier (Japan)</span>
+                  <span>Organization: Axier (a non-profit organization incorporated under the laws of Japan)</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Globe className="w-4 h-4" />
@@ -212,7 +212,7 @@ export default function TermsOfServicePage() {
                 
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">1.1 Binding Agreement</h3>
                 <p className="text-gray-700 dark:text-gray-300 mb-4">
-                  These Terms of Service (the &quot;Terms,&quot; &quot;Agreement,&quot; or &quot;ToS&quot;) constitute a legally binding agreement between you (&quot;you,&quot; &quot;your,&quot; or &quot;User&quot;) and Axier (&quot;Axier,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) governing your access to and use of the Emergencize platform located at sho1228.com and all associated services, subdomains, applications, interfaces, and tools (collectively, the &quot;Platform&quot; or &quot;Emergencize&quot;).
+                  These Terms of Service (the &quot;Terms,&quot; &quot;Agreement,&quot; or &quot;ToS&quot;) constitute a legally binding agreement between you (&quot;you,&quot; &quot;your,&quot; or &quot;User&quot;) and Axier (&quot;Axier,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) governing your access to and use of the Emergencize platform located at emergencize.com and all associated services, subdomains, applications, interfaces, and tools (collectively, the &quot;Platform&quot; or &quot;Emergencize&quot;).
                 </p>
 
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">1.2 Affirmative Acceptance</h3>
@@ -246,7 +246,7 @@ export default function TermsOfServicePage() {
                 
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">2.1 Key Terms</h3>
                 <ul className="text-gray-700 dark:text-gray-300 mb-4 space-y-2">
-                  <li><strong>&quot;Platform,&quot; &quot;Service,&quot; &quot;Website,&quot; or &quot;Emergencize&quot;:</strong> The site at sho1228.com and all related subdomains, applications (including mobile), APIs, features, tools, content, and infrastructure.</li>
+                  <li><strong>&quot;Platform,&quot; &quot;Service,&quot; &quot;Website,&quot; or &quot;Emergencize&quot;:</strong> The site at axier.dev and all related subdomains, applications (including mobile), APIs, features, tools, content, and infrastructure.</li>
                   <li><strong>&quot;Axier,&quot; &quot;we,&quot; &quot;us,&quot; &quot;our&quot;:</strong> Axier, a non-profit entity under Japanese law, including affiliates, directors, officers, employees, agents, volunteers, contractors, successors, and assigns.</li>
                   <li><strong>&quot;User,&quot; &quot;you,&quot; &quot;your&quot;:</strong> Any individual or entity accessing or using the Platform, including registered and guest users.</li>
                   <li><strong>&quot;Content&quot;:</strong> Any text, images, audio, video, data, code, posts, messages, comments, profiles, metadata, or other materials available on or through the Platform.</li>
