@@ -36,7 +36,7 @@ export function useNetworkStatus(socketConnected?: boolean): NetworkStatus {
     window.addEventListener('offline', handleOffline)
 
     return () => {
-      window.removeEventListener('online', handleOffline)
+      window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
     }
   }, [])
