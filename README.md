@@ -87,6 +87,10 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789
 NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789:web:abc123def456
 NEXT_PUBLIC_SOCKET_URL=http://localhost:3001
+
+# Optional: For push notifications (web-push)
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=your-vapid-public-key
+VAPID_PRIVATE_KEY=your-vapid-private-key
 ```
 
 ### 3. Run the Application

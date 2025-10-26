@@ -80,7 +80,7 @@ self.addEventListener('push', (event) => {
   const notificationTitle = type === 'danger' ? '🚨 EMERGENCY ALERT' : '💙 HELP REQUEST'
   const notificationOptions = {
     body: `From: ${fromUser}\n${message}${location ? '\n📍 Location included' : ''}`,
-    icon: '/icon-192x192.svg',
+    icon: '/icon-1280x1280.PNG',
     // Optional assets commented out until provided
     // badge: '/badge-72x72.png',
     // image: type === 'danger' ? '/emergency-banner.png' : '/help-banner.png',
@@ -101,18 +101,15 @@ self.addEventListener('push', (event) => {
     actions: [
       {
         action: 'respond',
-        title: '💬 Respond',
-        icon: '/action-respond.png'
+        title: '💬 Respond'
       },
       {
         action: 'call',
-        title: '📞 Call',
-        icon: '/action-call.png'
+        title: '📞 Call'
       },
       {
         action: 'dismiss',
-        title: '✕ Dismiss',
-        icon: '/action-dismiss.png'
+        title: '✕ Dismiss'
       }
     ]
   }

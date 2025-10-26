@@ -1,374 +1,288 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { useState } from 'react'
 import { 
-  UserPlus, 
-  AlertTriangle, 
-  Heart, 
-  Users, 
-  Smartphone,
+  ArrowLeft,
+  UserPlus,
+  Users,
+  AlertTriangle,
+  Heart,
   MapPin,
   Bell,
-  Shield,
-  ArrowRight,
+  Smartphone,
   CheckCircle,
-  Clock
+  ChevronRight
 } from 'lucide-react'
 import Link from 'next/link'
 
 export default function HowToUsePage() {
+  const [activeStep, setActiveStep] = useState(0)
+
   const steps = [
     {
-      icon: <UserPlus size={32} />,
-      title: "Create Your Account",
-      description: "Sign up with your email to create your emergency alert account.",
-      details: ["Enter your email and password", "Verify your account", "Complete your profile"]
+      title: "Sign Up & Create Account",
+      icon: <UserPlus className="w-8 h-8" />,
+      gradient: "from-blue-500 to-indigo-500",
+      description: "Create your emergency alert account in seconds",
+      details: [
+        "Click 'Get Started' on the home page",
+        "Enter your email and create a secure password",
+        "Verify your email address",
+        "Complete your profile with emergency contact information"
+      ]
     },
     {
-      icon: <Users size={32} />,
       title: "Add Emergency Contacts",
-      description: "Send friend requests to people you want as emergency contacts.",
-      details: ["Click 'Send Friend Request' button", "Enter their email address", "They'll receive a notification to accept"]
+      icon: <Users className="w-8 h-8" />,
+      gradient: "from-purple-500 to-pink-500",
+      description: "Build your safety network by adding trusted contacts",
+      details: [
+        "Go to your dashboard and click 'Add Contact'",
+        "Enter the email address of your emergency contact",
+        "Send them a friend request",
+        "Wait for them to accept (they'll need an Emergencize account)",
+        "Add nicknames and relationship tags for easy identification"
+      ]
     },
     {
-      icon: <Bell size={32} />,
-      title: "Accept Friend Requests",
-      description: "Review and accept incoming friend requests from your contacts.",
-      details: ["Check the 'Friend Requests' tab", "Accept, decline, or block requests", "Both become emergency contacts when accepted"]
+      title: "Enable Location Services",
+      icon: <MapPin className="w-8 h-8" />,
+      gradient: "from-green-500 to-emerald-500",
+      description: "Allow GPS access for automatic location sharing",
+      details: [
+        "Click 'Allow' when prompted for location permissions",
+        "Your location is only shared when you send an alert",
+        "Location data is never stored permanently",
+        "You can revoke access anytime in browser settings"
+      ]
     },
     {
-      icon: <Heart size={32} />,
-      title: "Send Help Alerts",
-      description: "Use the HELP button for non-urgent assistance requests.",
-      details: ["Click the blue HELP button", "Alert sent instantly to online contacts", "Include your location if enabled"]
+      title: "Test Your Alerts",
+      icon: <Bell className="w-8 h-8" />,
+      gradient: "from-yellow-500 to-orange-500",
+      description: "Make sure everything works before an emergency",
+      details: [
+        "Send a test HELP alert to your contacts",
+        "Verify they receive the notification",
+        "Check that your location appears correctly",
+        "Practice the 3-second hold for DANGER alerts"
+      ]
     },
     {
-      icon: <AlertTriangle size={32} />,
-      title: "Send Danger Alerts",
-      description: "Use the DANGER button for critical emergency situations.",
-      details: ["Hold the red DANGER button for 3 seconds", "Confirms before sending critical alert", "All contacts notified immediately"]
+      title: "Understand Alert Types",
+      icon: <AlertTriangle className="w-8 h-8" />,
+      gradient: "from-red-500 to-rose-500",
+      description: "Know when to use HELP vs DANGER",
+      details: [
+        "HELP: Non-critical assistance (flat tire, lost, need pickup)",
+        "HELP alerts go to online contacts only",
+        "DANGER: Life-threatening emergencies (medical, assault, accident)",
+        "DANGER alerts reach ALL contacts with highest priority",
+        "DANGER requires 3-second hold to prevent accidents"
+      ]
     },
     {
-      icon: <MapPin size={32} />,
-      title: "Location Sharing",
-      description: "Your location is automatically included in emergency alerts.",
-      details: ["Allow location access when prompted", "GPS coordinates sent with alerts", "Helps contacts find you quickly"]
-    }
-  ]
-
-  const features = [
-    {
-      icon: <Smartphone size={24} />,
-      title: "Mobile Optimized",
-      description: "Works perfectly on phones and tablets with touch-friendly buttons."
-    },
-    {
-      icon: <Shield size={24} />,
-      title: "Secure & Private",
-      description: "Your data is encrypted and only shared with your chosen contacts."
-    },
-    {
-      icon: <Clock size={24} />,
-      title: "Real-time Alerts",
-      description: "Instant notifications sent only to contacts who are currently online."
+      title: "Stay Connected",
+      icon: <Smartphone className="w-8 h-8" />,
+      gradient: "from-cyan-500 to-blue-500",
+      description: "Keep the app accessible for emergencies",
+      details: [
+        "Add Emergencize to your home screen",
+        "Enable push notifications for instant alerts",
+        "Keep your emergency contacts updated",
+        "Test your connection regularly",
+        "Review your alert history in notifications"
+      ]
     }
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-blue-800">
+    <div className="min-h-screen relative">
       {/* Header */}
-      <motion.header
-        className="backdrop-blur-sm bg-white bg-opacity-10 border-b border-white border-opacity-20 sticky top-0 z-40"
+      <motion.nav
+        className="relative z-50 flex justify-between items-center p-6 md:px-12 backdrop-blur-xl bg-slate-900/40 border-b border-white/10"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.6 }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                <span className="text-blue-600 font-bold">E</span>
-              </div>
-              <span className="text-white font-semibold">Emergencize</span>
-            </Link>
-            
-            <div className="flex items-center space-x-3">
-              <Link href="/dashboard">
-                <motion.button
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Dashboard
-                </motion.button>
-              </Link>
-              <Link href="/">
-                <motion.button
-                  className="px-4 py-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Home
-                </motion.button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </motion.header>
+        <Link href="/">
+          <motion.button
+            className="flex items-center space-x-2 text-slate-300 hover:text-white transition-colors px-4 py-2 rounded-xl hover:bg-white/5"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <ArrowLeft size={20} />
+            <span>Back to Home</span>
+          </motion.button>
+        </Link>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Hero Section */}
+        <Link href="/dashboard">
+          <motion.button
+            className="btn-primary"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Go to Dashboard
+          </motion.button>
+        </Link>
+      </motion.nav>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-6 py-16">
+        {/* Hero */}
         <motion.div
-          className="text-center mb-16"
+          className="max-w-3xl mx-auto text-center mb-16"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.6 }}
         >
-          <motion.div
-            className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl"
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ duration: 1, type: "spring", stiffness: 200 }}
-          >
-            <AlertTriangle size={48} className="text-red-500" />
-          </motion.div>
-          
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
             How to Use Emergencize
           </h1>
-          <p className="text-xl text-blue-200 max-w-3xl mx-auto">
-            Learn how to set up your emergency alert system and protect yourself and your loved ones
+          <p className="text-xl text-slate-300">
+            Follow these simple steps to set up your emergency alert system and keep your loved ones informed.
           </p>
         </motion.div>
 
-        {/* Step-by-Step Guide */}
-        <motion.div
-          className="mb-16"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          <h2 className="text-3xl font-bold text-white text-center mb-12">
-            Step-by-Step Setup Guide
-          </h2>
-          
-          <div className="space-y-8">
+        {/* Steps */}
+        <div className="max-w-5xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-6">
             {steps.map((step, index) => (
               <motion.div
                 key={index}
-                className="glass-effect rounded-2xl p-8"
-                initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-              >
-                <div className="flex flex-col lg:flex-row items-start lg:items-center space-y-4 lg:space-y-0 lg:space-x-6">
-                  <div className="flex items-center space-x-4">
-                    <motion.div
-                      className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg"
-                      whileHover={{ scale: 1.1, rotate: 360 }}
-                      transition={{ duration: 0.6 }}
-                    >
-                      {step.icon}
-                    </motion.div>
-                    <div className="text-2xl font-bold text-blue-300">
-                      Step {index + 1}
-                    </div>
-                  </div>
-                  
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-bold text-white mb-2">
-                      {step.title}
-                    </h3>
-                    <p className="text-blue-200 text-lg mb-4">
-                      {step.description}
-                    </p>
-                    <ul className="space-y-2">
-                      {step.details.map((detail, detailIndex) => (
-                        <li key={detailIndex} className="flex items-center text-gray-300">
-                          <CheckCircle size={16} className="text-green-400 mr-2 flex-shrink-0" />
-                          {detail}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  
-                  {index < steps.length - 1 && (
-                    <motion.div
-                      className="hidden lg:block text-blue-400"
-                      animate={{ x: [0, 10, 0] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    >
-                      <ArrowRight size={24} />
-                    </motion.div>
-                  )}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Key Features */}
-        <motion.div
-          className="mb-16"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-        >
-          <h2 className="text-3xl font-bold text-white text-center mb-12">
-            Key Features
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <motion.div
-                key={index}
-                className="glass-effect rounded-xl p-6 text-center hover:bg-white hover:bg-opacity-15 transition-all cursor-pointer"
+                className={`modern-card p-8 cursor-pointer transition-all ${
+                  activeStep === index ? 'ring-2 ring-blue-500' : ''
+                }`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
-                whileHover={{ scale: 1.05, y: -5 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                whileHover={{ y: -4 }}
+                onClick={() => setActiveStep(index)}
               >
-                <motion.div
-                  className="text-blue-300 mb-4 flex justify-center"
-                  whileHover={{ rotate: 360 }}
-                  transition={{ duration: 0.6 }}
-                >
-                  {feature.icon}
-                </motion.div>
-                <h3 className="text-white font-semibold text-lg mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-blue-200 text-sm">
-                  {feature.description}
-                </p>
+                <div className="flex items-start space-x-4">
+                  <div className={`p-4 rounded-2xl bg-gradient-to-br ${step.gradient} shrink-0`}>
+                    {step.icon}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-xl font-bold text-white">{step.title}</h3>
+                      <span className="text-3xl font-bold text-slate-600">
+                        {(index + 1).toString().padStart(2, '0')}
+                      </span>
+                    </div>
+                    <p className="text-slate-300 mb-4">{step.description}</p>
+                    
+                    {activeStep === index && (
+                      <motion.ul
+                        className="space-y-2"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                      >
+                        {step.details.map((detail, idx) => (
+                          <motion.li
+                            key={idx}
+                            className="flex items-start space-x-2 text-sm text-slate-400"
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: idx * 0.1 }}
+                          >
+                            <CheckCircle className="w-4 h-4 text-green-400 shrink-0 mt-0.5" />
+                            <span>{detail}</span>
+                          </motion.li>
+                        ))}
+                      </motion.ul>
+                    )}
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>
-        </motion.div>
+        </div>
 
-        {/* Emergency Button Guide */}
+        {/* Quick Tips */}
         <motion.div
-          className="mb-16"
+          className="max-w-4xl mx-auto mt-16"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
         >
-          <h2 className="text-3xl font-bold text-white text-center mb-12">
-            Emergency Button Guide
-          </h2>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <motion.div
-              className="glass-effect rounded-2xl p-8"
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="flex items-center space-x-4 mb-6">
-                <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
-                  <Heart size={32} className="text-white" />
+          <h2 className="text-3xl font-bold text-white text-center mb-8">Quick Tips</h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="modern-card p-6">
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="p-2 bg-blue-500/20 rounded-lg">
+                  <Heart className="w-5 h-5 text-blue-400" />
                 </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-white">HELP Button</h3>
-                  <p className="text-blue-200">Non-urgent assistance</p>
-                </div>
+                <h3 className="text-lg font-bold text-white">HELP Button</h3>
               </div>
-              <ul className="space-y-3 text-gray-300">
-                <li className="flex items-start">
-                  <CheckCircle size={16} className="text-blue-400 mr-2 mt-1 flex-shrink-0" />
-                  Single click to activate
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle size={16} className="text-blue-400 mr-2 mt-1 flex-shrink-0" />
-                  For non-emergency help requests
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle size={16} className="text-blue-400 mr-2 mt-1 flex-shrink-0" />
-                  Sends to all online contacts
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle size={16} className="text-blue-400 mr-2 mt-1 flex-shrink-0" />
-                  Includes your location
-                </li>
-              </ul>
-            </motion.div>
-            
-            <motion.div
-              className="glass-effect rounded-2xl p-8"
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="flex items-center space-x-4 mb-6">
-                <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center">
-                  <AlertTriangle size={32} className="text-white" />
+              <p className="text-slate-300 text-sm">
+                Use for non-life-threatening situations like car trouble, getting lost, or needing a ride. 
+                One tap instantly alerts online contacts.
+              </p>
+            </div>
+
+            <div className="modern-card p-6">
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="p-2 bg-red-500/20 rounded-lg">
+                  <AlertTriangle className="w-5 h-5 text-red-400" />
                 </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-white">DANGER Button</h3>
-                  <p className="text-red-200">Critical emergency</p>
-                </div>
+                <h3 className="text-lg font-bold text-white">DANGER Button</h3>
               </div>
-              <ul className="space-y-3 text-gray-300">
-                <li className="flex items-start">
-                  <CheckCircle size={16} className="text-red-400 mr-2 mt-1 flex-shrink-0" />
-                  Hold for 3 seconds to activate
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle size={16} className="text-red-400 mr-2 mt-1 flex-shrink-0" />
-                  For critical emergencies only
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle size={16} className="text-red-400 mr-2 mt-1 flex-shrink-0" />
-                  Alerts ALL your contacts
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle size={16} className="text-red-400 mr-2 mt-1 flex-shrink-0" />
-                  Prevents accidental activation
-                </li>
-              </ul>
-            </motion.div>
+              <p className="text-slate-300 text-sm">
+                Reserved for genuine emergencies like medical crises, accidents, or immediate danger. 
+                Hold for 3 seconds to alert ALL contacts.
+              </p>
+            </div>
+
+            <div className="modern-card p-6">
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="p-2 bg-green-500/20 rounded-lg">
+                  <MapPin className="w-5 h-5 text-green-400" />
+                </div>
+                <h3 className="text-lg font-bold text-white">Location Sharing</h3>
+              </div>
+              <p className="text-slate-300 text-sm">
+                Your GPS location is automatically included with every alert. Contacts can see exactly 
+                where you are and how to reach you.
+              </p>
+            </div>
+
+            <div className="modern-card p-6">
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="p-2 bg-purple-500/20 rounded-lg">
+                  <Smartphone className="w-5 h-5 text-purple-400" />
+                </div>
+                <h3 className="text-lg font-bold text-white">Always Available</h3>
+              </div>
+              <p className="text-slate-300 text-sm">
+                Add Emergencize to your home screen for instant access. Works offline and queues alerts 
+                when connection is restored.
+              </p>
+            </div>
           </div>
         </motion.div>
 
-        {/* Tips Section */}
+        {/* CTA */}
         <motion.div
-          className="glass-effect rounded-2xl p-8 text-center"
+          className="text-center mt-16"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
+          transition={{ duration: 0.6, delay: 1 }}
         >
-          <h2 className="text-3xl font-bold text-white mb-6">
-            Pro Tips
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
-            <div className="bg-white bg-opacity-5 rounded-lg p-4">
-              <h4 className="text-white font-semibold mb-2">Test Your System</h4>
-              <p className="text-gray-300 text-sm">Send test alerts to make sure everything works properly.</p>
-            </div>
-            <div className="bg-white bg-opacity-5 rounded-lg p-4">
-              <h4 className="text-white font-semibold mb-2">Keep Contacts Updated</h4>
-              <p className="text-gray-300 text-sm">Regularly review and update your emergency contact list.</p>
-            </div>
-            <div className="bg-white bg-opacity-5 rounded-lg p-4">
-              <h4 className="text-white font-semibold mb-2">Enable Location</h4>
-              <p className="text-gray-300 text-sm">Always allow location access for more effective emergency response.</p>
-            </div>
-            <div className="bg-white bg-opacity-5 rounded-lg p-4">
-              <h4 className="text-white font-semibold mb-2">Use Responsibly</h4>
-              <p className="text-gray-300 text-sm">Only use the DANGER button for real emergencies.</p>
-            </div>
-          </div>
-          
-          <motion.div className="mt-8">
-            <Link href="/dashboard">
-              <motion.button
-                className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-lg transition-colors flex items-center mx-auto"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
+          <Link href="/dashboard">
+            <motion.button
+              className="btn-primary px-8 py-4 text-lg"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <span className="flex items-center">
                 Get Started Now
-                <ArrowRight size={20} className="ml-2" />
-              </motion.button>
-            </Link>
-          </motion.div>
+                <ChevronRight size={20} className="ml-2" />
+              </span>
+            </motion.button>
+          </Link>
         </motion.div>
       </div>
     </div>

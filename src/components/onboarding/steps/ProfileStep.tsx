@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { User, Mail, Phone, MapPin, Camera, Check, AlertCircle } from 'lucide-react'
 import { useLocalization } from '../../localization/LocalizationProvider'
@@ -39,11 +39,7 @@ export function ProfileStep({ onDataChange, initialData }: ProfileStepProps) {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isValidating, setIsValidating] = useState(false)
 
-  useEffect(() => {
-    validateAndUpdateData()
-  }, [profileData])
-
-  const validateAndUpdateData = async () => {
+  const validateAndUpdateData = useCallback(async () => {
     setIsValidating(true)
     try {
       const validationResult = validationService.validateUserProfile(profileData)
@@ -63,7 +59,11 @@ export function ProfileStep({ onDataChange, initialData }: ProfileStepProps) {
     } finally {
       setIsValidating(false)
     }
-  }
+  }, [profileData, onDataChange])
+
+  useEffect(() => {
+    validateAndUpdateData()
+  }, [validateAndUpdateData])
 
   const handleInputChange = (field: keyof ProfileData, value: string) => {
     setProfileData(prev => ({

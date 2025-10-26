@@ -182,7 +182,7 @@ class PushNotificationService {
       const notificationTitle = type === 'danger' ? '🚨 EMERGENCY ALERT' : '💙 HELP REQUEST'
       const notificationOptions: NotificationOptions = {
         body: `From: ${fromUser}\n${message}${location ? '\n📍 Location included' : ''}`,
-        icon: '/icon-192x192.png',
+        icon: '/icon-1280x1280.PNG',
         badge: '/badge-72x72.png',
         tag: `alert-${alertId}`,
         requireInteraction: type === 'danger',

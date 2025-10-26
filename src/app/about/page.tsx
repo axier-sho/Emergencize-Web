@@ -14,125 +14,88 @@ import {
   Heart,
   AlertTriangle,
   Star,
-  ExternalLink,
   LogIn,
-  UserPlus
+  UserPlus,
+  CheckCircle,
+  Layers,
+  Lock,
+  Wifi
 } from 'lucide-react'
 import Link from 'next/link'
 import AuthModal from '@/components/AuthModal'
 import { useAuth } from '@/hooks/useAuth'
-import { useClient, useWindowSize } from '@/hooks/useClient'
 
 export default function AboutPage() {
   const [showContent, setShowContent] = useState(false)
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login')
-  const windowSize = useWindowSize()
-  const isClient = useClient()
   const { user, logout } = useAuth()
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowContent(true)
-    }, 1000)
-    return () => clearTimeout(timer)
+    setShowContent(true)
   }, [])
 
   const technologies = [
-    { name: "Next.js 15", icon: <Globe className="w-6 h-6" />, color: "text-blue-400" },
-    { name: "TypeScript", icon: <Code className="w-6 h-6" />, color: "text-blue-500" },
-    { name: "Framer Motion", icon: <Zap className="w-6 h-6" />, color: "text-purple-400" },
-    { name: "Tailwind CSS", icon: <Star className="w-6 h-6" />, color: "text-cyan-400" },
-    { name: "Socket.io", icon: <Users className="w-6 h-6" />, color: "text-green-400" },
-    { name: "Firebase", icon: <Shield className="w-6 h-6" />, color: "text-orange-400" }
+    { name: "Next.js 15", icon: <Globe className="w-6 h-6" />, gradient: "from-blue-500 to-cyan-500" },
+    { name: "TypeScript", icon: <Code className="w-6 h-6" />, gradient: "from-blue-600 to-blue-700" },
+    { name: "Framer Motion", icon: <Zap className="w-6 h-6" />, gradient: "from-purple-500 to-pink-500" },
+    { name: "Tailwind CSS", icon: <Star className="w-6 h-6" />, gradient: "from-cyan-500 to-teal-500" },
+    { name: "Socket.io", icon: <Wifi className="w-6 h-6" />, gradient: "from-green-500 to-emerald-500" },
+    { name: "Firebase", icon: <Shield className="w-6 h-6" />, gradient: "from-orange-500 to-red-500" }
   ]
 
-  const adaptations = [
+  const features = [
     {
-      from: "Core Location (iOS)",
-      to: "Geolocation API",
-      icon: <Globe className="w-5 h-5" />
+      icon: <Zap className="w-6 h-6" />,
+      title: "Real-time Communication",
+      description: "Socket.io enables instant alert delivery with WebSocket fallback support",
+      gradient: "from-yellow-500 to-orange-500"
     },
     {
-      from: "Push Notifications (iOS)",
-      to: "Web Push API + Service Workers",
-      icon: <Zap className="w-5 h-5" />
+      icon: <Shield className="w-6 h-6" />,
+      title: "Enterprise Security",
+      description: "Multi-layer input sanitization, rate limiting, and security monitoring",
+      gradient: "from-blue-500 to-indigo-500"
     },
     {
-      from: "Haptic Feedback (iOS)",
-      to: "Vibration API + Visual Feedback",
-      icon: <Smartphone className="w-5 h-5" />
+      icon: <Users className="w-6 h-6" />,
+      title: "Contact Management",
+      description: "Invite contacts via email with real-time presence tracking",
+      gradient: "from-green-500 to-teal-500"
     },
     {
-      from: "VoIP Calls (iOS)",
-      to: "WebRTC Integration",
-      icon: <Users className="w-5 h-5" />
+      icon: <Globe className="w-6 h-6" />,
+      title: "Location Services",
+      description: "Automatic GPS coordinates with geofencing and safe zones",
+      gradient: "from-purple-500 to-pink-500"
+    },
+    {
+      icon: <Heart className="w-6 h-6" />,
+      title: "Accessibility First",
+      description: "WCAG 2.1 AA compliant with screen reader and keyboard support",
+      gradient: "from-red-500 to-pink-500"
+    },
+    {
+      icon: <Layers className="w-6 h-6" />,
+      title: "Progressive Web App",
+      description: "Works offline with service workers and background sync",
+      gradient: "from-cyan-500 to-blue-500"
     }
   ]
 
   return (
-    <div className="min-h-screen">
-      {/* Animated Background */}
-      <motion.div
-        className="fixed inset-0 bg-gradient-to-br from-purple-600 via-blue-600 to-blue-800"
-        initial={{ scale: 1.1, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 1.5, ease: "easeOut" }}
-      />
-
-      {/* Floating Elements */}
-      {isClient && windowSize.width > 0 && (
-        <div className="fixed inset-0 overflow-hidden pointer-events-none">
-          {[...Array(15)].map((_, i) => {
-            const x = (i * 142 + 567) % windowSize.width
-            const y = (i * 834 + 291) % windowSize.height
-            const duration = 4 + (i % 3)
-            const delay = i * 0.3
-            
-            return (
-              <motion.div
-                key={i}
-                className="absolute"
-                initial={{
-                  x,
-                  y,
-                  opacity: 0
-                }}
-                animate={{
-                  y: [null, y - 50],
-                  opacity: [0, 0.3, 0],
-                  rotate: 360
-                }}
-                transition={{
-                  duration,
-                  repeat: Infinity,
-                  delay
-                }}
-              >
-                {i % 3 === 0 ? (
-                  <AlertTriangle size={16} className="text-white" />
-                ) : i % 3 === 1 ? (
-                  <Heart size={16} className="text-red-300" />
-                ) : (
-                  <Shield size={16} className="text-blue-300" />
-                )}
-              </motion.div>
-            )
-          })}
-        </div>
-      )}
-
+    <div className="min-h-screen relative">
       {/* Navigation */}
       <motion.nav
-        className="relative z-10 flex justify-between items-center p-6"
-        initial={{ opacity: 0, y: -30 }}
+        className="relative z-50 flex justify-between items-center p-6 md:px-12 backdrop-blur-xl bg-slate-900/40 border-b border-white/10"
+        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
         <Link href="/">
           <motion.button
-            className="flex items-center space-x-2 text-white hover:text-blue-200 transition-colors"
-            whileHover={{ scale: 1.05, x: -2 }}
+            className="flex items-center space-x-2 text-slate-300 hover:text-white transition-colors px-4 py-2 rounded-xl hover:bg-white/5"
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             <ArrowLeft size={20} />
@@ -142,18 +105,17 @@ export default function AboutPage() {
 
         <div className="flex items-center space-x-4">
           <motion.a
-            href="https://github.com/Sho1228"
+            href="https://github.com/axier-sho"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center space-x-2 text-white hover:text-blue-200 transition-colors"
+            className="hidden md:flex items-center space-x-2 text-slate-300 hover:text-white transition-colors px-4 py-2 rounded-xl hover:bg-white/5"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <Github size={20} />
+            <Github size={18} />
             <span>GitHub</span>
           </motion.a>
 
-          {/* Auth Buttons in Header */}
           {!user ? (
             <>
               <motion.button
@@ -161,12 +123,12 @@ export default function AboutPage() {
                   setAuthMode('login')
                   setAuthModalOpen(true)
                 }}
-                className="flex items-center space-x-2 px-3 py-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors"
+                className="flex items-center space-x-2 px-4 py-2 text-white hover:bg-white/10 rounded-xl transition-all"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
                 <LogIn size={16} />
-                <span>Sign In</span>
+                <span className="hidden sm:inline">Sign In</span>
               </motion.button>
               
               <motion.button
@@ -174,19 +136,19 @@ export default function AboutPage() {
                   setAuthMode('signup')
                   setAuthModalOpen(true)
                 }}
-                className="flex items-center space-x-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                className="btn-primary"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <UserPlus size={16} />
-                <span>Sign Up</span>
+                <UserPlus size={16} className="inline mr-2" />
+                <span>Get Started</span>
               </motion.button>
             </>
           ) : (
             <div className="flex items-center space-x-3">
               <Link href="/dashboard">
                 <motion.button
-                  className="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm"
+                  className="btn-primary"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -195,7 +157,7 @@ export default function AboutPage() {
               </Link>
               <motion.button
                 onClick={logout}
-                className="px-3 py-2 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors text-sm"
+                className="px-4 py-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition-all"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -209,240 +171,203 @@ export default function AboutPage() {
       {/* Main Content */}
       <AnimatePresence>
         {showContent && (
-          <motion.main
-            className="relative z-10 px-6 py-12"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8 }}
-          >
-            <div className="max-w-6xl mx-auto">
-              {/* Hero Section */}
+          <div className="relative z-10 container mx-auto px-6 py-16">
+            {/* Hero Section */}
+            <motion.div
+              className="max-w-4xl mx-auto text-center mb-20"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
               <motion.div
-                className="text-center mb-16"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
+                className="inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-6 shadow-2xl overflow-hidden"
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ duration: 0.8, type: "spring" }}
               >
+                <img src="/icon-1280x1280.PNG" alt="Emergencize" className="w-full h-full object-cover" />
+              </motion.div>
+
+              <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+                About Emergencize
+              </h1>
+              <p className="text-xl text-slate-300 leading-relaxed">
+                A modern, real-time emergency alert system built with cutting-edge web technologies. 
+                Designed to keep you connected with your emergency contacts when it matters most.
+              </p>
+            </motion.div>
+
+            {/* Mission Statement */}
+            <motion.div
+              className="modern-card max-w-4xl mx-auto mb-16 p-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <div className="flex items-start space-x-4">
+                <div className="p-3 bg-blue-500/20 rounded-xl">
+                  <Heart className="w-6 h-6 text-blue-400" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-white mb-3">Our Mission</h2>
+                  <p className="text-slate-300 leading-relaxed">
+                    Emergencize was created to provide a reliable, fast, and accessible way to alert 
+                    your emergency contacts during critical situations. We believe everyone deserves a 
+                    safety network that works instantly, regardless of device or location.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Features Grid */}
+            <motion.div
+              className="mb-20"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <h2 className="text-3xl font-bold text-white text-center mb-12">Key Features</h2>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {features.map((feature, index) => (
+                  <motion.div
+                    key={index}
+                    className="modern-card p-6"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
+                    whileHover={{ y: -4 }}
+                  >
+                    <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${feature.gradient} mb-4`}>
+                      {feature.icon}
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">{feature.title}</h3>
+                    <p className="text-slate-400">{feature.description}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Technology Stack */}
+            <motion.div
+              className="mb-20"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+            >
+              <h2 className="text-3xl font-bold text-white text-center mb-12">Built With Modern Technology</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                {technologies.map((tech, index) => (
+                  <motion.div
+                    key={index}
+                    className="modern-card p-6 text-center"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.7 + index * 0.1 }}
+                    whileHover={{ y: -4 }}
+                  >
+                    <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${tech.gradient} mb-3`}>
+                      {tech.icon}
+                    </div>
+                    <h3 className="text-sm font-semibold text-white">{tech.name}</h3>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Alert Types */}
+            <motion.div
+              className="mb-20"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.9 }}
+            >
+              <h2 className="text-3xl font-bold text-white text-center mb-12">Two Alert Types</h2>
+              <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
                 <motion.div
-                  className="mb-8"
-                  initial={{ scale: 0, rotate: -90 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ 
-                    duration: 1, 
-                    type: "spring",
-                    stiffness: 200,
-                    damping: 20 
-                  }}
+                  className="modern-card p-8 border-l-4 border-blue-500"
+                  whileHover={{ scale: 1.02 }}
                 >
-                  <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-2xl mx-auto">
-                    <AlertTriangle size={48} className="text-red-500" />
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="p-3 bg-blue-500/20 rounded-xl">
+                      <Heart className="w-8 h-8 text-blue-400" />
+                    </div>
+                    <h3 className="text-3xl font-bold text-white">HELP</h3>
+                  </div>
+                  <p className="text-slate-300 mb-4">
+                    For non-critical situations requiring assistance. One tap sends instant notifications 
+                    to your online contacts.
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-center text-sm text-blue-400">
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Instant activation
+                    </div>
+                    <div className="flex items-center text-sm text-blue-400">
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Online contacts only
+                    </div>
+                    <div className="flex items-center text-sm text-blue-400">
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      GPS location included
+                    </div>
                   </div>
                 </motion.div>
 
-                <motion.h1
-                  className="text-5xl md:text-6xl font-bold text-white mb-4"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.4 }}
+                <motion.div
+                  className="modern-card p-8 border-l-4 border-red-500"
+                  whileHover={{ scale: 1.02 }}
                 >
-                  About Emergencize
-                </motion.h1>
-
-                <motion.p
-                  className="text-xl text-blue-200 max-w-3xl mx-auto"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.6 }}
-                >
-                  A modern web adaptation of an iOS emergency alert system, 
-                  rebuilt for the web with real-time communication and smooth animations.
-                </motion.p>
-              </motion.div>
-
-              {/* Developer Section */}
-              <motion.section
-                className="mb-16"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.8 }}
-              >
-                <div className="glass-effect rounded-3xl p-8 text-center">
-                  <motion.div
-                    className="mb-6"
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <div className="w-20 h-20 bg-[rgb(155,180,215)] rounded-full shadow-xl mx-auto mb-4">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="p-3 bg-red-500/20 rounded-xl">
+                      <AlertTriangle className="w-8 h-8 text-red-400" />
                     </div>
-                  </motion.div>
-
-                  <h2 className="text-3xl font-bold text-white mb-2">Sho𓆑</h2>
-                  <p className="text-blue-200 mb-6">Developer & Emergency System Designer</p>
-                  
-                  <motion.a
-                    href="https://github.com/Sho1228"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center space-x-2 px-6 py-3 bg-white bg-opacity-10 hover:bg-opacity-20 rounded-full text-white transition-all"
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Github size={20} />
-                    <span>Visit GitHub Profile</span>
-                    <ExternalLink size={16} />
-                  </motion.a>
-                </div>
-              </motion.section>
-
-              {/* Project Story */}
-              <motion.section
-                className="mb-16"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 1 }}
-              >
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div className="glass-effect rounded-2xl p-8">
-                    <h3 className="text-2xl font-bold text-white mb-4 flex items-center">
-                      <Smartphone className="mr-3 text-blue-400" />
-                      From iOS to Web
-                    </h3>
-                    <p className="text-blue-200 leading-relaxed">
-                      Originally an iOS emergency app with native features like Core Location, 
-                      push notifications, and haptic feedback. This web version adapts these 
-                      iPhone-specific capabilities to work seamlessly in modern browsers.
-                    </p>
+                    <h3 className="text-3xl font-bold text-white">DANGER</h3>
                   </div>
-
-                  <div className="glass-effect rounded-2xl p-8">
-                    <h3 className="text-2xl font-bold text-white mb-4 flex items-center">
-                      <Users className="mr-3 text-green-400" />
-                      Online-Only Alerts
-                    </h3>
-                    <p className="text-blue-200 leading-relaxed">
-                      Unlike traditional emergency systems, Emergencize only sends alerts to 
-                      users who are actively online. This ensures real-time response capability 
-                      and prevents alert fatigue from offline notifications.
-                    </p>
+                  <p className="text-slate-300 mb-4">
+                    For life-threatening emergencies. Hold for 3 seconds to alert ALL contacts with 
+                    maximum priority.
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-center text-sm text-red-400">
+                      <Lock className="w-4 h-4 mr-2" />
+                      3-second hold required
+                    </div>
+                    <div className="flex items-center text-sm text-red-400">
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      All contacts notified
+                    </div>
+                    <div className="flex items-center text-sm text-red-400">
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Priority delivery
+                    </div>
                   </div>
-                </div>
-              </motion.section>
+                </motion.div>
+              </div>
+            </motion.div>
 
-              {/* Technical Stack */}
-              <motion.section
-                className="mb-16"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 1.2 }}
+            {/* Developer */}
+            <motion.div
+              className="modern-card max-w-2xl mx-auto p-8 text-center"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 1.1 }}
+            >
+              <p className="text-slate-400 mb-3">Developed with passion by</p>
+              <motion.a
+                href="https://github.com/axier-sho"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center space-x-3 text-2xl font-bold text-white hover:text-blue-400 transition-colors"
+                whileHover={{ scale: 1.05 }}
               >
-                <h3 className="text-3xl font-bold text-white mb-8 text-center">
-                  Built With Modern Technology
-                </h3>
-                
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {technologies.map((tech, index) => (
-                    <motion.div
-                      key={index}
-                      className="glass-effect rounded-xl p-4 text-center hover:bg-white hover:bg-opacity-10 transition-all"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.5, delay: 1.4 + index * 0.1 }}
-                      whileHover={{ scale: 1.05, y: -5 }}
-                    >
-                      <motion.div
-                        className={`${tech.color} mb-3 flex justify-center`}
-                        whileHover={{ rotate: 360 }}
-                        transition={{ duration: 0.6 }}
-                      >
-                        {tech.icon}
-                      </motion.div>
-                      <span className="text-white font-medium text-sm">{tech.name}</span>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.section>
-
-              {/* iOS to Web Adaptations */}
-              <motion.section
-                className="mb-16"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 1.6 }}
-              >
-                <h3 className="text-3xl font-bold text-white mb-8 text-center">
-                  iPhone → Web Adaptations
-                </h3>
-                
-                <div className="space-y-4">
-                  {adaptations.map((adaptation, index) => (
-                    <motion.div
-                      key={index}
-                      className="glass-effect rounded-xl p-6 flex items-center justify-between"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.5, delay: 1.8 + index * 0.1 }}
-                      whileHover={{ scale: 1.02, x: 5 }}
-                    >
-                      <div className="flex items-center space-x-4">
-                        <div className="text-red-400">
-                          {adaptation.icon}
-                        </div>
-                        <div>
-                          <span className="text-gray-300 line-through">{adaptation.from}</span>
-                          <ArrowLeft className="w-4 h-4 text-blue-400 mx-2 inline rotate-180" />
-                          <span className="text-white font-medium">{adaptation.to}</span>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.section>
-
-              {/* Key Features */}
-              <motion.section
-                className="text-center"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 2 }}
-              >
-                <h3 className="text-3xl font-bold text-white mb-8">
-                  Emergency Features That Matter
-                </h3>
-                
-                <div className="grid md:grid-cols-3 gap-6">
-                  <motion.div
-                    className="glass-effect rounded-2xl p-6"
-                    whileHover={{ scale: 1.05, y: -5 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Heart size={32} className="text-blue-400 mx-auto mb-4" />
-                    <h4 className="text-xl font-semibold text-white mb-2">Help Alerts</h4>
-                    <p className="text-blue-200">Non-critical assistance requests with gentle notifications</p>
-                  </motion.div>
-
-                  <motion.div
-                    className="glass-effect rounded-2xl p-6"
-                    whileHover={{ scale: 1.05, y: -5 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <AlertTriangle size={32} className="text-red-400 mx-auto mb-4" />
-                    <h4 className="text-xl font-semibold text-white mb-2">Danger Alerts</h4>
-                    <p className="text-blue-200">Critical emergency signals with urgent visual effects</p>
-                  </motion.div>
-
-                  <motion.div
-                    className="glass-effect rounded-2xl p-6"
-                    whileHover={{ scale: 1.05, y: -5 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Globe size={32} className="text-green-400 mx-auto mb-4" />
-                    <h4 className="text-xl font-semibold text-white mb-2">Location Sharing</h4>
-                    <p className="text-blue-200">Automatic GPS coordinates with every emergency alert</p>
-                  </motion.div>
-                </div>
-              </motion.section>
-            </div>
-          </motion.main>
+                <span>Sho𓆑</span>
+                <Github size={24} />
+              </motion.a>
+              <p className="text-slate-400 mt-4">
+                Open source project dedicated to making emergency response accessible to everyone.
+              </p>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 
@@ -451,6 +376,7 @@ export default function AboutPage() {
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
         initialMode={authMode}
+        lockMode={false}
       />
     </div>
   )

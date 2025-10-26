@@ -18,13 +18,10 @@ import ContactManager from '@/components/ContactManager'
 import SettingsModal from '@/components/SettingsModal'
 import EmergencyChat from '@/components/EmergencyChat'
 import { 
-  MapPin, 
   Settings, 
   LogOut, 
   Home, 
   Bell, 
-  Users, 
-  MessageCircle,
   Activity,
   Wifi,
   WifiOff,
@@ -255,10 +252,10 @@ export default function DashboardPage() {
         {showLoading && <LoadingAnimation />}
       </AnimatePresence>
 
-      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-blue-800">
+      <div className="min-h-screen relative">
         {/* Header */}
         <motion.header
-          className="backdrop-blur-sm bg-white bg-opacity-10 border-b border-white border-opacity-20 sticky top-0 z-40"
+          className="backdrop-blur-xl bg-slate-900/40 border-b border-white/10 sticky top-0 z-40"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -266,51 +263,41 @@ export default function DashboardPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center space-x-4">
-                <Link href="/" className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                    <span className="text-blue-600 font-bold">E</span>
+                <Link href="/" className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-2xl overflow-hidden shadow-lg">
+                    <img src="/icon-1280x1280.PNG" alt="Emergencize" className="w-full h-full object-cover" />
                   </div>
-                  <span className="text-white font-semibold hidden sm:block">Emergencize</span>
+                  <span className="text-white font-bold text-lg hidden sm:block">Emergencize</span>
                 </Link>
                 
                 <div className="flex items-center space-x-2 text-sm">
                   {networkStatus.connectionType === 'online' ? (
-                    <div className="flex items-center text-green-200">
-                      <Wifi size={16} className="mr-1" />
-                      <span className="hidden sm:inline">Real-time Mode</span>
+                    <div className="flex items-center px-3 py-1 bg-emerald-500/20 text-emerald-300 rounded-lg border border-emerald-500/30">
+                      <Wifi size={14} className="mr-1.5" />
+                      <span className="hidden sm:inline font-medium">Real-time</span>
                     </div>
                   ) : networkStatus.connectionType === 'browser-only' ? (
-                    <div className="flex items-center text-blue-200">
-                      <Wifi size={16} className="mr-1" />
-                      <span className="hidden sm:inline">Standard Mode</span>
+                    <div className="flex items-center px-3 py-1 bg-blue-500/20 text-blue-300 rounded-lg border border-blue-500/30">
+                      <Wifi size={14} className="mr-1.5" />
+                      <span className="hidden sm:inline font-medium">Standard</span>
                     </div>
                   ) : (
-                    <div className="flex items-center text-red-200">
-                      <WifiOff size={16} className="mr-1" />
-                      <span className="hidden sm:inline">Offline</span>
-                    </div>
-                  )}
-                  {networkStatus.connectionType !== 'online' && networkStatus.isOnline && (
-                    <div className="hidden sm:block text-xs text-blue-300">
-                      (Emergency alerts work)
-                    </div>
-                  )}
-                  {!networkStatus.isOnline && (
-                    <div className="hidden sm:block text-xs text-red-300">
-                      (Check your internet)
+                    <div className="flex items-center px-3 py-1 bg-red-500/20 text-red-300 rounded-lg border border-red-500/30">
+                      <WifiOff size={14} className="mr-1.5" />
+                      <span className="hidden sm:inline font-medium">Offline</span>
                     </div>
                   )}
                 </div>
               </div>
               
               <div className="flex items-center space-x-3">
-                <span className="text-white text-sm hidden sm:block">
-                  Welcome, {user.email?.split('@')[0]}
+                <span className="text-slate-300 text-sm hidden md:block">
+                  Welcome, <span className="text-white font-semibold">{user.email?.split('@')[0]}</span>
                 </span>
                 
                 <Link href="/notifications">
                   <motion.button
-                    className="p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors"
+                    className="p-2.5 text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition-all"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     title="Notifications"
@@ -321,7 +308,7 @@ export default function DashboardPage() {
 
                 <Link href="/">
                   <motion.button
-                    className="p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors"
+                    className="p-2.5 text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition-all"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
@@ -331,7 +318,7 @@ export default function DashboardPage() {
                 
                 <motion.button
                   onClick={() => setSettingsOpen(true)}
-                  className="p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors"
+                  className="p-2.5 text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition-all"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -340,7 +327,7 @@ export default function DashboardPage() {
                 
                 <motion.button 
                   onClick={logout}
-                  className="p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors"
+                  className="p-2.5 text-red-300 hover:text-white hover:bg-red-500/20 rounded-xl transition-all"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -373,7 +360,7 @@ export default function DashboardPage() {
             {/* Emergency Buttons */}
             <div className="xl:col-span-2">
               <motion.div
-                className="glass-effect rounded-2xl p-8"
+                className="modern-card p-8"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.6 }}
@@ -383,18 +370,18 @@ export default function DashboardPage() {
                     <Activity className="mr-3 text-red-400" />
                     Emergency Dashboard
                   </h2>
-                  <p className="text-blue-200 text-lg">
-                    Press a button to alert your online emergency contacts
+                  <p className="text-slate-300 text-lg">
+                    Press a button to alert your emergency contacts
                   </p>
                   {location && (
                     <motion.div
-                      className="mt-4 inline-flex items-center space-x-2 px-4 py-2 bg-green-500 bg-opacity-20 border border-green-400 border-opacity-30 rounded-full text-green-200"
+                      className="mt-4 inline-flex items-center space-x-2 px-4 py-2 bg-emerald-500/20 border border-emerald-500/30 rounded-xl text-emerald-300"
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.3, delay: 0.8 }}
                     >
                       <Navigation size={16} />
-                      <span className="text-sm">Location sharing enabled</span>
+                      <span className="text-sm font-medium">Location sharing enabled</span>
                     </motion.div>
                   )}
                 </div>

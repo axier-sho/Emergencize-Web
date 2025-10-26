@@ -12,54 +12,10 @@
   "lang": "en",
   "icons": [
     {
-      "src": "/icon-192x192.svg",
-      "sizes": "192x192",
-      "type": "image/svg+xml",
+      "src": "/icon-1280x1280.PNG",
+      "sizes": "1280x1280",
+      "type": "image/png",
       "purpose": "any maskable"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Emergency Alert",
-      "short_name": "Emergency",
-      "description": "Send emergency alert",
-      "url": "/dashboard?action=emergency",
-      "icons": [
-        {
-          "src": "/shortcut-emergency.png",
-          "sizes": "96x96",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "Help Request",
-      "short_name": "Help",
-      "description": "Send help request",
-      "url": "/dashboard?action=help",
-      "icons": [
-        {
-          "src": "/shortcut-help.png",
-          "sizes": "96x96",
-          "type": "image/png"
-        }
-      ]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshot-desktop.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Emergencize desktop view"
-    },
-    {
-      "src": "/screenshot-mobile.png",
-      "sizes": "360x640",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Emergencize mobile view"
     }
   ],
   "features": [

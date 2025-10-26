@@ -67,7 +67,7 @@ export default class ErrorBoundary extends Component<Props, State> {
   }
 
   handleReportBug = () => {
-    const bugReportUrl = 'https://github.com/Sho1228/emergencize-web/issues/new'
+    const bugReportUrl = 'https://github.com/axier-sho/Emergencize-Web/issues/new'
     const errorDetails = `Error: ${this.state.error?.message}\n\nStack: ${this.state.error?.stack}`
     const encodedDetails = encodeURIComponent(errorDetails)
     window.open(`${bugReportUrl}?body=${encodedDetails}`, '_blank')

@@ -12,8 +12,8 @@ export const metadata: Metadata = {
   authors: [{ name: 'Sho' }],
   manifest: '/manifest.json',
   icons: {
-    icon: '/icon-192x192.svg',
-    apple: '/icon-192x192.svg',
+    icon: '/icon-1280x1280.PNG',
+    apple: '/icon-1280x1280.PNG',
   },
 }
 

@@ -69,7 +69,7 @@ export function useSocket({
       onVoiceCallEnd,
       onIceCandidate
     }
-  })
+  }, [onUserOnline, onUserOffline, onEmergencyAlert, onChatMessage, onGroupMessage, onUserTyping, onUserStoppedTyping, onVoiceCallOffer, onVoiceCallAnswer, onVoiceCallEnd, onIceCandidate])
 
   useEffect(() => {
     if (!userId) return
