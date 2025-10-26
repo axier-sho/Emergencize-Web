@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   X, 
@@ -15,8 +15,12 @@ import {
   Save,
   User,
   Mail,
-  Phone
+  Phone,
+  CheckCircle,
+  AlertCircle,
+  Loader
 } from 'lucide-react'
+import { usePushNotifications } from '@/hooks/usePushNotifications'
 
 interface SettingsModalProps {
   isOpen: boolean
@@ -29,6 +33,15 @@ interface SettingsModalProps {
 
 export default function SettingsModal({ isOpen, onClose, currentUser }: SettingsModalProps) {
   const [activeTab, setActiveTab] = useState<'profile' | 'notifications' | 'privacy' | 'emergency'>('profile')
+  const {
+    permission,
+    isSubscribed,
+    isLoading: pushLoading,
+    requestPermission,
+    subscribe,
+    unsubscribe,
+    testNotification
+  } = usePushNotifications()
   const [settings, setSettings] = useState({
     // Profile settings
     displayName: currentUser?.displayName || '',
@@ -206,10 +219,139 @@ export default function SettingsModal({ isOpen, onClose, currentUser }: Settings
                       <h3 className="text-xl font-semibold text-white mb-4">Notification Preferences</h3>
                       
                       <div className="space-y-4">
+                        {/* Push Notifications - Special handling */}
+                        <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 rounded-xl p-4 border border-blue-500/30">
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-start space-x-3 flex-1">
+                              <Bell size={24} className="text-blue-400 mt-1" />
+                              <div className="flex-1">
+                                <h4 className="text-white font-semibold text-lg">Push Notifications</h4>
+                                <p className="text-gray-300 text-sm mb-3">Receive emergency alerts even when the app is closed</p>
+                                
+                                {/* Status Badge */}
+                                <div className="flex items-center space-x-2 mb-3">
+                                  {permission === 'granted' && isSubscribed ? (
+                                    <div className="flex items-center space-x-1 text-green-400 text-sm">
+                                      <CheckCircle size={16} />
+                                      <span>Enabled & Active</span>
+                                    </div>
+                                  ) : permission === 'granted' ? (
+                                    <div className="flex items-center space-x-1 text-yellow-400 text-sm">
+                                      <AlertCircle size={16} />
+                                      <span>Granted but not subscribed</span>
+                                    </div>
+                                  ) : permission === 'denied' ? (
+                                    <div className="flex items-center space-x-1 text-red-400 text-sm">
+                                      <AlertCircle size={16} />
+                                      <span>Blocked - Enable in browser settings</span>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center space-x-1 text-gray-400 text-sm">
+                                      <AlertCircle size={16} />
+                                      <span>Not enabled</span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="flex flex-wrap gap-2">
+                                  {permission !== 'granted' && (
+                                    <motion.button
+                                      onClick={async () => {
+                                        const result = await requestPermission()
+                                        if (result.granted) {
+                                          await subscribe()
+                                        }
+                                      }}
+                                      disabled={pushLoading || permission === 'denied'}
+                                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors flex items-center space-x-2"
+                                      whileHover={permission !== 'denied' ? { scale: 1.02 } : {}}
+                                      whileTap={permission !== 'denied' ? { scale: 0.98 } : {}}
+                                    >
+                                      {pushLoading ? (
+                                        <>
+                                          <Loader size={16} className="animate-spin" />
+                                          <span>Enabling...</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Bell size={16} />
+                                          <span>Enable Notifications</span>
+                                        </>
+                                      )}
+                                    </motion.button>
+                                  )}
+
+                                  {permission === 'granted' && !isSubscribed && (
+                                    <motion.button
+                                      onClick={subscribe}
+                                      disabled={pushLoading}
+                                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded-lg font-medium transition-colors flex items-center space-x-2"
+                                      whileHover={{ scale: 1.02 }}
+                                      whileTap={{ scale: 0.98 }}
+                                    >
+                                      {pushLoading ? (
+                                        <>
+                                          <Loader size={16} className="animate-spin" />
+                                          <span>Subscribing...</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <CheckCircle size={16} />
+                                          <span>Subscribe</span>
+                                        </>
+                                      )}
+                                    </motion.button>
+                                  )}
+
+                                  {permission === 'granted' && isSubscribed && (
+                                    <>
+                                      <motion.button
+                                        onClick={testNotification}
+                                        disabled={pushLoading}
+                                        className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white rounded-lg font-medium transition-colors flex items-center space-x-2"
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                      >
+                                        <Bell size={16} />
+                                        <span>Test Notification</span>
+                                      </motion.button>
+
+                                      <motion.button
+                                        onClick={unsubscribe}
+                                        disabled={pushLoading}
+                                        className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white rounded-lg font-medium transition-colors flex items-center space-x-2"
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                      >
+                                        <X size={16} />
+                                        <span>Disable</span>
+                                      </motion.button>
+                                    </>
+                                  )}
+                                </div>
+
+                                {permission === 'denied' && (
+                                  <div className="mt-3 p-3 bg-red-900/30 border border-red-500/30 rounded-lg">
+                                    <p className="text-red-200 text-sm">
+                                      <strong>Notifications are blocked.</strong> To enable them:
+                                    </p>
+                                    <ol className="text-red-200 text-xs mt-2 space-y-1 ml-4 list-decimal">
+                                      <li>Click the lock/info icon in your browser&apos;s address bar</li>
+                                      <li>Find &quot;Notifications&quot; and change to &quot;Allow&quot;</li>
+                                      <li>Refresh this page</li>
+                                    </ol>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Other notification settings */}
                         {[
                           { key: 'soundEnabled', label: 'Sound Notifications', icon: Volume2, description: 'Play sound for incoming alerts' },
                           { key: 'vibrationEnabled', label: 'Vibration', icon: Vibrate, description: 'Vibrate device for alerts (mobile)' },
-                          { key: 'pushNotifications', label: 'Push Notifications', icon: Smartphone, description: 'Receive push notifications' },
                           { key: 'emailAlerts', label: 'Email Alerts', icon: Mail, description: 'Send alerts to your email' }
                         ].map((option) => {
                           const Icon = option.icon

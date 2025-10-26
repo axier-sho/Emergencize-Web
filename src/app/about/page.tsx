@@ -181,9 +181,9 @@ export default function AboutPage() {
             >
               <motion.div
                 className="inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-6 shadow-2xl overflow-hidden"
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ duration: 0.8, type: "spring" }}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.5, type: "spring" }}
               >
                 <img src="/icon-1280x1280.PNG" alt="Emergencize" className="w-full h-full object-cover" />
               </motion.div>
