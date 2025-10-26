@@ -237,5 +237,3 @@ export default function EmergencyButton({ type, onClick, disabled = false }: Eme
     </motion.button>
   )
 }
-
-}

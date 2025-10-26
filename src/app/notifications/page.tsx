@@ -20,7 +20,7 @@ import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'
 import { getUserNotifications, markNotificationAsRead, type NotificationHistory } from '@/lib/database'
 
-type NotificationFilter = 'all' | 'alerts' | 'requests' | 'messages' | 'calls'
+type NotificationFilter = 'all' | 'alerts' | 'requests' | 'contacts'
 
 export default function NotificationsPage() {
   const { user, logout } = useAuth()
@@ -56,10 +56,8 @@ export default function NotificationsPage() {
             return notif.type.includes('alert')
           case 'requests':
             return notif.type.includes('request')
-          case 'messages':
-            return notif.type === 'message'
-          case 'calls':
-            return notif.type === 'call'
+          case 'contacts':
+            return notif.type === 'contact_added'
           default:
             return true
         }
@@ -218,7 +216,7 @@ export default function NotificationsPage() {
 
             {/* Filter */}
             <div className="flex gap-2">
-              {(['all', 'alerts', 'requests'] as NotificationFilter[]).map((f) => (
+              {(['all', 'alerts', 'requests', 'contacts'] as NotificationFilter[]).map((f) => (
                 <motion.button
                   key={f}
                   onClick={() => setFilter(f)}
