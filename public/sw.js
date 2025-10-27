@@ -143,7 +143,8 @@ self.addEventListener('notificationclick', (event) => {
   
   event.notification.close()
   
-  const { action, data } = event
+  const action = event.action
+  const data = event.notification?.data
   const { alertId, type, fromUser, url = '/dashboard' } = data || {}
   
   if (action === 'respond') {

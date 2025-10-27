@@ -37,7 +37,7 @@ export function useSocket({
   const [onlineUsers, setOnlineUsers] = useState<string[]>([])
   const [connectionAttempted, setConnectionAttempted] = useState(false)
   const socketRef = useRef<Socket | null>(null)
-  const connectionTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const connectionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Store callback refs to avoid recreation
   const callbackRefs = useRef({

@@ -183,7 +183,6 @@ class PushNotificationService {
       const notificationOptions: NotificationOptions = {
         body: `From: ${fromUser}\n${message}${location ? '\n📍 Location included' : ''}`,
         icon: '/icon-1280x1280.PNG',
-        badge: '/badge-72x72.png',
         tag: `alert-${alertId}`,
         requireInteraction: type === 'danger',
         silent: false,

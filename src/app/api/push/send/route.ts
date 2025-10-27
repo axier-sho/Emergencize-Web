@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server'
 import webpush from 'web-push'
 
+// Ensure this route runs on the Node.js runtime (not Edge) because web-push
+// requires Node APIs like crypto and HTTP/2.
+export const runtime = 'nodejs'
+
 // Expect these env vars to be set (public key already exposed client-side)
 // Generate with: npx web-push generate-vapid-keys
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
