@@ -52,7 +52,7 @@ export function LocalizationProvider({ children }: LocalizationProviderProps) {
     }
 
     initializeLocalization()
-  }, [])
+  }, [localizationService])
 
   const setLanguage = async (languageCode: string): Promise<boolean> => {
     try {

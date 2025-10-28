@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { AlertTriangle, Shield, Users, Zap, Github, Info, ArrowRight, LogIn, UserPlus, CheckCircle, MapPin, Sparkles } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import AuthModal from '@/components/AuthModal'
 import { useAuth } from '@/hooks/useAuth'
 import { useClient } from '@/hooks/useClient'
@@ -66,7 +67,14 @@ export default function LandingPage() {
           whileHover={{ scale: 1.02 }}
         >
           <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-lg glow-blue">
-            <img src="/icon-1280x1280.PNG" alt="Emergencize" className="w-full h-full object-cover" />
+            <Image
+              src="/icon-1280x1280.PNG"
+              alt="Emergencize"
+              width={48}
+              height={48}
+              className="w-full h-full object-cover"
+              priority
+            />
           </div>
           <span className="text-white text-2xl font-bold">Emergencize</span>
         </motion.div>

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   MapPin, 
@@ -47,6 +47,26 @@ export default function GeofenceManager({ isOpen, onClose }: GeofenceManagerProp
 
   const { announce, playAudioCue } = useAccessibilityContext()
 
+  const handleGeofenceEvent = useCallback((event: GeofenceEvent) => {
+    console.log('Geofence event:', event)
+    loadRecentEvents()
+    updateStatus()
+    
+    // Announce to screen reader
+    announce(`${event.type === 'enter' ? 'Entered' : 'Left'} safe zone: ${event.safeZone.name}`)
+    playAudioCue(event.type === 'enter' ? 'success' : 'info')
+  }, [announce, playAudioCue])
+
+  const handleGeofenceAlert = useCallback((alert: GeofenceAlert) => {
+    console.log('Geofence alert:', alert)
+    
+    // Announce critical alerts
+    if (alert.severity === 'high') {
+      announce(alert.message, 'assertive')
+      playAudioCue('warning')
+    }
+  }, [announce, playAudioCue])
+
   useEffect(() => {
     if (isOpen) {
       loadSafeZones()
@@ -62,7 +82,7 @@ export default function GeofenceManager({ isOpen, onClose }: GeofenceManagerProp
         unsubscribeAlert()
       }
     }
-  }, [isOpen])
+  }, [isOpen, handleGeofenceEvent, handleGeofenceAlert])
 
   const loadSafeZones = () => {
     const zones = geofencingService.getSafeZones()
@@ -81,25 +101,7 @@ export default function GeofenceManager({ isOpen, onClose }: GeofenceManagerProp
     setRecentEvents(events.slice(-10).reverse()) // Last 10 events, newest first
   }
 
-  const handleGeofenceEvent = (event: GeofenceEvent) => {
-    console.log('Geofence event:', event)
-    loadRecentEvents()
-    updateStatus()
-    
-    // Announce to screen reader
-    announce(`${event.type === 'enter' ? 'Entered' : 'Left'} safe zone: ${event.safeZone.name}`)
-    playAudioCue(event.type === 'enter' ? 'success' : 'info')
-  }
-
-  const handleGeofenceAlert = (alert: GeofenceAlert) => {
-    console.log('Geofence alert:', alert)
-    
-    // Announce critical alerts
-    if (alert.severity === 'high') {
-      announce(alert.message, 'assertive')
-      playAudioCue('warning')
-    }
-  }
+  
 
   const startMonitoring = async () => {
     try {

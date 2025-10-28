@@ -28,6 +28,7 @@ import {
   Navigation
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface Alert {
   id: string
@@ -265,7 +266,14 @@ export default function DashboardPage() {
               <div className="flex items-center space-x-4">
                 <Link href="/" className="flex items-center space-x-3">
                   <div className="w-10 h-10 rounded-2xl overflow-hidden shadow-lg">
-                    <img src="/icon-1280x1280.PNG" alt="Emergencize" className="w-full h-full object-cover" />
+                    <Image
+                      src="/icon-1280x1280.PNG"
+                      alt="Emergencize"
+                      width={40}
+                      height={40}
+                      className="w-full h-full object-cover"
+                      priority
+                    />
                   </div>
                   <span className="text-white font-bold text-lg hidden sm:block">Emergencize</span>
                 </Link>

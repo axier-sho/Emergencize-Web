@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { AlertTriangle, Heart, X, MapPin, Clock, Phone, MessageCircle, CheckCircle2 } from 'lucide-react'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { ScreenReaderOnly } from './accessibility/AccessibilityProvider'
 
 interface Alert {
@@ -37,36 +37,11 @@ export default function AlertNotification({
   const alertRefs = useRef<(HTMLDivElement | null)[]>([])
   const announcementRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    const newVisibleAlerts = alerts.filter(alert => !alert.isRead)
-    setVisibleAlerts(newVisibleAlerts)
-    
-    // Announce new alerts to screen readers
-    if (newVisibleAlerts.length > visibleAlerts.length) {
-      const newAlerts = newVisibleAlerts.slice(visibleAlerts.length)
-      newAlerts.forEach(alert => {
-        announceAlert(alert)
-        playAlertSound(alert.type)
-      })
-    }
-  }, [alerts, visibleAlerts.length])
-
-  // Screen reader announcement function
-  const announceAlert = (alert: Alert) => {
-    const urgency = alert.type === 'danger' ? 'Emergency alert' : 'Help request'
-    const location = alert.location ? `Location included` : ''
-    const message = `${urgency} from ${alert.fromUser}. ${alert.message}. ${location}`.trim()
-    
-    if (announcementRef.current) {
-      announcementRef.current.textContent = message
-    }
-  }
-
   // Shared AudioContext to prevent memory leaks
   const audioContextRef = useRef<AudioContext | null>(null)
   
   // Get or create AudioContext
-  const getAudioContext = () => {
+  const getAudioContext = useCallback(() => {
     if (!audioContextRef.current) {
       try {
         audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
@@ -82,19 +57,21 @@ export default function AlertNotification({
     }
     
     return audioContextRef.current
-  }
+  }, [])
 
-  // Cleanup AudioContext on unmount
-  useEffect(() => {
-    return () => {
-      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close()
-      }
+  // Screen reader announcement function
+  const announceAlert = useCallback((alert: Alert) => {
+    const urgency = alert.type === 'danger' ? 'Emergency alert' : 'Help request'
+    const location = alert.location ? `Location included` : ''
+    const message = `${urgency} from ${alert.fromUser}. ${alert.message}. ${location}`.trim()
+    
+    if (announcementRef.current) {
+      announcementRef.current.textContent = message
     }
   }, [])
 
   // Play alert sound
-  const playAlertSound = (type: 'help' | 'danger') => {
+  const playAlertSound = useCallback((type: 'help' | 'danger') => {
     try {
       const audioContext = getAudioContext()
       if (!audioContext) return
@@ -137,7 +114,30 @@ export default function AlertNotification({
     } catch (error) {
       console.error('Error playing alert sound:', error)
     }
-  }
+  }, [getAudioContext])
+
+  useEffect(() => {
+    const newVisibleAlerts = alerts.filter(alert => !alert.isRead)
+    setVisibleAlerts(newVisibleAlerts)
+    
+    // Announce new alerts to screen readers
+    if (newVisibleAlerts.length > visibleAlerts.length) {
+      const newAlerts = newVisibleAlerts.slice(visibleAlerts.length)
+      newAlerts.forEach(alert => {
+        announceAlert(alert)
+        playAlertSound(alert.type)
+      })
+    }
+  }, [alerts, visibleAlerts.length, announceAlert, playAlertSound])
+
+  // Cleanup AudioContext on unmount
+  useEffect(() => {
+    return () => {
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close()
+      }
+    }
+  }, [])
 
   // Keyboard navigation
   useEffect(() => {

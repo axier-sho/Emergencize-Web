@@ -103,7 +103,7 @@ export const useSecureAuth = (): AuthState & AuthActions => {
         clearInterval(refreshInterval)
       }
     }
-  }, [])
+  }, [TOKEN_REFRESH_INTERVAL])
 
   const refreshToken = async (): Promise<void> => {
     if (!auth.currentUser) {

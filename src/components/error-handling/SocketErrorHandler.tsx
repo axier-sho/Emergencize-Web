@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Wifi, WifiOff, RotateCcw, AlertTriangle, CheckCircle2 } from 'lucide-react'
 
@@ -53,9 +53,9 @@ export default function SocketErrorHandler({
         handleAutoRetry()
       }
     }
-  }, [isConnected])
+  }, [isConnected, connectionState.status, handleAutoRetry])
 
-  const handleAutoRetry = () => {
+  const handleAutoRetry = useCallback(() => {
     if (connectionState.attempts >= MAX_RETRY_ATTEMPTS) {
       setConnectionState(prev => ({
         ...prev,
@@ -78,7 +78,7 @@ export default function SocketErrorHandler({
     }, delay)
 
     setRetryTimer(timer)
-  }
+  }, [RETRY_DELAYS, connectionState.attempts, MAX_RETRY_ATTEMPTS, onRetry])
 
   const handleManualRetry = () => {
     if (retryTimer) {

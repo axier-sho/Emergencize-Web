@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { User, Mail, Phone, MapPin, Camera, Check, AlertCircle } from 'lucide-react'
 import { useLocalization } from '../../localization/LocalizationProvider'
@@ -181,9 +182,11 @@ export function ProfileStep({ onDataChange, initialData }: ProfileStepProps) {
         <div className="relative">
           <div className="w-24 h-24 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center overflow-hidden">
             {profileData.avatar ? (
-              <img 
+              <Image 
                 src={profileData.avatar} 
                 alt="Avatar" 
+                width={96}
+                height={96}
                 className="w-full h-full object-cover"
               />
             ) : (

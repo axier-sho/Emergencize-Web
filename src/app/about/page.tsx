@@ -22,6 +22,7 @@ import {
   Wifi
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import AuthModal from '@/components/AuthModal'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -185,7 +186,14 @@ export default function AboutPage() {
                 animate={{ scale: 1 }}
                 transition={{ duration: 0.5, type: "spring" }}
               >
-                <img src="/icon-1280x1280.PNG" alt="Emergencize" className="w-full h-full object-cover" />
+                <Image
+                  src="/icon-1280x1280.PNG"
+                  alt="Emergencize"
+                  width={80}
+                  height={80}
+                  className="w-full h-full object-cover"
+                  priority
+                />
               </motion.div>
 
               <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">

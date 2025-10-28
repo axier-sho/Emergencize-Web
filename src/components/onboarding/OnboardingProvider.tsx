@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react'
 import { validationService } from '@/services/ValidationService'
 import { securityMonitoringService } from '@/services/SecurityMonitoringService'
 
@@ -143,9 +143,28 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
     loadProgress()
   }, [])
 
+  const saveProgress = useCallback(async (): Promise<void> => {
+    try {
+      if (typeof window !== 'undefined') {
+        const progressData = {
+          steps: steps.map(step => ({
+            id: step.id,
+            completed: step.completed,
+            data: step.data
+          })),
+          progress,
+          lastSaved: new Date().toISOString()
+        }
+        localStorage.setItem('emergencize_onboarding_progress', JSON.stringify(progressData))
+      }
+    } catch (error) {
+      console.error('Failed to save onboarding progress:', error)
+    }
+  }, [steps, progress])
+
   useEffect(() => {
     saveProgress()
-  }, [progress])
+  }, [progress, saveProgress])
 
   const nextStep = async (): Promise<boolean> => {
     try {
@@ -337,7 +356,7 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
     }
   }
 
-  const loadProgress = async (): Promise<void> => {
+  const loadProgress = useCallback(async (): Promise<void> => {
     try {
       if (typeof window !== 'undefined') {
         const savedData = localStorage.getItem('emergencize_onboarding_progress')
@@ -372,7 +391,7 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
     } catch (error) {
       console.error('Failed to load onboarding progress:', error)
     }
-  }
+  }, [])
 
   const isStepAccessible = (stepId: string): boolean => {
     const stepIndex = steps.findIndex(step => step.id === stepId)
