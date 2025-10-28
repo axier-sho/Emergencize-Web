@@ -65,3 +65,18 @@ temp/
 # Claude configuration (keep private)
 .claude/
 CLAUDE.md
+
+# Firebase local files
+.firebase/
+firestore_export/
+firebase-debug.log*
+
+# Vercel
+.vercel/
+
+# Service account / private keys (if ever generated locally)
+*serviceAccount*.json
+*adminsdk-*.json
+
+# Web push generated keys (if stored locally)
+vapid-*.json
