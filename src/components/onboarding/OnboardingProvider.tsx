@@ -139,9 +139,7 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
 
   const currentStep = steps[progress.currentStep] || null
 
-  useEffect(() => {
-    loadProgress()
-  }, [])
+  
 
   const saveProgress = useCallback(async (): Promise<void> => {
     try {
@@ -165,6 +163,14 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
   useEffect(() => {
     saveProgress()
   }, [progress, saveProgress])
+
+  // Load progress on mount without referencing before declaration
+  useEffect(() => {
+    (async () => {
+      await loadProgress()
+    })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const nextStep = async (): Promise<boolean> => {
     try {
@@ -337,24 +343,7 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
     }
   }
 
-  const saveProgress = async (): Promise<void> => {
-    try {
-      if (typeof window !== 'undefined') {
-        const progressData = {
-          steps: steps.map(step => ({
-            id: step.id,
-            completed: step.completed,
-            data: step.data
-          })),
-          progress,
-          lastSaved: new Date().toISOString()
-        }
-        localStorage.setItem('emergencize_onboarding_progress', JSON.stringify(progressData))
-      }
-    } catch (error) {
-      console.error('Failed to save onboarding progress:', error)
-    }
-  }
+  
 
   const loadProgress = useCallback(async (): Promise<void> => {
     try {

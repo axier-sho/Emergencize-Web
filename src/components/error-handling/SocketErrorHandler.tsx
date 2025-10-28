@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Wifi, WifiOff, RotateCcw, AlertTriangle, CheckCircle2 } from 'lucide-react'
 
@@ -28,32 +28,9 @@ export default function SocketErrorHandler({
   const [showNotification, setShowNotification] = useState(false)
   const [retryTimer, setRetryTimer] = useState<NodeJS.Timeout | null>(null)
 
+  // Stable retry configuration
   const MAX_RETRY_ATTEMPTS = 5
-  const RETRY_DELAYS = [1000, 2000, 5000, 10000, 30000] // Progressive delays
-
-  useEffect(() => {
-    if (isConnected) {
-      if (connectionState.status !== 'connected') {
-        setConnectionState({
-          status: 'connected',
-          attempts: 0
-        })
-        setShowNotification(true)
-        setTimeout(() => setShowNotification(false), 3000)
-      }
-    } else {
-      if (connectionState.status === 'connected') {
-        setConnectionState(prev => ({
-          ...prev,
-          status: 'disconnected'
-        }))
-        setShowNotification(true)
-        
-        // Start automatic retry
-        handleAutoRetry()
-      }
-    }
-  }, [isConnected, connectionState.status, handleAutoRetry])
+  const RETRY_DELAYS = useMemo(() => [1000, 2000, 5000, 10000, 30000], []) // Progressive delays
 
   const handleAutoRetry = useCallback(() => {
     if (connectionState.attempts >= MAX_RETRY_ATTEMPTS) {
@@ -79,6 +56,30 @@ export default function SocketErrorHandler({
 
     setRetryTimer(timer)
   }, [RETRY_DELAYS, connectionState.attempts, MAX_RETRY_ATTEMPTS, onRetry])
+
+  useEffect(() => {
+    if (isConnected) {
+      if (connectionState.status !== 'connected') {
+        setConnectionState({
+          status: 'connected',
+          attempts: 0
+        })
+        setShowNotification(true)
+        setTimeout(() => setShowNotification(false), 3000)
+      }
+    } else {
+      if (connectionState.status === 'connected') {
+        setConnectionState(prev => ({
+          ...prev,
+          status: 'disconnected'
+        }))
+        setShowNotification(true)
+        
+        // Start automatic retry
+        handleAutoRetry()
+      }
+    }
+  }, [isConnected, connectionState.status, handleAutoRetry])
 
   const handleManualRetry = () => {
     if (retryTimer) {
