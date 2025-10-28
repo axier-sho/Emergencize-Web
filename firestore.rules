@@ -12,19 +12,24 @@ service cloud.firestore {
     // Users
     match /users/{userId} {
       // Allow users to read their own profile and allow authenticated users to read basic info of others
-      allow read: if isOwner(userId)
-                  || (isAuthenticated() && resource.data.keys().hasAny(['displayName','photoURL','isOnline','lastActive']));
+      allow get: if isOwner(userId) || isAuthenticated();
+      
+      // Allow authenticated users to query/list users (needed for finding users by email)
+      allow list: if isAuthenticated();
 
       allow create: if isOwner(userId)
-                    && request.resource.data.keys().hasAll(['email','displayName','createdAt'])
+                    && request.resource.data.keys().hasAll(['email','createdAt'])
                     && isEmail(request.resource.data.email)
                     && request.resource.data.email == request.auth.token.email
-                    && isStringBetween(request.resource.data.displayName, 1, 100)
-                    && request.resource.data.createdAt is timestamp;
+                    && request.resource.data.createdAt is timestamp
+                    && (!request.resource.data.keys().hasAny(['displayName']) || isStringBetween(request.resource.data.displayName, 1, 100))
+                    && (!request.resource.data.keys().hasAny(['photoURL']) || isStringBetween(request.resource.data.photoURL, 1, 500));
 
       allow update: if isOwner(userId)
                     && request.resource.data.email == resource.data.email
-                    && request.resource.data.createdAt == resource.data.createdAt;
+                    && request.resource.data.createdAt == resource.data.createdAt
+                    && (!request.resource.data.keys().hasAny(['displayName']) || isStringBetween(request.resource.data.displayName, 1, 100))
+                    && (!request.resource.data.keys().hasAny(['photoURL']) || isStringBetween(request.resource.data.photoURL, 1, 500));
     }
 
     // Contacts

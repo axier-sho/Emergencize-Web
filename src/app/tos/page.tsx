@@ -1,21 +1,20 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { ArrowLeft, FileText, Shield, Lock, AlertTriangle, CheckCircle } from 'lucide-react'
+import { ArrowLeft, FileText, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
+import { useEffect, useMemo, useState } from 'react'
 
 export default function TermsOfServicePage() {
   const sections = [
     {
       title: "1. Acceptance of Terms",
-      icon: <CheckCircle className="w-5 h-5" />,
       content: `By accessing and using Emergencize, you accept and agree to be bound by these Terms of Service. 
       If you do not agree to these terms, please do not use this service. We reserve the right to update these 
       terms at any time, and continued use of the service constitutes acceptance of any changes.`
     },
     {
       title: "2. Emergency Use Disclaimer",
-      icon: <AlertTriangle className="w-5 h-5" />,
       content: `Emergencize is designed as a supplementary emergency alert system and should NOT be used as a 
       replacement for official emergency services (911, local emergency numbers). In case of a genuine emergency, 
       always contact local emergency services first. We cannot guarantee message delivery or response times, and 
@@ -23,7 +22,6 @@ export default function TermsOfServicePage() {
     },
     {
       title: "3. User Responsibilities",
-      icon: <FileText className="w-5 h-5" />,
       content: `You are responsible for: (a) maintaining the security of your account credentials, (b) all activities 
       that occur under your account, (c) ensuring the accuracy of your emergency contact information, (d) using the 
       service appropriately and not sending false or misleading alerts, and (e) complying with all applicable laws 
@@ -31,7 +29,6 @@ export default function TermsOfServicePage() {
     },
     {
       title: "4. Data Privacy & Security",
-      icon: <Lock className="w-5 h-5" />,
       content: `We take your privacy seriously. Location data is only shared when you send an alert and is not stored 
       permanently. Your emergency contacts and alert history are stored securely using Firebase with industry-standard 
       encryption. We do not sell your data to third parties. For detailed information, please review our Privacy Policy. 
@@ -39,7 +36,6 @@ export default function TermsOfServicePage() {
     },
     {
       title: "5. Service Availability",
-      icon: <Shield className="w-5 h-5" />,
       content: `While we strive to maintain 99.9% uptime, we cannot guarantee uninterrupted service availability. 
       The service may be temporarily unavailable due to maintenance, updates, or circumstances beyond our control 
       (network outages, server issues, natural disasters). We are not liable for any damages resulting from service 
@@ -47,7 +43,6 @@ export default function TermsOfServicePage() {
     },
     {
       title: "6. Acceptable Use Policy",
-      icon: <AlertTriangle className="w-5 h-5" />,
       content: `You agree not to: (a) send false emergency alerts, (b) abuse or spam the alert system, (c) harass or 
       threaten other users, (d) attempt to gain unauthorized access to the system, (e) use automated tools to scrape 
       or abuse the service, (f) violate any laws or regulations, or (g) impersonate others. Violation of these policies 
@@ -55,7 +50,6 @@ export default function TermsOfServicePage() {
     },
     {
       title: "7. Limitation of Liability",
-      icon: <Shield className="w-5 h-5" />,
       content: `Emergencize is provided "as is" without warranties of any kind. To the fullest extent permitted by law, 
       we disclaim all liability for: (a) any direct, indirect, incidental, or consequential damages, (b) loss of data 
       or privacy breaches, (c) personal injury or death resulting from use of the service, (d) failure to deliver alerts, 
@@ -63,14 +57,12 @@ export default function TermsOfServicePage() {
     },
     {
       title: "8. Contact Information Accuracy",
-      icon: <FileText className="w-5 h-5" />,
       content: `You are solely responsible for ensuring your emergency contacts are accurate, up-to-date, and have 
       consented to receive emergency alerts from you. We are not responsible for alerts sent to incorrect or outdated 
       contacts. Regularly review and update your emergency contact list to ensure its accuracy.`
     },
     {
       title: "9. Account Termination",
-      icon: <Lock className="w-5 h-5" />,
       content: `We reserve the right to suspend or terminate your account at any time for violations of these terms, 
       suspicious activity, or any other reason at our sole discretion. You may delete your account at any time through 
       your account settings. Upon termination, your data will be deleted within 30 days, except as required by law or 
@@ -78,26 +70,60 @@ export default function TermsOfServicePage() {
     },
     {
       title: "10. Changes to Service",
-      icon: <Shield className="w-5 h-5" />,
       content: `We reserve the right to modify, suspend, or discontinue any aspect of the service at any time without 
       prior notice. We may also impose limits on certain features or restrict access to parts of the service. We are 
       not liable for any modifications, suspensions, or discontinuations of the service.`
     },
     {
       title: "11. Third-Party Services",
-      icon: <FileText className="w-5 h-5" />,
       content: `Emergencize integrates with third-party services (Firebase, mapping services, etc.). We are not 
       responsible for the availability, accuracy, or functionality of these third-party services. Your use of 
       third-party services is subject to their respective terms of service and privacy policies.`
     },
     {
       title: "12. Governing Law",
-      icon: <Shield className="w-5 h-5" />,
       content: `These Terms of Service are governed by and construed in accordance with applicable laws. Any disputes 
       arising from these terms or use of the service will be resolved through binding arbitration, except where 
       prohibited by law. You waive your right to participate in class action lawsuits.`
     }
   ]
+
+  const slugify = (title: string) =>
+    title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+
+  const toc = useMemo(() => sections.map((s) => ({ id: slugify(s.title), title: s.title })), [])
+  const [activeId, setActiveId] = useState<string>(toc[0]?.id || '')
+
+  useEffect(() => {
+    const targets = Array.from(document.querySelectorAll('[data-tos-section="true"]')) as HTMLElement[]
+    if (targets.length === 0) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+        if (visible[0]) {
+          const id = (visible[0].target as HTMLElement).id
+          if (id && id !== activeId) {
+            setActiveId(id)
+            if (history.replaceState) {
+              history.replaceState(null, '', `#${id}`)
+            }
+          }
+        }
+      },
+      { rootMargin: '0px 0px -65% 0px', threshold: [0] }
+    )
+
+    targets.forEach((el) => observer.observe(el))
+    return () => observer.disconnect()
+  }, [activeId])
 
   return (
     <div className="min-h-screen relative">
@@ -131,7 +157,7 @@ export default function TermsOfServicePage() {
       </motion.nav>
 
       {/* Main Content */}
-      <div className="container mx-auto px-6 py-16 max-w-4xl">
+      <div className="mx-auto px-6 py-16 max-w-6xl">
         {/* Hero */}
         <motion.div
           className="text-center mb-12"
@@ -170,28 +196,58 @@ export default function TermsOfServicePage() {
                 </div>
         </motion.div>
 
-        {/* Terms Sections */}
-        <div className="space-y-6">
-          {sections.map((section, index) => (
-            <motion.div
-              key={index}
-              className="modern-card p-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 + index * 0.05 }}
-            >
-              <div className="flex items-start space-x-3 mb-3">
-                <div className="p-2 bg-blue-500/20 rounded-lg shrink-0">
-                  {section.icon}
-                </div>
-                <h2 className="text-xl font-bold text-white">{section.title}</h2>
-              </div>
-              <p className="text-slate-300 leading-relaxed ml-11">
-                {section.content}
-              </p>
-            </motion.div>
-          ))}
+        {/* TOC + Terms Sections */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+          {/* TOC */}
+          <aside className="md:col-span-3">
+            <div className="modern-card p-4 md:sticky md:top-28">
+              <h3 className="text-white font-semibold mb-3">Contents</h3>
+              <nav className="space-y-1">
+                {toc.map((item) => (
+                  <a
+                    key={item.id}
+                    href={`#${item.id}`}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      const el = document.getElementById(item.id)
+                      if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                      }
+                    }}
+                    className={`block px-3 py-2 rounded-lg transition-colors border border-transparent ${
+                      activeId === item.id ? 'text-blue-400 bg-white/5 border-white/10' : 'text-slate-300 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    {item.title}
+                  </a>
+                ))}
+              </nav>
             </div>
+          </aside>
+
+          {/* Sections */}
+          <div className="md:col-span-9">
+            {sections.map((section, index) => {
+              const id = slugify(section.title)
+              return (
+                <motion.section
+                  id={id}
+                  data-tos-section="true"
+                  key={id}
+                  className="scroll-mt-28 py-6 border-b border-white/10"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 + index * 0.05 }}
+                >
+                  <h2 className="text-xl font-bold text-white mb-2">{section.title}</h2>
+                  <p className="text-slate-300 leading-relaxed">
+                    {section.content}
+                  </p>
+                </motion.section>
+              )
+            })}
+          </div>
+        </div>
 
         {/* Contact */}
         <motion.div

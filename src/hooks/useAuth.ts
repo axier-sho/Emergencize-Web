@@ -6,7 +6,11 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  RecaptchaVerifier,
+  PhoneAuthProvider,
+  multiFactor,
+  PhoneMultiFactorGenerator
 } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
 import { createUserProfile, getUserProfile, updateUserStatus } from '@/lib/database'
@@ -14,6 +18,8 @@ import { createUserProfile, getUserProfile, updateUserStatus } from '@/lib/datab
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  // Keep a cache of RecaptchaVerifier instances by container id to avoid duplicates
+  const [recaptchaCache] = useState<Record<string, RecaptchaVerifier>>({})
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -36,7 +42,8 @@ export function useAuth() {
     try {
       await signInWithEmailAndPassword(auth, email, password)
     } catch (error: any) {
-      throw new Error(error.message)
+      // rethrow original error so callers can inspect error.code and error.resolver
+      throw error
     }
   }
 
@@ -67,6 +74,37 @@ export function useAuth() {
     }
   }
 
+  // Sends an SMS code to enroll Phone as a multi-factor during signup
+  // Returns the verificationId which must be used with the user's code
+  const sendMfaEnrollmentCode = async (phoneNumber: string, recaptchaContainerId: string): Promise<string> => {
+    if (!auth.currentUser) {
+      throw new Error('Must be signed in to enroll MFA')
+    }
+
+    const mfaSession = await multiFactor(auth.currentUser).getSession()
+
+    let verifier = recaptchaCache[recaptchaContainerId]
+    if (!verifier) {
+      verifier = new RecaptchaVerifier(auth, recaptchaContainerId, { size: 'invisible' })
+      recaptchaCache[recaptchaContainerId] = verifier
+    }
+
+    const phoneInfoOptions = { phoneNumber, session: mfaSession }
+    const provider = new PhoneAuthProvider(auth)
+    const verificationId = await provider.verifyPhoneNumber(phoneInfoOptions, verifier)
+    return verificationId
+  }
+
+  // Completes MFA enrollment with the code user received by SMS
+  const enrollMfaWithCode = async (verificationId: string, verificationCode: string, displayName = 'SMS') => {
+    if (!auth.currentUser) {
+      throw new Error('Must be signed in to enroll MFA')
+    }
+    const cred = PhoneAuthProvider.credential(verificationId, verificationCode)
+    const assertion = PhoneMultiFactorGenerator.assertion(cred)
+    await multiFactor(auth.currentUser).enroll(assertion, displayName)
+  }
+
   const logout = async () => {
     try {
       if (user) {
@@ -84,6 +122,8 @@ export function useAuth() {
     loading,
     login,
     register,
-    logout
+    logout,
+    sendMfaEnrollmentCode,
+    enrollMfaWithCode
   }
 }
