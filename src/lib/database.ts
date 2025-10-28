@@ -76,8 +76,18 @@ export interface NotificationHistory {
 // User functions
 export const createUserProfile = async (userData: Omit<User, 'createdAt' | 'lastActive' | 'isOnline'>) => {
   const userRef = doc(db, 'users', userData.uid)
+  
+  // Filter out undefined values to prevent Firestore errors
+  const cleanedData: any = {}
+  Object.keys(userData).forEach((key) => {
+    const value = (userData as any)[key]
+    if (value !== undefined) {
+      cleanedData[key] = value
+    }
+  })
+  
   await setDoc(userRef, {
-    ...userData,
+    ...cleanedData,
     createdAt: serverTimestamp(),
     lastActive: serverTimestamp(),
     isOnline: true

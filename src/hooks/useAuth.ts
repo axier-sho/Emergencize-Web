@@ -46,12 +46,21 @@ export function useAuth() {
       const user = userCredential.user
       
       // Create user profile in Firestore
-      await createUserProfile({
+      // Only include fields that are not undefined
+      const profileData: any = {
         uid: user.uid,
-        email: user.email!,
-        displayName: user.displayName || undefined,
-        photoURL: user.photoURL || undefined
-      })
+        email: user.email!
+      }
+      
+      if (user.displayName) {
+        profileData.displayName = user.displayName
+      }
+      
+      if (user.photoURL) {
+        profileData.photoURL = user.photoURL
+      }
+      
+      await createUserProfile(profileData)
       
     } catch (error: any) {
       throw new Error(error.message)
