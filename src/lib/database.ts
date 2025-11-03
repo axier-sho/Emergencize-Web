@@ -104,6 +104,12 @@ export const getUserProfile = async (uid: string): Promise<User | null> => {
   return null
 }
 
+// Update user profile (partial). Does not change email/createdAt per rules
+export const updateUserProfile = async (uid: string, updates: Partial<User> & Record<string, any>) => {
+  const userRef = doc(db, 'users', uid)
+  await updateDoc(userRef, updates)
+}
+
 export const updateUserStatus = async (uid: string, isOnline: boolean) => {
   const userRef = doc(db, 'users', uid)
   await updateDoc(userRef, {

@@ -21,6 +21,8 @@ import {
   Loader
 } from 'lucide-react'
 import { usePushNotifications } from '@/hooks/usePushNotifications'
+import { useAuth } from '@/hooks/useAuth'
+import { updateUserProfile } from '@/lib/database'
 
 interface SettingsModalProps {
   isOpen: boolean
@@ -32,6 +34,7 @@ interface SettingsModalProps {
 }
 
 export default function SettingsModal({ isOpen, onClose, currentUser }: SettingsModalProps) {
+  const { user } = useAuth()
   const [activeTab, setActiveTab] = useState<'profile' | 'notifications' | 'privacy' | 'emergency'>('profile')
   const {
     permission,
@@ -73,10 +76,30 @@ export default function SettingsModal({ isOpen, onClose, currentUser }: Settings
     { id: 'emergency', label: 'Emergency', icon: Shield }
   ]
 
-  const handleSave = () => {
-    // Save settings to database
-    console.log('Saving settings:', settings)
-    onClose()
+  const handleSave = async () => {
+    try {
+      if (!user) throw new Error('Not authenticated')
+      await updateUserProfile(user.uid, {
+        displayName: settings.displayName,
+        phone: settings.phone,
+        emergencyInfo: settings.emergencyInfo,
+        profileVisibility: settings.profileVisibility,
+        soundEnabled: settings.soundEnabled,
+        vibrationEnabled: settings.vibrationEnabled,
+        pushNotifications: settings.pushNotifications,
+        emailAlerts: settings.emailAlerts,
+        locationSharing: settings.locationSharing,
+        onlineStatus: settings.onlineStatus,
+        autoLocationShare: settings.autoLocationShare,
+        emergencyTimeout: settings.emergencyTimeout,
+        requireConfirmation: settings.requireConfirmation,
+        emergencyContacts: settings.emergencyContacts
+      })
+      onClose()
+    } catch (e) {
+      console.error('Failed to save settings:', e)
+      alert('Failed to save settings')
+    }
   }
 
   const updateSetting = (key: string, value: any) => {
@@ -97,7 +120,7 @@ export default function SettingsModal({ isOpen, onClose, currentUser }: Settings
           >
             {/* Modal */}
             <motion.div
-              className="glass-effect rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden"
+              className="glass-effect rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden"
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -117,9 +140,31 @@ export default function SettingsModal({ isOpen, onClose, currentUser }: Settings
                 </button>
               </div>
 
-              <div className="flex h-[600px]">
+              <div className="flex h-[80vh] md:h-[600px] flex-col md:flex-row">
+                {/* Mobile Tabs */}
+                <div className="md:hidden px-4 pt-4 border-b border-white border-opacity-10">
+                  <div className="flex gap-2 overflow-x-auto no-scrollbar pb-3">
+                    {tabs.map((tab) => {
+                      const Icon = tab.icon
+                      return (
+                        <button
+                          key={tab.id}
+                          onClick={() => setActiveTab(tab.id as any)}
+                          className={`shrink-0 inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                            activeTab === tab.id ? 'bg-blue-600 text-white' : 'text-gray-300 bg-white/5'
+                          }`}
+                          aria-pressed={activeTab === tab.id}
+                        >
+                          <Icon size={16} />
+                          <span>{tab.label}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
                 {/* Sidebar */}
-                <div className="w-64 border-r border-white border-opacity-20 p-6">
+                <div className="hidden md:block md:w-64 border-r border-white border-opacity-20 p-6">
                   <nav className="space-y-2">
                     {tabs.map((tab) => {
                       const Icon = tab.icon
@@ -144,7 +189,7 @@ export default function SettingsModal({ isOpen, onClose, currentUser }: Settings
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 p-6 overflow-y-auto">
+                <div className="flex-1 p-4 md:p-6 overflow-y-auto">
                   {activeTab === 'profile' && (
                     <motion.div
                       className="space-y-6"
@@ -545,10 +590,10 @@ export default function SettingsModal({ isOpen, onClose, currentUser }: Settings
               </div>
 
               {/* Footer */}
-              <div className="flex justify-end space-x-4 p-6 border-t border-white border-opacity-20">
+              <div className="flex justify-end gap-3 p-4 md:p-6 border-t border-white border-opacity-20">
                 <motion.button
                   onClick={onClose}
-                  className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+                  className="px-5 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -556,7 +601,7 @@ export default function SettingsModal({ isOpen, onClose, currentUser }: Settings
                 </motion.button>
                 <motion.button
                   onClick={handleSave}
-                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center"
+                  className="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >

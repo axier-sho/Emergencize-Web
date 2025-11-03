@@ -18,6 +18,7 @@ import {
   Shield,
   Clock
 } from 'lucide-react'
+import { findUserByEmail } from '@/lib/database'
 
 interface Contact {
   id: string
@@ -84,6 +85,8 @@ export default function ContactManager({
     newEmail: ''
   })
   const [newNickname, setNewNickname] = useState('')
+  const [checkEmailLoading, setCheckEmailLoading] = useState(false)
+  const [checkEmailResult, setCheckEmailResult] = useState<null | { exists: boolean; name?: string }>(null)
 
   const filteredContacts = contacts.filter(contact =>
     contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -294,14 +297,43 @@ export default function ContactManager({
                             <label className="block text-white text-sm font-medium mb-2">
                               Email Address *
                             </label>
-                            <input
-                              type="email"
-                              value={newContact.email}
-                              onChange={(e) => setNewContact(prev => ({ ...prev, email: e.target.value }))}
-                              className="w-full px-4 py-3 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 transition-colors"
-                              placeholder="Enter email address"
-                              required
-                            />
+                            <div className="flex gap-2">
+                              <input
+                                type="email"
+                                value={newContact.email}
+                                onChange={(e) => {
+                                  setNewContact(prev => ({ ...prev, email: e.target.value }))
+                                  setCheckEmailResult(null)
+                                }}
+                                className="w-full px-4 py-3 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 transition-colors"
+                                placeholder="Enter email address"
+                                required
+                              />
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  if (!newContact.email) return
+                                  setCheckEmailLoading(true)
+                                  setCheckEmailResult(null)
+                                  try {
+                                    const user = await findUserByEmail(newContact.email)
+                                    setCheckEmailResult(user ? { exists: true, name: (user as any).displayName || (user as any).email } : { exists: false })
+                                  } catch {
+                                    setCheckEmailResult({ exists: false })
+                                  } finally {
+                                    setCheckEmailLoading(false)
+                                  }
+                                }}
+                                className="px-4 py-3 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg text-white hover:bg-white/20 transition-colors"
+                              >
+                                {checkEmailLoading ? 'Checking...' : 'Check'}
+                              </button>
+                            </div>
+                            {checkEmailResult && (
+                              <div className={`mt-2 text-sm ${checkEmailResult.exists ? 'text-green-300' : 'text-red-300'}`}>
+                                {checkEmailResult.exists ? `User found: ${checkEmailResult.name}` : 'User not found'}
+                              </div>
+                            )}
                           </div>
                           <div>
                             <label className="block text-white text-sm font-medium mb-2">

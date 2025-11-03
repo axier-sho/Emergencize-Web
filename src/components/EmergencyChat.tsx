@@ -14,6 +14,7 @@ import {
   Video
 } from 'lucide-react'
 import { useSocket } from '@/hooks/useSocket'
+import { saveAlert } from '@/lib/database'
 
 interface Message {
   id: string
@@ -55,6 +56,9 @@ export default function EmergencyChat({
   const [newMessage, setNewMessage] = useState('')
   const [isTyping, setIsTyping] = useState<string[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [isVoiceSupported, setIsVoiceSupported] = useState(false)
+  const [isListening, setIsListening] = useState(false)
+  const recognitionRef = useRef<any>(null)
 
   const { socket } = useSocket({
     userId: isOpen ? currentUserId : undefined, // Only create socket when modal is open
@@ -86,6 +90,42 @@ export default function EmergencyChat({
       setIsTyping([])
     }
   }, [isOpen, messages.length])
+
+  // Voice input setup
+  useEffect(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (SpeechRecognition) {
+      setIsVoiceSupported(true)
+      const recog = new SpeechRecognition()
+      recog.lang = 'en-US'
+      recog.interimResults = true
+      recog.continuous = false
+      recog.onresult = (event: any) => {
+        let transcript = ''
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          transcript += event.results[i][0].transcript
+        }
+        setNewMessage(prev => (prev ? prev + ' ' : '') + transcript.trim())
+      }
+      recog.onend = () => setIsListening(false)
+      recognitionRef.current = recog
+    }
+  }, [])
+
+  const toggleVoice = () => {
+    if (!isVoiceSupported) return
+    if (isListening) {
+      try { recognitionRef.current?.stop() } catch {}
+      setIsListening(false)
+      return
+    }
+    try {
+      recognitionRef.current?.start()
+      setIsListening(true)
+    } catch (e) {
+      console.error('Voice start failed', e)
+    }
+  }
 
   function handleReceiveMessage(message: Message) {
     setMessages(prev => {
@@ -167,7 +207,7 @@ export default function EmergencyChat({
     )
   }
 
-  const sendEmergencyAlert = () => {
+  const sendEmergencyAlert = async () => {
     if (!socket) return
 
     const alertMessage: Message = {
@@ -188,7 +228,35 @@ export default function EmergencyChat({
       const newMessages = [...prev, alertMessage]
       return newMessages.length > 100 ? newMessages.slice(-100) : newMessages
     })
+
+    // Persist to Firestore for alert history
+    try {
+      await saveAlert({
+        fromUserId: currentUserId,
+        type: 'danger',
+        message: alertMessage.content
+      })
+    } catch (e) {
+      console.error('Failed to save emergency alert:', e)
+    }
   }
+
+  // Global shortcut: Ctrl/Cmd + Shift + A to send alert (ignored while typing)
+  useEffect(() => {
+    if (!isOpen) return
+    const handler = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null
+      const typing = !!target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || (target as any).isContentEditable)
+      if (typing) return
+      const key = e.key.toLowerCase()
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && key === 'a') {
+        e.preventDefault()
+        sendEmergencyAlert()
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [isOpen])
 
   const handleTyping = () => {
     if (socket) {
@@ -259,7 +327,7 @@ export default function EmergencyChat({
           >
             {/* Chat Window */}
             <motion.div
-              className="glass-effect rounded-2xl w-full max-w-4xl h-[700px] flex flex-col overflow-hidden"
+              className="glass-effect rounded-2xl w-full max-w-4xl h-[700px] flex flex-col overflow-hidden relative"
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -395,6 +463,17 @@ export default function EmergencyChat({
                     placeholder="Type an emergency message..."
                     className="flex-1 px-4 py-3 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 transition-colors"
                   />
+                  {isVoiceSupported && (
+                    <motion.button
+                      onClick={toggleVoice}
+                      className={`p-3 ${isListening ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-700'} text-white rounded-lg transition-colors`}
+                      whileHover={{ scale: 1.08 }}
+                      whileTap={{ scale: 0.95 }}
+                      title={isListening ? 'Stop voice input' : 'Voice input'}
+                    >
+                      {isListening ? <Phone size={18} /> : <Phone size={18} />}
+                    </motion.button>
+                  )}
                   
                   <motion.button
                     onClick={sendMessage}
@@ -411,6 +490,20 @@ export default function EmergencyChat({
                   <p>Press Enter to send • Shift+Enter for new line</p>
                   <p>{contacts.filter(c => c.isOnline).length} participants online</p>
                 </div>
+              </div>
+
+              {/* Floating Emergency FAB */}
+              <div className="absolute bottom-24 right-4 md:right-6">
+                <motion.button
+                  onClick={sendEmergencyAlert}
+                  className="w-14 h-14 md:w-16 md:h-16 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-lg flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-red-400"
+                  title="Send Emergency Alert (Ctrl/Cmd + Shift + A)"
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.95 }}
+                  aria-label="Send Emergency Alert"
+                >
+                  <AlertTriangle size={24} />
+                </motion.button>
               </div>
             </motion.div>
           </motion.div>
