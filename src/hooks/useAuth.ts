@@ -108,11 +108,17 @@ export function useAuth() {
   const logout = async () => {
     try {
       if (user) {
-        // Update user status to offline before signing out
-        await updateUserStatus(user.uid, false)
+        // Try to mark offline but don't block sign-out if this fails (e.g., missing profile doc)
+        try {
+          await updateUserStatus(user.uid, false)
+        } catch (statusError) {
+          console.warn('Failed to update user status on logout:', statusError)
+        }
       }
       await signOut(auth)
     } catch (error: any) {
+      // As a safety, try signOut again in case status update threw above
+      try { await signOut(auth) } catch {}
       throw new Error(error.message)
     }
   }
