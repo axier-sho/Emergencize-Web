@@ -5,7 +5,7 @@ type FirebaseAdminModule = {
   initializeFirebaseAdmin: () => typeof FirebaseAdmin
 }
 
-const { admin, initializeFirebaseAdmin } = require('./firebaseAdminConfig') as FirebaseAdminModule
+const { admin, initializeFirebaseAdmin } = require('./firebaseAdminConfig.js') as FirebaseAdminModule
 
 try {
   initializeFirebaseAdmin()

@@ -47,11 +47,20 @@ const validateFirebaseAdminEnv = () => {
     'FIREBASE_ADMIN_PRIVATE_KEY'
   ]
 
+  const placeholderPatterns = ['your-', 'placeholder', 'example', 'test-key', 'changeme']
+
   const missingVars = requiredEnvVars.filter((key) => {
     const value = process.env[key]
     if (value === undefined || value === null) return true
     const trimmed = String(value).trim()
-    return trimmed.length === 0 || trimmed === 'undefined' || trimmed === 'null'
+    if (trimmed.length === 0) return true
+
+    const normalized = trimmed.toLowerCase()
+    return (
+      normalized === 'undefined' ||
+      normalized === 'null' ||
+      placeholderPatterns.some((pattern) => normalized.includes(pattern))
+    )
   })
 
   if (missingVars.length > 0) {
@@ -85,8 +94,13 @@ const LOCATION_SCALE = 10 ** LOCATION_PRECISION
 const REQUEST_BODY_LIMIT = process.env.REQUEST_BODY_LIMIT || '1mb'
 const RATE_LIMIT_RETENTION_MS =
   Number(process.env.RATE_LIMIT_RETENTION_MS) || 10 * 60 * 1000
-const RATE_LIMIT_SWEEP_INTERVAL_MS =
-  Number(process.env.RATE_LIMIT_SWEEP_INTERVAL_MS) || 5 * 60 * 1000
+const RATE_LIMIT_SWEEP_INTERVAL_MS = Math.max(
+  1000,
+  Math.min(
+    Number(process.env.RATE_LIMIT_SWEEP_INTERVAL_MS) || 60 * 1000,
+    RATE_LIMIT_RETENTION_MS
+  )
+)
 const DEFAULT_ALLOWED_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
 const DEFAULT_ALLOWED_HEADERS = ['Content-Type', 'Authorization']
 
@@ -269,7 +283,7 @@ const isRateLimited = (userId, action, intervalMinutes = 1, maxRequests = 10) =>
   return false
 }
 
-setInterval(() => {
+const rateLimitSweepHandle = setInterval(() => {
   const now = Date.now()
   for (const [key, timestamps] of rateLimits.entries()) {
     const recent = timestamps.filter(
@@ -281,7 +295,11 @@ setInterval(() => {
       rateLimits.set(key, recent)
     }
   }
-}).unref?.()
+}, RATE_LIMIT_SWEEP_INTERVAL_MS)
+
+if (typeof rateLimitSweepHandle.unref === 'function') {
+  rateLimitSweepHandle.unref()
+}
 
 // Security audit logging
 const auditLog = (userId, action, data, result) => {

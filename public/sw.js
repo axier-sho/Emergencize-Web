@@ -341,10 +341,13 @@ async function cleanupExpiredNotificationCache() {
     const cache = await caches.open(CACHE_NAME)
     const requests = await cache.keys()
     const now = Date.now()
+    const maxToProcess = 100
+    const notificationRequests = requests.filter((request) => request.url.includes('/notifications/'))
+
+    const batch = notificationRequests.slice(0, maxToProcess)
 
     await Promise.all(
-      requests
-        .filter((request) => request.url.includes('/notifications/'))
+      batch
         .map(async (request) => {
           const response = await cache.match(request)
           if (!response) {
@@ -362,6 +365,14 @@ async function cleanupExpiredNotificationCache() {
           }
         })
     )
+
+    if (notificationRequests.length > maxToProcess) {
+      setTimeout(() => {
+        cleanupExpiredNotificationCache().catch((error) =>
+          console.warn('Deferred notification cache cleanup failed:', error)
+        )
+      }, 0)
+    }
   } catch (error) {
     console.warn('Failed to clean notification cache:', error)
   }
