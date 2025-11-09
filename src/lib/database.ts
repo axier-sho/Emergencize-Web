@@ -11,15 +11,19 @@ import {
   addDoc,
   onSnapshot,
   orderBy,
+  limit,
   serverTimestamp,
   Timestamp
 } from 'firebase/firestore'
 import { db } from './firebase'
 
+const normalizeEmail = (email: string) => email.trim().toLowerCase()
+
 // Types
 export interface User {
   uid: string
   email: string
+  normalizedEmail?: string
   displayName?: string
   photoURL?: string
   createdAt: Timestamp
@@ -90,7 +94,8 @@ export const createUserProfile = async (userData: Omit<User, 'createdAt' | 'last
     ...cleanedData,
     createdAt: serverTimestamp(),
     lastActive: serverTimestamp(),
-    isOnline: true
+    isOnline: true,
+    normalizedEmail: normalizeEmail(userData.email)
   })
 }
 
@@ -107,6 +112,9 @@ export const getUserProfile = async (uid: string): Promise<User | null> => {
 // Update user profile (partial). Does not change email/createdAt per rules
 export const updateUserProfile = async (uid: string, updates: Partial<User> & Record<string, any>) => {
   const userRef = doc(db, 'users', uid)
+  if (typeof updates.email === 'string') {
+    updates.normalizedEmail = normalizeEmail(updates.email)
+  }
   await updateDoc(userRef, updates)
 }
 
@@ -119,20 +127,45 @@ export const updateUserStatus = async (uid: string, isOnline: boolean) => {
 }
 
 export const findUserByEmail = async (email: string): Promise<User | null> => {
-  const q = query(collection(db, 'users'), where('email', '==', email))
-  const querySnapshot = await getDocs(q)
-  
-  if (!querySnapshot.empty) {
-    const doc = querySnapshot.docs[0]
-    return { uid: doc.id, ...doc.data() } as User
+  const normalized = normalizeEmail(email)
+  const normalizedQuery = query(collection(db, 'users'), where('normalizedEmail', '==', normalized))
+  const normalizedSnapshot = await getDocs(normalizedQuery)
+
+  if (!normalizedSnapshot.empty) {
+    const userDoc = normalizedSnapshot.docs[0]
+    return { uid: userDoc.id, ...userDoc.data() } as User
   }
+
+  const fallbackQuery = query(collection(db, 'users'), where('email', '==', email))
+  const fallbackSnapshot = await getDocs(fallbackQuery)
+
+  if (!fallbackSnapshot.empty) {
+    const userDoc = fallbackSnapshot.docs[0]
+    return { uid: userDoc.id, ...userDoc.data() } as User
+  }
+
   return null
 }
 
 // Contact functions
 export const addContact = async (userId: string, contactUserId: string, nickname?: string, relationship?: string) => {
+  if (userId === contactUserId) {
+    throw new Error('You cannot add yourself as a contact.')
+  }
+
+  const existingQuery = query(
+    collection(db, 'contacts'),
+    where('userId', '==', userId),
+    where('contactUserId', '==', contactUserId),
+    where('status', '==', 'active')
+  )
+  const existingSnapshot = await getDocs(existingQuery)
+  if (!existingSnapshot.empty) {
+    return existingSnapshot.docs[0].id
+  }
+
   const contactRef = collection(db, 'contacts')
-  await addDoc(contactRef, {
+  const docRef = await addDoc(contactRef, {
     userId,
     contactUserId,
     nickname,
@@ -140,6 +173,8 @@ export const addContact = async (userId: string, contactUserId: string, nickname
     createdAt: serverTimestamp(),
     status: 'active'
   })
+
+  return docRef.id
 }
 
 export const getUserContacts = (userId: string, callback: (contacts: Contact[]) => void) => {
@@ -275,11 +310,17 @@ export const saveAlert = async (alertData: Omit<Alert, 'id' | 'createdAt' | 'rea
   })
 }
 
-export const getUserAlerts = (userId: string, callback: (alerts: Alert[]) => void) => {
+export const getUserAlerts = (
+  userId: string,
+  callback: (alerts: Alert[]) => void,
+  options: { limit?: number } = {}
+) => {
   // Get alerts where user is the sender or receiver (through contacts)
+  const limitCount = Math.max(options.limit ?? 50, 1)
   const q = query(
     collection(db, 'alerts'),
-    orderBy('createdAt', 'desc')
+    orderBy('createdAt', 'desc'),
+    limit(limitCount)
   )
   
   return onSnapshot(q, (querySnapshot) => {

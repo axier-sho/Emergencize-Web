@@ -1,5 +1,7 @@
 'use client'
 
+import { auth } from '@/lib/firebase'
+
 export interface NotificationPermissionResult {
   granted: boolean
   error?: string
@@ -224,10 +226,17 @@ class PushNotificationService {
     payload: NotificationPayload
   ): Promise<boolean> {
     try {
+      // Include auth token if available
+      let token: string | undefined
+      try {
+        token = await auth.currentUser?.getIdToken()
+      } catch {}
+
       const response = await fetch('/api/push/send', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
         body: JSON.stringify({
           subscription,

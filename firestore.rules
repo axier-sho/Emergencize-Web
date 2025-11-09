@@ -159,9 +159,9 @@ service cloud.firestore {
       allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
 
-    // Rate limits (non-sensitive): allow authenticated users (aligns with current client implementation)
+    // Rate limits are managed server-side only
     match /rateLimits/{docId} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if request.auth != null && request.auth.token.admin == true;
     }
 
     // Audit log (write allowed for users, read restricted to admins)

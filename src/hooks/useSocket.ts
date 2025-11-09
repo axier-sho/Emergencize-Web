@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { io, Socket } from 'socket.io-client'
+import { auth } from '@/lib/firebase'
+import { logger } from '@/utils/logger'
 
 interface UseSocketProps {
   userId?: string
@@ -74,127 +76,175 @@ export function useSocket({
   useEffect(() => {
     if (!userId) return
 
+    let isCancelled = false
+    let activeSocket: Socket | null = null
+    let hasAttemptedConnection = false
     setConnectionAttempted(true)
 
-    // Try to connect to Socket.io server with timeout
-    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001'
-    console.log('Attempting to connect to socket server:', socketUrl)
-    
-    const newSocket = io(socketUrl, {
-      transports: ['websocket', 'polling'],
-      autoConnect: true,
-      timeout: 3000, // Shorter timeout
-      reconnection: true,
-      reconnectionAttempts: 2, // Fewer attempts
-      reconnectionDelay: 2000
-    })
+    const connectSocket = async () => {
+      if (hasAttemptedConnection) return
+      hasAttemptedConnection = true
 
-    socketRef.current = newSocket
-    setSocket(newSocket)
+      const currentUser = auth.currentUser
+      if (!currentUser) {
+        hasAttemptedConnection = false
+        return
+      }
 
-    // Set a timeout to stop trying after 10 seconds
-    connectionTimeoutRef.current = setTimeout(() => {
-      if (!newSocket.connected) {
-        console.log('🔄 Socket connection timeout - switching to offline mode')
-        newSocket.disconnect()
+      let token: string
+      try {
+        token = await currentUser.getIdToken()
+      } catch (e) {
+        logger.error('Cannot connect socket without auth token:', e)
+        hasAttemptedConnection = false
+        return
+      }
+
+      if (isCancelled) {
+        return
+      }
+
+      const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001'
+      logger.info('Attempting to connect to socket server: %s', socketUrl)
+
+      const newSocket = io(socketUrl, {
+        transports: ['websocket', 'polling'],
+        autoConnect: true,
+        timeout: 3000, // Shorter timeout
+        reconnection: true,
+        reconnectionAttempts: 2, // Fewer attempts
+        reconnectionDelay: 2000,
+        auth: { token }
+      })
+
+      activeSocket = newSocket
+      socketRef.current = newSocket
+      setSocket(newSocket)
+
+      connectionTimeoutRef.current = setTimeout(() => {
+        if (!newSocket.connected) {
+          logger.warn('Socket connection timeout - switching to offline mode')
+          newSocket.disconnect()
+          setIsConnected(false)
+          setConnectionAttempted(true)
+        }
+      }, 10000)
+
+      newSocket.on('connect', () => {
+        setIsConnected(true)
+        logger.info('Connected to socket server successfully')
+        if (connectionTimeoutRef.current) {
+          clearTimeout(connectionTimeoutRef.current)
+          connectionTimeoutRef.current = null
+        }
+        newSocket.emit('user-join', userId)
+      })
+
+      newSocket.on('disconnect', (reason) => {
         setIsConnected(false)
-        setConnectionAttempted(true)
+        logger.warn('Disconnected from server, reason: %s', reason)
+      })
+
+      newSocket.on('connect_error', (error) => {
+        setIsConnected(false)
+        logger.warn('Socket server unavailable - running in offline mode')
+        logger.debug('This is normal if the Socket.io server is not running')
+      })
+
+      newSocket.on('reconnect_attempt', async (attemptNumber) => {
+        logger.info('Reconnection attempt %d/2', attemptNumber)
+        try {
+          const refreshed = await auth.currentUser?.getIdToken(true)
+          if (refreshed) {
+            newSocket.auth = { token: refreshed }
+          }
+        } catch (error) {
+          logger.error('Failed to refresh auth token during socket reconnection', error)
+          setIsConnected(false)
+          newSocket.disconnect()
+        }
+      })
+
+      newSocket.on('reconnect_failed', () => {
+        logger.warn('Running in offline mode - emergency alerts will be saved to database')
+        setIsConnected(false)
+      })
+
+      newSocket.on('user-online', (onlineUserId: string) => {
+        setOnlineUsers((prev) => [...prev.filter((id) => id !== onlineUserId), onlineUserId])
+        callbackRefs.current.onUserOnline?.(onlineUserId)
+      })
+
+      newSocket.on('user-offline', (offlineUserId: string) => {
+        setOnlineUsers((prev) => prev.filter((id) => id !== offlineUserId))
+        callbackRefs.current.onUserOffline?.(offlineUserId)
+      })
+
+      newSocket.on('online-users', (users: string[]) => {
+        setOnlineUsers(users.filter((id) => id !== userId))
+      })
+
+      newSocket.on('emergency-alert', (alert: any) => {
+        callbackRefs.current.onEmergencyAlert?.(alert)
+      })
+
+      newSocket.on('chat-message', (message: any) => {
+        callbackRefs.current.onChatMessage?.(message)
+      })
+
+      newSocket.on('group-message', (message: any) => {
+        callbackRefs.current.onGroupMessage?.(message)
+      })
+
+      newSocket.on('user-typing-group', (data: any) => {
+        callbackRefs.current.onUserTyping?.(data)
+      })
+
+      newSocket.on('user-stopped-typing-group', (data: any) => {
+        callbackRefs.current.onUserStoppedTyping?.(data)
+      })
+
+      newSocket.on('voice-call-offer', (data: any) => {
+        callbackRefs.current.onVoiceCallOffer?.(data)
+      })
+
+      newSocket.on('voice-call-answer', (data: any) => {
+        callbackRefs.current.onVoiceCallAnswer?.(data)
+      })
+
+      newSocket.on('voice-call-end', (data: any) => {
+        callbackRefs.current.onVoiceCallEnd?.(data)
+      })
+
+      newSocket.on('ice-candidate', (data: any) => {
+        callbackRefs.current.onIceCandidate?.(data)
+      })
+    }
+
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      if (currentUser && !isCancelled) {
+        void connectSocket()
       }
-    }, 10000)
-
-    // Connection events
-    newSocket.on('connect', () => {
-      setIsConnected(true)
-      console.log('✅ Connected to socket server successfully')
-      if (connectionTimeoutRef.current) {
-        clearTimeout(connectionTimeoutRef.current)
-      }
-      // Join user to their personal room after successful connection
-      newSocket.emit('user-join', userId)
     })
 
-    newSocket.on('disconnect', (reason) => {
-      setIsConnected(false)
-      console.log('❌ Disconnected from server, reason:', reason)
-    })
+    if (auth.currentUser) {
+      void connectSocket()
+    } else {
+      logger.info('Waiting for user authentication before connecting socket')
+    }
 
-    newSocket.on('connect_error', (error) => {
-      setIsConnected(false)
-      console.log('⚠️ Socket server unavailable - running in offline mode')
-      console.log('💡 This is normal if the Socket.io server is not running')
-    })
-
-    newSocket.on('reconnect_attempt', (attemptNumber) => {
-      console.log(`🔄 Reconnection attempt ${attemptNumber}/2`)
-    })
-
-    newSocket.on('reconnect_failed', () => {
-      console.log('📱 Running in offline mode - emergency alerts will be saved to database')
-      setIsConnected(false)
-    })
-
-    // User presence events
-    newSocket.on('user-online', (onlineUserId: string) => {
-      setOnlineUsers(prev => [...prev.filter(id => id !== onlineUserId), onlineUserId])
-      callbackRefs.current.onUserOnline?.(onlineUserId)
-    })
-
-    newSocket.on('user-offline', (offlineUserId: string) => {
-      setOnlineUsers(prev => prev.filter(id => id !== offlineUserId))
-      callbackRefs.current.onUserOffline?.(offlineUserId)
-    })
-
-    newSocket.on('online-users', (users: string[]) => {
-      setOnlineUsers(users.filter(id => id !== userId))
-    })
-
-    // Emergency alert events
-    newSocket.on('emergency-alert', (alert: any) => {
-      callbackRefs.current.onEmergencyAlert?.(alert)
-    })
-
-    // Chat message events
-    newSocket.on('chat-message', (message: any) => {
-      callbackRefs.current.onChatMessage?.(message)
-    })
-
-    // Group chat events
-    newSocket.on('group-message', (message: any) => {
-      callbackRefs.current.onGroupMessage?.(message)
-    })
-
-    newSocket.on('user-typing-group', (data: any) => {
-      callbackRefs.current.onUserTyping?.(data)
-    })
-
-    newSocket.on('user-stopped-typing-group', (data: any) => {
-      callbackRefs.current.onUserStoppedTyping?.(data)
-    })
-
-    // Voice call events
-    newSocket.on('voice-call-offer', (data: any) => {
-      callbackRefs.current.onVoiceCallOffer?.(data)
-    })
-
-    newSocket.on('voice-call-answer', (data: any) => {
-      callbackRefs.current.onVoiceCallAnswer?.(data)
-    })
-
-    newSocket.on('voice-call-end', (data: any) => {
-      callbackRefs.current.onVoiceCallEnd?.(data)
-    })
-
-    newSocket.on('ice-candidate', (data: any) => {
-      callbackRefs.current.onIceCandidate?.(data)
-    })
-
-    // Cleanup on unmount
     return () => {
+      isCancelled = true
+      unsubscribe()
       if (connectionTimeoutRef.current) {
         clearTimeout(connectionTimeoutRef.current)
+        connectionTimeoutRef.current = null
       }
-      newSocket.disconnect()
+      if (activeSocket) {
+        activeSocket.disconnect()
+      }
       socketRef.current = null
+      setIsConnected(false)
     }
   }, [userId]) // Only depend on userId to prevent constant reconnections
 
@@ -237,7 +287,7 @@ export function useSocket({
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (socketRef.current) {
-        socketRef.current.emit('user-disconnect', userId)
+        socketRef.current.emit('user-disconnect')
       }
     }
 

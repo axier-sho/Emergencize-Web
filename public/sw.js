@@ -1,6 +1,7 @@
 // Service Worker for Emergencize Push Notifications
 const CACHE_NAME = 'emergencize-v1'
 const STATIC_CACHE = 'emergencize-static-v1'
+const NOTIFICATION_CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000
 
 // Cache static assets
 const STATIC_ASSETS = [
@@ -16,13 +17,16 @@ self.addEventListener('install', (event) => {
   console.log('Service Worker installing...')
   
   event.waitUntil(
-    caches.open(STATIC_CACHE)
-      .then((cache) => {
-        return cache.addAll(STATIC_ASSETS)
-      })
-      .then(() => {
-        return self.skipWaiting()
-      })
+    (async () => {
+      try {
+        const cache = await caches.open(STATIC_CACHE)
+        await cache.addAll(STATIC_ASSETS)
+      } catch (error) {
+        console.warn('Failed to cache some static assets during install:', error)
+      }
+
+      await self.skipWaiting()
+    })()
   )
 })
 
@@ -44,6 +48,10 @@ self.addEventListener('activate', (event) => {
       })
       .then(() => {
         return self.clients.claim()
+      })
+      .then(() => cleanupExpiredNotificationCache())
+      .catch((error) => {
+        console.warn('Failed to complete activation tasks:', error)
       })
   )
 })
@@ -128,7 +136,7 @@ self.addEventListener('push', (event) => {
             return cache.put(
               `/notifications/${alertId}`,
               new Response(JSON.stringify(notificationRecord))
-            )
+            ).then(() => cleanupExpiredNotificationCache())
           })
       })
       .catch((error) => {
@@ -158,16 +166,7 @@ self.addEventListener('notificationclick', (event) => {
       clients.openWindow(`/dashboard?action=call&alertId=${alertId}`)
     )
   } else if (action === 'dismiss') {
-    // Mark as dismissed
-    event.waitUntil(
-      fetch('/api/alerts/dismiss', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ alertId })
-      }).catch((error) => {
-        console.error('Error dismissing alert:', error)
-      })
-    )
+    event.waitUntil(handleDismissAction(alertId))
   } else {
     // Default action - open app
     event.waitUntil(
@@ -218,6 +217,7 @@ async function syncPendingAlerts() {
         const response = await fetch('/api/alerts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify(alert)
         })
         
@@ -273,38 +273,96 @@ self.addEventListener('message', (event) => {
 
 // Fetch event - serve from cache when offline
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests
-  if (event.request.method !== 'GET') {
+  // Only handle GET and same-origin
+  if (event.request.method !== 'GET') return
+
+  const url = new URL(event.request.url)
+  if (url.origin !== self.location.origin) return
+
+  // Do not intercept API or auth-related requests
+  if (url.pathname.startsWith('/api/')) return
+  if (event.request.headers.has('Authorization')) return
+
+  // Determine if this is a static asset we allow caching
+  const isStaticAsset = (() => {
+    if (url.pathname.startsWith('/_next/static/')) return true
+    if (url.pathname === '/manifest.json') return true
+    if (url.pathname.startsWith('/icon-')) return true
+    return /\.(?:js|css|png|jpg|jpeg|svg|webp|gif|ico|woff2?|ttf)$/.test(url.pathname)
+  })()
+
+  if (!isStaticAsset) {
+    // Network-first for non-static; fallback to cache if available
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match(event.request))
+    )
     return
   }
-  
-  // Skip cross-origin requests
-  if (!event.request.url.startsWith(self.location.origin)) {
-    return
-  }
-  
+
+  // Cache-first for static assets, then update cache in background
   event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Return cached version or fetch from network
-        return response || fetch(event.request)
-          .then((fetchResponse) => {
-            // Cache successful responses
-            if (fetchResponse.status === 200) {
-              const responseClone = fetchResponse.clone()
-              caches.open(CACHE_NAME)
-                .then((cache) => {
-                  cache.put(event.request, responseClone)
-                })
-            }
-            return fetchResponse
-          })
-      })
-      .catch(() => {
-        // If offline.html is not present, simply fail silently
-        if (event.request.mode === 'navigate') {
-          return new Response('', { status: 204 })
+    caches.match(event.request).then((cached) => {
+      const networkFetch = fetch(event.request).then((response) => {
+        if (response && response.status === 200) {
+          const clone = response.clone()
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone))
         }
-      })
+        return response
+      }).catch(() => cached || new Response('', { status: 204 }))
+
+      return cached || networkFetch
+    })
   )
 })
+
+async function handleDismissAction(alertId) {
+  if (!alertId) {
+    return
+  }
+
+  const clientList = await clients.matchAll({ type: 'window', includeUncontrolled: true })
+  if (clientList.length > 0) {
+    clientList.forEach((client) => {
+      client.postMessage({
+        type: 'DISMISS_ALERT',
+        payload: { alertId }
+      })
+    })
+    return
+  }
+
+  if (clients.openWindow) {
+    return clients.openWindow(`/dashboard?action=dismiss&alertId=${alertId}`)
+  }
+}
+
+async function cleanupExpiredNotificationCache() {
+  try {
+    const cache = await caches.open(CACHE_NAME)
+    const requests = await cache.keys()
+    const now = Date.now()
+
+    await Promise.all(
+      requests
+        .filter((request) => request.url.includes('/notifications/'))
+        .map(async (request) => {
+          const response = await cache.match(request)
+          if (!response) {
+            return
+          }
+
+          try {
+            const data = await response.clone().json()
+            const receivedAt = Date.parse(data?.receivedAt || '')
+            if (!receivedAt || now - receivedAt > NOTIFICATION_CACHE_MAX_AGE_MS) {
+              await cache.delete(request)
+            }
+          } catch {
+            await cache.delete(request)
+          }
+        })
+    )
+  } catch (error) {
+    console.warn('Failed to clean notification cache:', error)
+  }
+}

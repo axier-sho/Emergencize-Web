@@ -850,8 +850,8 @@ class ValidationService {
             fieldErrors.push(`Coordinate out of range (max: ${rules.max})`)
           }
 
-          // Round to 6 decimal places for precision
-          sanitizedValue = Math.round(fieldValue * 1000000) / 1000000
+          // Round to 4 decimal places to balance precision and privacy (~11m)
+          sanitizedValue = Math.round(fieldValue * 10000) / 10000
           break
 
         case 'boolean':

@@ -2,6 +2,119 @@ const express = require('express')
 const http = require('http')
 const socketIo = require('socket.io')
 const cors = require('cors')
+const fs = require('fs')
+const path = require('path')
+
+const resolveLogger = () => {
+  const defaultLogger = {
+    info: (message, ...args) => console.log(`[INFO] ${message}`, ...args),
+    error: (message, ...args) => console.error(`[ERROR] ${message}`, ...args),
+    warn: (message, ...args) => console.warn(`[WARN] ${message}`, ...args),
+    debug: (message, ...args) => {
+      if (process.env.NODE_ENV === 'development') {
+        console.debug(`[DEBUG] ${message}`, ...args)
+      }
+    }
+  }
+
+  const loggerPath = path.join(__dirname, 'server', 'logger.js')
+
+  try {
+    if (fs.existsSync(loggerPath)) {
+      const loadedModule = require('./server/logger')
+      if (loadedModule?.logger) {
+        return loadedModule.logger
+      }
+      return loadedModule
+    }
+
+    console.warn(`[server] Logger module missing at ${loggerPath}; falling back to console logger`)
+  } catch (error) {
+    console.warn(
+      `[server] Failed to load logger module; falling back to console logger: ${error?.message ?? 'Unknown error'}`
+    )
+  }
+
+  return defaultLogger
+}
+
+const logger = resolveLogger()
+
+const validateFirebaseAdminEnv = () => {
+  const requiredEnvVars = [
+    'FIREBASE_ADMIN_PROJECT_ID',
+    'FIREBASE_ADMIN_CLIENT_EMAIL',
+    'FIREBASE_ADMIN_PRIVATE_KEY'
+  ]
+
+  const missingVars = requiredEnvVars.filter((key) => {
+    const value = process.env[key]
+    if (value === undefined || value === null) return true
+    const trimmed = String(value).trim()
+    return trimmed.length === 0 || trimmed === 'undefined' || trimmed === 'null'
+  })
+
+  if (missingVars.length > 0) {
+    logger.error(
+      `FATAL: Missing required Firebase Admin environment variables: ${missingVars.join(', ')}`
+    )
+    process.exit(1)
+  }
+
+  const privateKey = String(process.env.FIREBASE_ADMIN_PRIVATE_KEY ?? '')
+  if (privateKey && !privateKey.includes('BEGIN PRIVATE KEY')) {
+    logger.warn(
+      'Firebase Admin private key is present but does not include the expected header; verify formatting (ensure escaped newlines are provided)'
+    )
+  }
+}
+
+validateFirebaseAdminEnv()
+
+const {
+  admin,
+  initializeFirebaseAdmin,
+  isFirebaseAdminInitialized
+} = require('./src/lib/firebaseAdminConfig')
+
+const LOCATION_PRECISION = Math.min(
+  Math.max(Number(process.env.LOCATION_PRECISION ?? 4), 0),
+  6
+)
+const LOCATION_SCALE = 10 ** LOCATION_PRECISION
+const REQUEST_BODY_LIMIT = process.env.REQUEST_BODY_LIMIT || '1mb'
+const RATE_LIMIT_RETENTION_MS =
+  Number(process.env.RATE_LIMIT_RETENTION_MS) || 10 * 60 * 1000
+const RATE_LIMIT_SWEEP_INTERVAL_MS =
+  Number(process.env.RATE_LIMIT_SWEEP_INTERVAL_MS) || 5 * 60 * 1000
+const DEFAULT_ALLOWED_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+const DEFAULT_ALLOWED_HEADERS = ['Content-Type', 'Authorization']
+
+const RATE_LIMIT_CONFIG = {
+  emergencyAlert: { windowMinutes: 1, maxRequests: 5 },
+  chatMessage: { windowMinutes: 1, maxRequests: 60 },
+  groupMessage: { windowMinutes: 1, maxRequests: 30 },
+  userStatus: { windowMinutes: 1, maxRequests: 30 }
+}
+
+const formatRateLimitMessage = (config, unitLabel) => {
+  const windowLabel = config.windowMinutes === 1 ? 'minute' : 'minutes'
+  return `Rate limit exceeded. Maximum ${config.maxRequests} ${unitLabel} per ${config.windowMinutes} ${windowLabel}.`
+}
+
+let adminInitialized = false
+try {
+  initializeFirebaseAdmin()
+  adminInitialized = isFirebaseAdminInitialized()
+} catch (error) {
+  logger.error('FATAL: Failed to initialize Firebase Admin:', error)
+  process.exit(1)
+}
+
+if (!adminInitialized) {
+  logger.error('FATAL: Firebase Admin SDK is required but failed to initialize')
+  process.exit(1)
+}
 
 // Basic validation utilities for Node.js (simplified version)
 const validateSocketMessage = (messageType, data) => {
@@ -18,16 +131,18 @@ const validateSocketMessage = (messageType, data) => {
       /<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi,
       /javascript:/gi,
       /on\w+\s*=/gi,
-      /[<>'"\`]/g
+      /<[a-z][\s\S]*>/gi
     ]
     
     let sanitized = str.trim().replace(/\s+/g, ' ')
     const foundDangerous = dangerousPatterns.some(pattern => pattern.test(sanitized))
     
     if (foundDangerous) {
-      dangerousPatterns.forEach(pattern => {
-        sanitized = sanitized.replace(pattern, '')
-      })
+      return {
+        isValid: false,
+        sanitizedValue: '',
+        errors: ['Message contains potentially dangerous content']
+      }
     }
     
     if (sanitized.length > maxLength) {
@@ -35,9 +150,9 @@ const validateSocketMessage = (messageType, data) => {
     }
     
     return {
-      isValid: !foundDangerous,
+      isValid: true,
       sanitizedValue: sanitized,
-      errors: foundDangerous ? ['Dangerous content detected and removed'] : []
+      errors: []
     }
   }
 
@@ -108,8 +223,8 @@ const validateSocketMessage = (messageType, data) => {
       errors.push('Invalid location coordinates')
     } else {
       sanitizedData.location = {
-        lat: Math.round(data.location.lat * 1000000) / 1000000,
-        lng: Math.round(data.location.lng * 1000000) / 1000000
+        lat: Math.round(data.location.lat * LOCATION_SCALE) / LOCATION_SCALE,
+        lng: Math.round(data.location.lng * LOCATION_SCALE) / LOCATION_SCALE
       }
       if (data.location.address) {
         const addressResult = sanitizeString(data.location.address, 200)
@@ -154,6 +269,20 @@ const isRateLimited = (userId, action, intervalMinutes = 1, maxRequests = 10) =>
   return false
 }
 
+setInterval(() => {
+  const now = Date.now()
+  for (const [key, timestamps] of rateLimits.entries()) {
+    const recent = timestamps.filter(
+      (timestamp) => now - timestamp <= RATE_LIMIT_RETENTION_MS
+    )
+    if (recent.length === 0) {
+      rateLimits.delete(key)
+    } else {
+      rateLimits.set(key, recent)
+    }
+  }
+}).unref?.()
+
 // Security audit logging
 const auditLog = (userId, action, data, result) => {
   const logEntry = {
@@ -165,70 +294,124 @@ const auditLog = (userId, action, data, result) => {
     ip: data.ip || 'unknown'
   }
   
-  console.log('SECURITY AUDIT:', logEntry)
+  logger.info('SECURITY AUDIT:', logEntry)
   
   // In production, you'd want to log to a file or database
   // Consider implementing log rotation and monitoring
 }
 
+const parseOrigins = (value) =>
+  (value || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter((origin) => origin.length > 0)
+
 const app = express()
 const server = http.createServer(app)
+const developmentOrigins = parseOrigins(
+  process.env.SOCKET_CORS_ORIGINS || 'http://localhost:3000,http://localhost:3001'
+)
+const productionOrigins = parseOrigins(process.env.PRODUCTION_ORIGIN).slice(0)
 const io = socketIo(server, {
   cors: {
-    origin: ["http://localhost:3000", "http://localhost:3001"],
-    methods: ["GET", "POST"],
+    origin:
+      process.env.NODE_ENV === 'production'
+        ? productionOrigins.length > 0
+          ? productionOrigins
+          : ['https://yourdomain.com']
+        : developmentOrigins,
+    methods: ['GET', 'POST'],
     credentials: true
   }
 })
 
-app.use(cors())
-app.use(express.json())
+const allowedOrigins =
+  process.env.NODE_ENV === 'production'
+    ? productionOrigins.length > 0
+      ? productionOrigins
+      : ['https://yourdomain.com']
+    : developmentOrigins
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+    methods: DEFAULT_ALLOWED_METHODS,
+    allowedHeaders: DEFAULT_ALLOWED_HEADERS
+  })
+)
+app.use(express.json({ limit: REQUEST_BODY_LIMIT }))
+app.use(express.urlencoded({ extended: true, limit: REQUEST_BODY_LIMIT }))
 
 // Store online users
 const onlineUsers = new Map()
 const userSockets = new Map()
 
+// Authenticate socket connections using Firebase ID token in handshake
+io.use(async (socket, next) => {
+  try {
+    const headerAuth = socket.handshake.headers['authorization']
+    const tokenFromHeader = headerAuth && headerAuth.startsWith('Bearer ') ? headerAuth.slice(7) : null
+    const token = socket.handshake.auth?.token || tokenFromHeader
+    if (!token) {
+      return next(new Error('Authentication required'))
+    }
+    const decoded = await admin.auth().verifyIdToken(token)
+    socket.data.userId = decoded.uid
+    return next()
+  } catch (err) {
+    return next(new Error('Invalid authentication token'))
+  }
+})
+
 io.on('connection', (socket) => {
-  console.log('User connected:', socket.id)
+  logger.info('User connected: %s', socket.id)
+  const authedUserId = socket.data.userId
+  if (!authedUserId) {
+    logger.warn('Socket connected without authenticated user, disconnecting: %s', socket.id)
+    socket.disconnect(true)
+    return
+  }
+
+  // Register user as online immediately on connection
+  onlineUsers.set(authedUserId, {
+    socketId: socket.id,
+    joinedAt: new Date(),
+    isOnline: true
+  })
+  userSockets.set(socket.id, authedUserId)
+  socket.join(authedUserId)
+  socket.broadcast.emit('user-online', authedUserId)
+  socket.emit('online-users', Array.from(onlineUsers.keys()))
 
   // User joins with their ID
   socket.on('user-join', (userId) => {
-    console.log('User joined:', userId)
-    
-    // Store user info
-    onlineUsers.set(userId, {
-      socketId: socket.id,
-      joinedAt: new Date(),
-      isOnline: true
-    })
-    userSockets.set(socket.id, userId)
-    
-    // Join user to their personal room
-    socket.join(userId)
-    
-    // Broadcast to all users that this user is online
-    socket.broadcast.emit('user-online', userId)
-    
-    // Send current online users to the newly joined user
-    const currentOnlineUsers = Array.from(onlineUsers.keys())
-    socket.emit('online-users', currentOnlineUsers)
-    
-    console.log('Online users:', currentOnlineUsers)
+    // Backward compatibility: ignore provided userId and rely on authenticated uid
+    logger.debug('User join event received (ignored userId param), authed uid: %s', authedUserId)
   })
 
   // Handle emergency alerts
   socket.on('emergency-alert', (alertData) => {
-    console.log('Emergency alert received:', alertData)
+    logger.info('Emergency alert received:', alertData)
     
-    const fromUserId = userSockets.get(socket.id)
+    const fromUserId = socket.data.userId || userSockets.get(socket.id)
     if (!fromUserId) {
       socket.emit('error', { message: 'User not authenticated' })
       return
     }
 
     // Rate limiting check
-    if (isRateLimited(fromUserId, 'emergency-alert', 1, 5)) {
-      socket.emit('error', { message: 'Rate limit exceeded. Maximum 5 alerts per minute.' })
+    if (
+      isRateLimited(
+        fromUserId,
+        'emergency-alert',
+        RATE_LIMIT_CONFIG.emergencyAlert.windowMinutes,
+        RATE_LIMIT_CONFIG.emergencyAlert.maxRequests
+      )
+    ) {
+      socket.emit('error', {
+        message: formatRateLimitMessage(RATE_LIMIT_CONFIG.emergencyAlert, 'alerts')
+      })
       auditLog(fromUserId, 'emergency-alert', { ip: socket.handshake.address }, { isValid: false, errors: ['Rate limit exceeded'] })
       return
     }
@@ -267,7 +450,11 @@ io.on('connection', (socket) => {
         }
       })
       
-      console.log(`Alert sent to ${sentCount} online contacts, ${offlineCount} offline contacts will be notified when they come online`)
+      logger.info(
+        'Alert sent to %d online contacts, %d offline contacts will be notified when they come online',
+        sentCount,
+        offlineCount
+      )
     } else {
       // Fallback: Send to all online users except the sender
       onlineUsers.forEach((userInfo, userId) => {
@@ -275,23 +462,32 @@ io.on('connection', (socket) => {
           io.to(userId).emit('emergency-alert', alert)
         }
       })
-      console.log('Alert sent to', onlineUsers.size - 1, 'users')
+      logger.info('Alert sent to %d users', Math.max(onlineUsers.size - 1, 0))
     }
   })
 
   // Handle chat messages
   socket.on('chat-message', (messageData) => {
-    console.log('Chat message received:', messageData)
+    logger.info('Chat message received:', messageData)
     
-    const fromUserId = userSockets.get(socket.id)
+    const fromUserId = socket.data.userId || userSockets.get(socket.id)
     if (!fromUserId) {
       socket.emit('error', { message: 'User not authenticated' })
       return
     }
 
     // Rate limiting check
-    if (isRateLimited(fromUserId, 'chat-message', 1, 60)) {
-      socket.emit('error', { message: 'Rate limit exceeded. Maximum 60 messages per minute.' })
+    if (
+      isRateLimited(
+        fromUserId,
+        'chat-message',
+        RATE_LIMIT_CONFIG.chatMessage.windowMinutes,
+        RATE_LIMIT_CONFIG.chatMessage.maxRequests
+      )
+    ) {
+      socket.emit('error', {
+        message: formatRateLimitMessage(RATE_LIMIT_CONFIG.chatMessage, 'messages')
+      })
       auditLog(fromUserId, 'chat-message', { ip: socket.handshake.address }, { isValid: false, errors: ['Rate limit exceeded'] })
       return
     }
@@ -316,35 +512,35 @@ io.on('connection', (socket) => {
       io.to(validation.sanitizedData.toUserId).emit('chat-message', message)
     }
 
-    console.log('Chat message sent to:', messageData.toUserId)
+    logger.info('Chat message sent to: %s', messageData.toUserId)
   })
 
   // Handle voice call signaling
   socket.on('voice-call-offer', (data) => {
-    console.log('Voice call offer:', data)
+    logger.info('Voice call offer:', data)
     if (onlineUsers.has(data.to)) {
       io.to(data.to).emit('voice-call-offer', {
-        from: userSockets.get(socket.id),
+        from: socket.data.userId || userSockets.get(socket.id),
         offer: data.offer
       })
     }
   })
 
   socket.on('voice-call-answer', (data) => {
-    console.log('Voice call answer:', data)
+    logger.info('Voice call answer:', data)
     if (onlineUsers.has(data.to)) {
       io.to(data.to).emit('voice-call-answer', {
-        from: userSockets.get(socket.id),
+        from: socket.data.userId || userSockets.get(socket.id),
         answer: data.answer
       })
     }
   })
 
   socket.on('voice-call-end', (data) => {
-    console.log('Voice call end:', data)
+    logger.info('Voice call end:', data)
     if (onlineUsers.has(data.to)) {
       io.to(data.to).emit('voice-call-end', {
-        from: userSockets.get(socket.id)
+        from: socket.data.userId || userSockets.get(socket.id)
       })
     }
   })
@@ -352,7 +548,7 @@ io.on('connection', (socket) => {
   socket.on('ice-candidate', (data) => {
     if (onlineUsers.has(data.to)) {
       io.to(data.to).emit('ice-candidate', {
-        from: userSockets.get(socket.id),
+        from: socket.data.userId || userSockets.get(socket.id),
         candidate: data.candidate
       })
     }
@@ -360,7 +556,7 @@ io.on('connection', (socket) => {
 
   // Handle group chat messages
   socket.on('group-message', (messageData) => {
-    console.log('Group message received:', messageData)
+    logger.info('Group message received:', messageData)
     
     const fromUserId = userSockets.get(socket.id)
     if (!fromUserId) {
@@ -369,8 +565,17 @@ io.on('connection', (socket) => {
     }
 
     // Rate limiting check
-    if (isRateLimited(fromUserId, 'group-message', 1, 30)) {
-      socket.emit('error', { message: 'Rate limit exceeded. Maximum 30 group messages per minute.' })
+    if (
+      isRateLimited(
+        fromUserId,
+        'group-message',
+        RATE_LIMIT_CONFIG.groupMessage.windowMinutes,
+        RATE_LIMIT_CONFIG.groupMessage.maxRequests
+      )
+    ) {
+      socket.emit('error', {
+        message: formatRateLimitMessage(RATE_LIMIT_CONFIG.groupMessage, 'group messages')
+      })
       auditLog(fromUserId, 'group-message', { ip: socket.handshake.address }, { isValid: false, errors: ['Rate limit exceeded'] })
       return
     }
@@ -399,7 +604,7 @@ io.on('connection', (socket) => {
       })
     }
 
-    console.log('Group message sent to recipients')
+    logger.info('Group message sent to recipients')
   })
 
   // Handle group typing indicators
@@ -447,15 +652,24 @@ io.on('connection', (socket) => {
 
   // Handle user status updates
   socket.on('user-status', (statusData) => {
-    const fromUserId = userSockets.get(socket.id)
+    const fromUserId = socket.data.userId || userSockets.get(socket.id)
     if (!fromUserId) {
       socket.emit('error', { message: 'User not authenticated' })
       return
     }
 
     // Rate limiting check
-    if (isRateLimited(fromUserId, 'user-status', 1, 30)) {
-      socket.emit('error', { message: 'Rate limit exceeded. Maximum 30 status updates per minute.' })
+    if (
+      isRateLimited(
+        fromUserId,
+        'user-status',
+        RATE_LIMIT_CONFIG.userStatus.windowMinutes,
+        RATE_LIMIT_CONFIG.userStatus.maxRequests
+      )
+    ) {
+      socket.emit('error', {
+        message: formatRateLimitMessage(RATE_LIMIT_CONFIG.userStatus, 'status updates')
+      })
       auditLog(fromUserId, 'user-status', { ip: socket.handshake.address }, { isValid: false, errors: ['Rate limit exceeded'] })
       return
     }
@@ -469,14 +683,11 @@ io.on('connection', (socket) => {
       return
     }
 
-    const { userId, status } = validation.sanitizedData
+    const { status } = validation.sanitizedData
+    const userId = fromUserId
     
     // Ensure user can only update their own status
-    if (userId !== fromUserId) {
-      socket.emit('error', { message: 'Cannot update another user\'s status' })
-      auditLog(fromUserId, 'user-status', { ip: socket.handshake.address }, { isValid: false, errors: ['Unauthorized status update'] })
-      return
-    }
+    // (userId is forced to authed user above)
 
     if (onlineUsers.has(userId)) {
       onlineUsers.set(userId, {
@@ -494,19 +705,19 @@ io.on('connection', (socket) => {
   })
 
   // Handle user disconnect
-  socket.on('user-disconnect', (userId) => {
-    handleUserDisconnect(socket, userId)
+  socket.on('user-disconnect', () => {
+    handleUserDisconnect(socket, socket.data.userId)
   })
 
   // Handle socket disconnect
   socket.on('disconnect', () => {
-    const userId = userSockets.get(socket.id)
+    const userId = socket.data.userId || userSockets.get(socket.id)
     handleUserDisconnect(socket, userId)
   })
 
   function handleUserDisconnect(socket, userId) {
     if (userId) {
-      console.log('User disconnected:', userId)
+      logger.info('User disconnected: %s', userId)
       
       // Remove user from online users
       onlineUsers.delete(userId)
@@ -515,17 +726,25 @@ io.on('connection', (socket) => {
       // Broadcast to all users that this user is offline
       socket.broadcast.emit('user-offline', userId)
       
-      console.log('Remaining online users:', Array.from(onlineUsers.keys()))
+      logger.debug('Remaining online users:', Array.from(onlineUsers.keys()))
     }
   }
 })
 
 // Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
+app.get('/health', async (req, res) => {
+  let firebaseStatus = 'ok'
+  try {
+    await admin.auth().listUsers(1)
+  } catch (error) {
+    firebaseStatus = `error: ${(error && error.message) || 'Unknown error'}`
+  }
+
+  res.json({
+    status: firebaseStatus === 'ok' ? 'ok' : 'degraded',
     timestamp: new Date().toISOString(),
-    onlineUsers: onlineUsers.size
+    onlineUsers: onlineUsers.size,
+    firebase: firebaseStatus
   })
 })
 
@@ -544,6 +763,6 @@ app.get('/api/online-users', (req, res) => {
 const PORT = process.env.PORT || 3001
 
 server.listen(PORT, () => {
-  console.log(`Emergency Alert Server running on port ${PORT}`)
-  console.log(`Socket.io server ready for connections`)
+  logger.info(`Emergency Alert Server running on port ${PORT}`)
+  logger.info('Socket.io server ready for connections')
 })

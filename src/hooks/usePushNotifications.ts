@@ -7,6 +7,8 @@ import {
   PushSubscriptionData,
   NotificationPayload 
 } from '@/services/PushNotificationService'
+import { auth } from '@/lib/firebase'
+import { logger } from '@/utils/logger'
 
 export function usePushNotifications() {
   const [isSupported, setIsSupported] = useState(false)
@@ -16,6 +18,60 @@ export function usePushNotifications() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isInitialized, setIsInitialized] = useState(false)
+
+  const sendSubscriptionToBackend = useCallback(
+    async (subscriptionData: PushSubscriptionData): Promise<boolean> => {
+      try {
+        const token = await auth.currentUser?.getIdToken()
+        const response = await fetch('/api/push-subscriptions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+          },
+          body: JSON.stringify({ subscription: subscriptionData })
+        })
+
+        if (!response.ok) {
+          const message = await response.text()
+          throw new Error(message || 'Failed to register push subscription')
+        }
+
+        return true
+      } catch (err) {
+        logger.error('Error sending subscription to backend:', err)
+        return false
+      }
+    },
+    []
+  )
+
+  const removeSubscriptionFromBackend = useCallback(
+    async (endpoint?: string): Promise<boolean> => {
+      try {
+        const token = await auth.currentUser?.getIdToken()
+        const response = await fetch('/api/push-subscriptions', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+          },
+          body: JSON.stringify({ endpoint })
+        })
+
+        if (!response.ok) {
+          const message = await response.text()
+          throw new Error(message || 'Failed to remove push subscription')
+        }
+
+        return true
+      } catch (err) {
+        logger.error('Error removing subscription from backend:', err)
+        return false
+      }
+    },
+    []
+  )
 
   // Initialize service
   useEffect(() => {
@@ -49,7 +105,7 @@ export function usePushNotifications() {
 
         setError(null)
       } catch (err) {
-        console.error('Error initializing push notifications:', err)
+        logger.error('Error initializing push notifications:', err)
         setError('Failed to initialize push notifications')
       } finally {
         setIsLoading(false)
@@ -78,7 +134,7 @@ export function usePushNotifications() {
     } catch (err) {
       const errorMessage = 'Failed to request permission'
       setError(errorMessage)
-      console.error('Error requesting permission:', err)
+      logger.error('Error requesting permission:', err)
       return { granted: false, error: errorMessage }
     } finally {
       setIsLoading(false)
@@ -100,14 +156,17 @@ export function usePushNotifications() {
       }
 
       const subscriptionData = await pushNotificationService.subscribeToPush()
-      
+
       if (subscriptionData) {
         setSubscription(subscriptionData)
         setIsSubscribed(true)
-        
-        // TODO: Send subscription to backend
-        console.log('Subscription data:', subscriptionData)
-        
+
+        const backendSynced = await sendSubscriptionToBackend(subscriptionData)
+        if (!backendSynced) {
+          setError('Subscription saved locally but failed to persist on server')
+          logger.warn('Subscription saved locally but failed to persist on server')
+        }
+
         return true
       } else {
         setError('Failed to create push subscription')
@@ -116,12 +175,12 @@ export function usePushNotifications() {
     } catch (err) {
       const errorMessage = 'Failed to subscribe to push notifications'
       setError(errorMessage)
-      console.error('Error subscribing:', err)
+      logger.error('Error subscribing:', err)
       return false
     } finally {
       setIsLoading(false)
     }
-  }, [permission, requestPermission])
+  }, [permission, requestPermission, sendSubscriptionToBackend])
 
   // Unsubscribe from push notifications
   const unsubscribe = useCallback(async (): Promise<boolean> => {
@@ -129,14 +188,18 @@ export function usePushNotifications() {
       setIsLoading(true)
       setError(null)
 
+      const endpoint = subscription?.endpoint
       const success = await pushNotificationService.unsubscribeFromPush()
       
       if (success) {
         setIsSubscribed(false)
         setSubscription(null)
         
-        // TODO: Remove subscription from backend
-        
+        const backendSynced = await removeSubscriptionFromBackend(endpoint)
+        if (!backendSynced) {
+          setError('Failed to remove push subscription on server')
+        }
+
         return true
       } else {
         setError('Failed to unsubscribe from push notifications')
@@ -145,19 +208,19 @@ export function usePushNotifications() {
     } catch (err) {
       const errorMessage = 'Failed to unsubscribe'
       setError(errorMessage)
-      console.error('Error unsubscribing:', err)
+      logger.error('Error unsubscribing:', err)
       return false
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [removeSubscriptionFromBackend, subscription])
 
   // Send local notification
   const showLocalNotification = useCallback(async (payload: NotificationPayload): Promise<void> => {
     try {
       await pushNotificationService.showLocalNotification(payload)
     } catch (err) {
-      console.error('Error showing local notification:', err)
+      logger.error('Error showing local notification:', err)
       setError('Failed to show notification')
     }
   }, [])
@@ -170,7 +233,7 @@ export function usePushNotifications() {
     try {
       return await pushNotificationService.sendPushNotification(targetSubscription, payload)
     } catch (err) {
-      console.error('Error sending push notification:', err)
+      logger.error('Error sending push notification:', err)
       setError('Failed to send push notification')
       return false
     }
@@ -181,7 +244,7 @@ export function usePushNotifications() {
     try {
       await pushNotificationService.testNotification()
     } catch (err) {
-      console.error('Error testing notification:', err)
+      logger.error('Error testing notification:', err)
       setError('Failed to send test notification')
     }
   }, [])
@@ -191,7 +254,7 @@ export function usePushNotifications() {
     try {
       await pushNotificationService.cacheAlertForOffline(payload)
     } catch (err) {
-      console.error('Error caching alert for offline:', err)
+      logger.error('Error caching alert for offline:', err)
     }
   }, [])
 

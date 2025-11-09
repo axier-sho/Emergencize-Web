@@ -1,13 +1,15 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
+import { Timestamp } from 'firebase/firestore'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/hooks/useAuth'
 import { useSocket } from '@/hooks/useSocket'
 import { useContacts } from '@/hooks/useContacts'
 import { useFriendRequests } from '@/hooks/useFriendRequests'
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
-import { saveAlert } from '@/lib/database'
+import { saveAlert, findUserByEmail, getUserAlerts } from '@/lib/database'
+import { logger } from '@/utils/logger'
 import LoadingAnimation from '@/components/LoadingAnimation'
 import EmergencyButton from '@/components/EmergencyButton'
 import OnlineUsers from '@/components/OnlineUsers'
@@ -38,6 +40,7 @@ interface Alert {
   timestamp: Date
   location?: { lat: number; lng: number; address?: string }
   isRead?: boolean
+  source?: 'history' | 'realtime'
 }
 
 interface Contact {
@@ -48,6 +51,7 @@ interface Contact {
   isOnline: boolean
   lastSeen?: Date
   relationship?: string
+  contactUserId?: string
 }
 
 export default function DashboardPage() {
@@ -60,6 +64,41 @@ export default function DashboardPage() {
   const [contactManagerOpen, setContactManagerOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [emergencyChatOpen, setEmergencyChatOpen] = useState(false)
+  const [lastAlertTime, setLastAlertTime] = useState<number>(0)
+
+  const contactIds = useMemo(
+    () =>
+      contacts
+        .map((contact) => contact.contactUserId)
+        .filter((id): id is string => typeof id === 'string' && id.length > 0),
+    [contacts]
+  )
+
+  const onlineContactIds = useMemo(
+    () =>
+      contacts
+        .filter((c) => c.isOnline)
+        .map((c) => c.contactUserId)
+        .filter((id): id is string => typeof id === 'string' && id.length > 0),
+    [contacts]
+  )
+
+  const onlineContacts = useMemo(() => contacts.filter((c) => c.isOnline), [contacts])
+  const pushAlert = useCallback((alert: Alert) => {
+    const normalized: Alert = {
+      ...alert,
+      source: alert.source ?? 'realtime',
+      timestamp: alert.timestamp instanceof Date ? alert.timestamp : new Date(alert.timestamp)
+    }
+
+    setAlerts((prev) => {
+      const updated = [normalized, ...prev]
+      const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000
+      return updated
+        .filter((item) => item.timestamp.getTime() > oneDayAgo)
+        .slice(0, 50)
+    })
+  }, [])
 
   const handleEmergencyAlertReceived = useCallback((alert: any) => {
     const newAlert: Alert = {
@@ -68,8 +107,98 @@ export default function DashboardPage() {
       timestamp: new Date(alert.timestamp),
       fromUser: alert.fromUserId || 'Unknown User'
     }
-    setAlerts(prev => [newAlert, ...prev.slice(0, 49)]) // Keep max 50 alerts
+    pushAlert(newAlert)
+  }, [pushAlert])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    try {
+      const stored = window.localStorage.getItem('emergencize-alerts')
+      if (!stored) return
+
+      const parsed = JSON.parse(stored) as Array<Omit<Alert, 'timestamp'> & { timestamp: string }>
+      const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000
+      const restored = parsed
+        .map((item) => ({
+          ...item,
+          timestamp: new Date(item.timestamp)
+        }))
+        .filter((item) => item.timestamp.getTime() > oneDayAgo)
+        .slice(0, 50)
+
+      if (restored.length > 0) {
+        setAlerts(restored)
+      }
+    } catch (error) {
+      logger.error('Failed to restore alerts from local storage:', error)
+    }
   }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    try {
+      const serialized = JSON.stringify(
+        alerts.map((alert) => ({
+          ...alert,
+          timestamp: alert.timestamp.toISOString()
+        }))
+      )
+      window.localStorage.setItem('emergencize-alerts', serialized)
+    } catch (error) {
+      logger.error('Failed to persist alerts to local storage:', error)
+    }
+  }, [alerts])
+
+  useEffect(() => {
+    if (!user?.uid) {
+      return
+    }
+
+    const unsubscribe = getUserAlerts(
+      user.uid,
+      (items) => {
+        setAlerts((prev) => {
+          const historyAlerts: Alert[] = items.map((item) => {
+            const createdAt =
+              (item.createdAt as unknown as Timestamp | undefined)?.toDate?.() ?? new Date()
+            return {
+              id: item.id,
+              type: item.type,
+              fromUser: item.fromUserId === user.uid ? 'You' : item.fromUserId,
+              message: item.message,
+              timestamp: createdAt instanceof Date ? createdAt : new Date(createdAt),
+              location: item.location,
+              source: 'history'
+            }
+          })
+
+          const bucketKey = (alert: Alert) =>
+            `${alert.type}|${alert.message}|${Math.round(alert.timestamp.getTime() / 5000)}`
+
+          const merged = new Map<string, Alert>()
+          historyAlerts.forEach((alert) => {
+            merged.set(bucketKey(alert), alert)
+          })
+
+          prev.forEach((alert) => {
+            const key = bucketKey(alert)
+            if (!merged.has(key)) {
+              merged.set(key, alert)
+            }
+          })
+
+          return Array.from(merged.values())
+            .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+            .slice(0, 50)
+        })
+      },
+      { limit: 100 }
+    )
+
+    return unsubscribe
+  }, [user?.uid])
 
   const { isConnected, onlineUsers, sendEmergencyAlert } = useSocket({
     userId: user?.uid,
@@ -89,7 +218,7 @@ export default function DashboardPage() {
           })
         },
         (error) => {
-          console.log('Location access denied:', error)
+          logger.warn('Location access denied:', error)
         }
       )
     }
@@ -106,18 +235,26 @@ export default function DashboardPage() {
   const handleEmergencyAlert = async (type: 'help' | 'danger') => {
     if (!user) return
 
+    const now = Date.now()
+    const RATE_LIMIT_MS = 5000
+    if (now - lastAlertTime < RATE_LIMIT_MS) {
+      const remainingSeconds = Math.ceil((RATE_LIMIT_MS - (now - lastAlertTime)) / 1000)
+      pushAlert({
+        id: `rate-limit-${now}`,
+        type: 'help',
+        fromUser: 'System',
+        message: `Please wait ${remainingSeconds} second${remainingSeconds !== 1 ? 's' : ''} before sending another alert.`,
+        timestamp: new Date(),
+        isRead: false
+      })
+      logger.warn('Client-side rate limit prevented alert dispatch')
+      return
+    }
+    setLastAlertTime(now)
+
     const message = type === 'danger' 
       ? 'Emergency! I need immediate assistance!' 
       : 'I need help, please respond when you can.'
-
-    // Get contact user IDs for the alert
-    const contactIds = contacts
-      .map(contact => contact.contactUserId)
-      .filter((id): id is string => typeof id === 'string' && id.length > 0)
-    const onlineContactIds = contacts
-      .filter(c => c.isOnline)
-      .map(c => c.contactUserId)
-      .filter((id): id is string => typeof id === 'string' && id.length > 0)
 
     const alertData = {
       type,
@@ -130,13 +267,13 @@ export default function DashboardPage() {
     if (networkStatus.connectionType === 'online') {
       // Real-time mode: Send via socket AND save to database
       sendEmergencyAlert(alertData)
-      console.log('🚀 Alert sent via real-time connection')
+      logger.info('Alert sent via real-time connection')
     } else if (networkStatus.connectionType === 'browser-only') {
       // Standard mode: Save to database only
-      console.log('📱 Sending alert in standard mode (database only)')
+      logger.info('Sending alert in standard mode (database only)')
     } else {
       // Offline: Queue for when back online
-      console.log('📴 Device offline - alert will be queued')
+      logger.warn('Device offline - alert will be queued')
     }
 
     // Always try to save to database (Firebase works offline)
@@ -149,15 +286,15 @@ export default function DashboardPage() {
       })
       
       if (networkStatus.connectionType !== 'online') {
-        console.log('💾 Alert saved locally - will sync when online')
+        logger.info('Alert saved locally - will sync when online')
       }
     } catch (error) {
-      console.error('Failed to save alert:', error)
+      logger.error('Failed to save alert:', error)
       // Even if database save fails, show confirmation to user
     }
 
     // Show confirmation based on connection type
-    const targetCount = type === 'danger' ? contacts.length : contacts.filter(c => c.isOnline).length
+    const targetCount = type === 'danger' ? contactIds.length : onlineContactIds.length
     let confirmationMessage = ''
     
     if (networkStatus.connectionType === 'online') {
@@ -175,7 +312,7 @@ export default function DashboardPage() {
       message: confirmationMessage,
       timestamp: new Date()
     }
-    setAlerts(prev => [confirmationAlert, ...prev.slice(0, 49)]) // Keep max 50 alerts
+    pushAlert(confirmationAlert)
   }
 
   const dismissAlert = (alertId: string) => {
@@ -185,16 +322,36 @@ export default function DashboardPage() {
   }
 
   const respondToAlert = (alertId: string) => {
-    console.log('Responding to alert:', alertId)
+    logger.info('Responding to alert: %s', alertId)
     dismissAlert(alertId)
   }
 
   const handleAddContact = async (email: string, nickname?: string, relationship?: string) => {
+    if (!user?.uid) {
+      throw new Error('You must be signed in to add a contact.')
+    }
+
+    const targetUser = await findUserByEmail(email)
+    if (!targetUser) {
+      throw new Error('We could not find a user with that email address.')
+    }
+
+    if (targetUser.uid === user.uid) {
+      throw new Error('You cannot add yourself as a contact.')
+    }
+
+    const alreadyContact = contacts.some(
+      (contact) => contact.contactUserId === targetUser.uid && contact.userId === user.uid
+    )
+    if (alreadyContact) {
+      throw new Error('This person is already in your emergency contacts.')
+    }
+
     try {
-      await sendFriendRequest(email)
-      // The contact will be added automatically when the friend request is accepted
+      await addContact(targetUser.uid, nickname, relationship)
+      logger.info('Contact added: %s', targetUser.uid)
     } catch (error: any) {
-      console.error('Error sending friend request:', error.message)
+      logger.error('Error adding contact:', error?.message ?? error)
       throw error
     }
   }
@@ -203,7 +360,7 @@ export default function DashboardPage() {
     try {
       await removeContact(contactId)
     } catch (error) {
-      console.error('Error removing contact:', error)
+      logger.error('Error removing contact:', error)
     }
   }
 
@@ -211,7 +368,7 @@ export default function DashboardPage() {
     try {
       await updateContact(contactId, updates)
     } catch (error) {
-      console.error('Error updating contact:', error)
+      logger.error('Error updating contact:', error)
     }
   }
 
@@ -350,7 +507,7 @@ export default function DashboardPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Dashboard Stats */}
           <DashboardStats
-            onlineUsers={contacts.filter(c => c.isOnline).length}
+            onlineUsers={onlineContacts.length}
             totalContacts={contacts.length}
             alertsSent={alerts.length}
             responseTime="2.3s"

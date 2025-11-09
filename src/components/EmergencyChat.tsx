@@ -1,17 +1,17 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  X, 
-  Send, 
-  MessageCircle, 
-  Users, 
+import {
+  X,
+  Send,
+  MessageCircle,
+  Users,
   AlertTriangle,
   Clock,
   MapPin,
-  Phone,
-  Video
+  Mic,
+  MicOff
 } from 'lucide-react'
 import { useSocket } from '@/hooks/useSocket'
 import { saveAlert } from '@/lib/database'
@@ -59,6 +59,7 @@ export default function EmergencyChat({
   const [isVoiceSupported, setIsVoiceSupported] = useState(false)
   const [isListening, setIsListening] = useState(false)
   const recognitionRef = useRef<any>(null)
+  const contactsRef = useRef<Contact[]>(contacts)
 
   const { socket } = useSocket({
     userId: isOpen ? currentUserId : undefined, // Only create socket when modal is open
@@ -66,6 +67,10 @@ export default function EmergencyChat({
     onUserTyping: handleUserTyping,
     onUserStoppedTyping: handleUserStoppedTyping
   })
+
+  useEffect(() => {
+    contactsRef.current = contacts
+  }, [contacts])
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -75,55 +80,78 @@ export default function EmergencyChat({
   // System message when chat opens, cleanup when closed
   useEffect(() => {
     if (isOpen && messages.length === 0) {
-      const systemMessage: Message = {
-        id: Date.now().toString(),
+      const baseMessage: Message = {
+        id: `${Date.now()}-system`,
         fromUserId: 'system',
         fromUserName: 'System',
         content: 'Emergency group chat activated. All online contacts can see this conversation.',
         timestamp: new Date(),
         type: 'system'
       }
-      setMessages([systemMessage])
+
+      const practiceMessage: Message | null =
+        contacts.length === 0
+          ? {
+              id: `${Date.now()}-practice`,
+              fromUserId: 'system',
+              fromUserName: 'System',
+              content:
+                'Practice mode is enabled because no contacts are online yet. Send a message to see a simulated response and test the experience.',
+              timestamp: new Date(),
+              type: 'system'
+            }
+          : null
+
+      setMessages(practiceMessage ? [baseMessage, practiceMessage] : [baseMessage])
     } else if (!isOpen) {
       // Clear messages when chat is closed to free memory
       setMessages([])
       setIsTyping([])
     }
-  }, [isOpen, messages.length])
+  }, [isOpen, messages.length, contacts.length])
 
   // Voice input setup
   useEffect(() => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-    if (SpeechRecognition) {
-      setIsVoiceSupported(true)
-      const recog = new SpeechRecognition()
-      recog.lang = 'en-US'
-      recog.interimResults = true
-      recog.continuous = false
-      recog.onresult = (event: any) => {
-        let transcript = ''
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          transcript += event.results[i][0].transcript
-        }
-        setNewMessage(prev => (prev ? prev + ' ' : '') + transcript.trim())
-      }
-      recog.onend = () => setIsListening(false)
-      recognitionRef.current = recog
+    if (typeof window === 'undefined') return
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (!SpeechRecognition) {
+      setIsVoiceSupported(false)
+      return
     }
+
+    setIsVoiceSupported(true)
+    const recog = new SpeechRecognition()
+    recog.lang = 'en-US'
+    recog.interimResults = true
+    recog.continuous = false
+    recog.onresult = (event: any) => {
+      let transcript = ''
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        transcript += event.results[i][0].transcript
+      }
+      setNewMessage((prev) => (prev ? `${prev} ${transcript.trim()}` : transcript.trim()))
+    }
+    recog.onstart = () => setIsListening(true)
+    recog.onend = () => setIsListening(false)
+    recog.onerror = () => setIsListening(false)
+    recognitionRef.current = recog
   }, [])
 
   const toggleVoice = () => {
     if (!isVoiceSupported) return
     if (isListening) {
-      try { recognitionRef.current?.stop() } catch {}
-      setIsListening(false)
+      try {
+        recognitionRef.current?.stop()
+      } catch (error) {
+        console.error('Failed to stop voice input', error)
+      }
       return
     }
     try {
       recognitionRef.current?.start()
-      setIsListening(true)
     } catch (e) {
-      console.error('Voice start failed', e)
+      console.error('Voice input start failed', e)
     }
   }
 
@@ -145,23 +173,48 @@ export default function EmergencyChat({
     setIsTyping(prev => prev.filter(id => id !== data.userId))
   }
 
+  const schedulePracticeEcho = useCallback((userText: string) => {
+    const trimmed = userText.trim()
+    if (!trimmed) return
+
+    setTimeout(() => {
+      if (contactsRef.current.length > 0) return
+      const response: Message = {
+        id: `${Date.now()}-practice-response`,
+        fromUserId: 'practice-companion',
+        fromUserName: 'Practice Companion',
+        content: `Practice response: "${trimmed}". Add emergency contacts to chat with real people.`,
+        timestamp: new Date(),
+        type: 'text'
+      }
+
+      setMessages((prev) => {
+        const newMessages = [...prev, response]
+        return newMessages.length > 100 ? newMessages.slice(-100) : newMessages
+      })
+    }, 700)
+  }, [])
+
   const sendMessage = () => {
-    if (!newMessage.trim() || !socket) return
+    const trimmedContent = newMessage.trim()
+    if (!trimmedContent) return
 
     const message: Message = {
       id: Date.now().toString(),
       fromUserId: currentUserId,
       fromUserName: currentUserName,
-      content: newMessage,
+      content: trimmedContent,
       timestamp: new Date(),
       type: 'text'
     }
 
     // Emit to group chat
-    socket.emit('group-message', {
-      ...message,
-      recipients: contacts.map(c => c.userId)
-    })
+    if (socket) {
+      socket.emit('group-message', {
+        ...message,
+        recipients: contacts.map((c) => c.userId)
+      })
+    }
 
     setMessages(prev => {
       const newMessages = [...prev, message]
@@ -170,7 +223,13 @@ export default function EmergencyChat({
     setNewMessage('')
     
     // Stop typing indicator
-    socket.emit('stop-typing-group', { userId: currentUserId })
+    if (socket) {
+      socket.emit('stop-typing-group', { userId: currentUserId })
+    }
+
+    if (contacts.length === 0) {
+      schedulePracticeEcho(trimmedContent)
+    }
   }
 
   const shareLocation = () => {
@@ -463,17 +522,29 @@ export default function EmergencyChat({
                     placeholder="Type an emergency message..."
                     className="flex-1 px-4 py-3 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 transition-colors"
                   />
-                  {isVoiceSupported && (
-                    <motion.button
-                      onClick={toggleVoice}
-                      className={`p-3 ${isListening ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-700'} text-white rounded-lg transition-colors`}
-                      whileHover={{ scale: 1.08 }}
-                      whileTap={{ scale: 0.95 }}
-                      title={isListening ? 'Stop voice input' : 'Voice input'}
-                    >
-                      {isListening ? <Phone size={18} /> : <Phone size={18} />}
-                    </motion.button>
-                  )}
+                  <motion.button
+                    onClick={toggleVoice}
+                    disabled={!isVoiceSupported}
+                    className={`p-3 ${
+                      isListening
+                        ? 'bg-green-600 hover:bg-green-700'
+                        : isVoiceSupported
+                          ? 'bg-gray-600 hover:bg-gray-700'
+                          : 'bg-gray-700 cursor-not-allowed'
+                    } text-white rounded-lg transition-colors`}
+                    whileHover={{ scale: isVoiceSupported ? 1.08 : 1 }}
+                    whileTap={{ scale: isVoiceSupported ? 0.95 : 1 }}
+                    title={
+                      isVoiceSupported
+                        ? isListening
+                          ? 'Stop voice input'
+                          : 'Start voice input'
+                        : 'Voice input is not supported in this browser'
+                    }
+                    aria-disabled={!isVoiceSupported}
+                  >
+                    {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+                  </motion.button>
                   
                   <motion.button
                     onClick={sendMessage}
@@ -490,6 +561,11 @@ export default function EmergencyChat({
                   <p>Press Enter to send • Shift+Enter for new line</p>
                   <p>{contacts.filter(c => c.isOnline).length} participants online</p>
                 </div>
+                {!isVoiceSupported && (
+                  <p className="mt-2 text-xs text-gray-400">
+                    Voice input isn&apos;t supported in this browser. Try Chrome or Edge to dictate messages hands-free.
+                  </p>
+                )}
               </div>
 
               {/* Floating Emergency FAB */}

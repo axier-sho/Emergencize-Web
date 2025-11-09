@@ -22,7 +22,7 @@ import {
 } from 'lucide-react'
 import { usePushNotifications } from '@/hooks/usePushNotifications'
 import { useAuth } from '@/hooks/useAuth'
-import { updateUserProfile } from '@/lib/database'
+import { updateUserProfile, getUserProfile } from '@/lib/database'
 
 interface SettingsModalProps {
   isOpen: boolean
@@ -68,6 +68,10 @@ export default function SettingsModal({ isOpen, onClose, currentUser }: Settings
     requireConfirmation: true,
     emergencyContacts: 3
   })
+  const [profileLoading, setProfileLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [saveSuccess, setSaveSuccess] = useState(false)
 
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User },
@@ -76,9 +80,106 @@ export default function SettingsModal({ isOpen, onClose, currentUser }: Settings
     { id: 'emergency', label: 'Emergency', icon: Shield }
   ]
 
+  useEffect(() => {
+    if (!isOpen) {
+      setSaveSuccess(false)
+      setSaveError(null)
+      return
+    }
+
+    if (!user?.uid) {
+      return
+    }
+
+    let cancelled = false
+    setProfileLoading(true)
+
+    const loadProfile = async () => {
+      try {
+        const profile = await getUserProfile(user.uid)
+        if (!profile || cancelled) {
+          return
+        }
+
+        const profileAny = profile as Record<string, any>
+        setSettings((prev) => ({
+          ...prev,
+          displayName:
+            profile.displayName ??
+            currentUser?.displayName ??
+            prev.displayName ??
+            '',
+          phone: profileAny.phone ?? prev.phone ?? '',
+          emergencyInfo: profileAny.emergencyInfo ?? prev.emergencyInfo ?? '',
+          profileVisibility: profileAny.profileVisibility ?? prev.profileVisibility,
+          soundEnabled:
+            typeof profileAny.soundEnabled === 'boolean'
+              ? profileAny.soundEnabled
+              : prev.soundEnabled,
+          vibrationEnabled:
+            typeof profileAny.vibrationEnabled === 'boolean'
+              ? profileAny.vibrationEnabled
+              : prev.vibrationEnabled,
+          pushNotifications:
+            typeof profileAny.pushNotifications === 'boolean'
+              ? profileAny.pushNotifications
+              : prev.pushNotifications,
+          emailAlerts:
+            typeof profileAny.emailAlerts === 'boolean'
+              ? profileAny.emailAlerts
+              : prev.emailAlerts,
+          locationSharing:
+            typeof profileAny.locationSharing === 'boolean'
+              ? profileAny.locationSharing
+              : prev.locationSharing,
+          onlineStatus:
+            typeof profileAny.onlineStatus === 'boolean'
+              ? profileAny.onlineStatus
+              : prev.onlineStatus,
+          autoLocationShare:
+            typeof profileAny.autoLocationShare === 'boolean'
+              ? profileAny.autoLocationShare
+              : prev.autoLocationShare,
+          emergencyTimeout:
+            typeof profileAny.emergencyTimeout === 'number'
+              ? profileAny.emergencyTimeout
+              : prev.emergencyTimeout,
+          requireConfirmation:
+            typeof profileAny.requireConfirmation === 'boolean'
+              ? profileAny.requireConfirmation
+              : prev.requireConfirmation,
+          emergencyContacts:
+            typeof profileAny.emergencyContacts === 'number'
+              ? profileAny.emergencyContacts
+              : prev.emergencyContacts
+        }))
+      } catch (error) {
+        console.error('Failed to load user profile settings:', error)
+      } finally {
+        if (!cancelled) {
+          setProfileLoading(false)
+        }
+      }
+    }
+
+    void loadProfile()
+
+    return () => {
+      cancelled = true
+    }
+  }, [isOpen, user?.uid, currentUser?.displayName])
+
   const handleSave = async () => {
+    if (!user) {
+      setSaveError('You need to be signed in to update your profile.')
+      return
+    }
+
+    setSaving(true)
+    setSaveError(null)
+    setSaveSuccess(false)
+
     try {
-      if (!user) throw new Error('Not authenticated')
       await updateUserProfile(user.uid, {
         displayName: settings.displayName,
         phone: settings.phone,
@@ -95,10 +196,12 @@ export default function SettingsModal({ isOpen, onClose, currentUser }: Settings
         requireConfirmation: settings.requireConfirmation,
         emergencyContacts: settings.emergencyContacts
       })
-      onClose()
+      setSaveSuccess(true)
     } catch (e) {
       console.error('Failed to save settings:', e)
-      alert('Failed to save settings')
+      setSaveError('Failed to save settings. Please try again.')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -190,6 +293,12 @@ export default function SettingsModal({ isOpen, onClose, currentUser }: Settings
 
                 {/* Content */}
                 <div className="flex-1 p-4 md:p-6 overflow-y-auto">
+                  {profileLoading && (
+                    <div className="mb-4 flex items-center text-blue-200 text-sm gap-2">
+                      <Loader size={16} className="animate-spin" />
+                      <span>Loading your current settings…</span>
+                    </div>
+                  )}
                   {activeTab === 'profile' && (
                     <motion.div
                       className="space-y-6"
@@ -590,24 +699,50 @@ export default function SettingsModal({ isOpen, onClose, currentUser }: Settings
               </div>
 
               {/* Footer */}
-              <div className="flex justify-end gap-3 p-4 md:p-6 border-t border-white border-opacity-20">
-                <motion.button
-                  onClick={onClose}
-                  className="px-5 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  Cancel
-                </motion.button>
-                <motion.button
-                  onClick={handleSave}
-                  className="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Save size={18} className="mr-2" />
-                  Save Settings
-                </motion.button>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-4 md:p-6 border-t border-white border-opacity-20">
+                <div className="min-h-[20px]">
+                  {saveSuccess && (
+                    <div className="flex items-center text-green-300 text-sm gap-2">
+                      <CheckCircle size={16} />
+                      <span>Settings saved successfully.</span>
+                    </div>
+                  )}
+                  {saveError && (
+                    <div className="flex items-center text-red-300 text-sm gap-2">
+                      <AlertCircle size={16} />
+                      <span>{saveError}</span>
+                    </div>
+                  )}
+                </div>
+                <div className="flex justify-end gap-3">
+                  <motion.button
+                    onClick={onClose}
+                    className="px-5 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Cancel
+                  </motion.button>
+                  <motion.button
+                    onClick={handleSave}
+                    disabled={saving || profileLoading}
+                    className="px-5 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-900/60 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors flex items-center"
+                    whileHover={!(saving || profileLoading) ? { scale: 1.02 } : {}}
+                    whileTap={!(saving || profileLoading) ? { scale: 0.98 } : {}}
+                  >
+                    {saving ? (
+                      <>
+                        <Loader size={18} className="mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save size={18} className="mr-2" />
+                        Save Settings
+                      </>
+                    )}
+                  </motion.button>
+                </div>
               </div>
             </motion.div>
           </motion.div>

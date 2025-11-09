@@ -11,8 +11,9 @@
                recent.child('actionCount').val() >= maxRequests;
       }",
       "isValidString": "(str, minLen, maxLen) => {
-        return str != null && str.length >= minLen && str.length <= maxLen && 
-               !str.matches('.*[<>\"\\'].*');
+        return str != null && str.length >= minLen && str.length <= maxLen &&
+               !str.matches('(?i).*<[^>]+>.*') &&
+               !str.matches('(?i).*javascript:.*');
       }",
       "isValidEmail": "(email) => {
         return email != null && email.matches('^[\\w\\.-]+@[\\w\\.-]+\\.[\\w]+$') && 
@@ -47,7 +48,8 @@
                    newData.child('email').val() === auth.token.email &&
                    newData.child('displayName').val().length >= 1 && 
                    newData.child('displayName').val().length <= 100 &&
-                   !newData.child('displayName').val().matches('.*[<>\"\\'].*')",
+                   !newData.child('displayName').val().matches('(?i).*<[^>]+>.*') &&
+                   !newData.child('displayName').val().matches('(?i).*javascript:.*')",
         
         "profile": {
           ".read": "$uid === auth.uid || (auth != null && 
@@ -57,7 +59,8 @@
                     (!newData.child('displayName').exists() || 
                      (newData.child('displayName').val().length >= 1 && 
                       newData.child('displayName').val().length <= 100 &&
-                      !newData.child('displayName').val().matches('.*[<>\"\\'].*')))"
+                      !newData.child('displayName').val().matches('(?i).*<[^>]+>.*') &&
+                      !newData.child('displayName').val().matches('(?i).*javascript:.*')))"
         },
         
         "emergencyContacts": {
@@ -67,10 +70,12 @@
                       newData.hasChildren(['contactUserId']) &&
                       (!newData.child('nickname').exists() || 
                        (newData.child('nickname').val().length <= 50 &&
-                        !newData.child('nickname').val().matches('.*[<>\"\\'].*'))) &&
+                        !newData.child('nickname').val().matches('(?i).*<[^>]+>.*') &&
+                        !newData.child('nickname').val().matches('(?i).*javascript:.*'))) &&
                       (!newData.child('relationship').exists() || 
                        (newData.child('relationship').val().length <= 30 &&
-                        !newData.child('relationship').val().matches('.*[<>\"\\'].*')))"
+                        !newData.child('relationship').val().matches('(?i).*<[^>]+>.*') &&
+                        !newData.child('relationship').val().matches('(?i).*javascript:.*')))"
           }
         },
         
@@ -101,7 +106,8 @@
                      (newData.child('type').val() === 'help' || newData.child('type').val() === 'danger') &&
                      newData.child('message').val().length >= 1 && 
                      newData.child('message').val().length <= 500 &&
-                     !newData.child('message').val().matches('.*[<>\"\\'].*') &&
+                     !newData.child('message').val().matches('(?i).*<[^>]+>.*') &&
+                     !newData.child('message').val().matches('(?i).*javascript:.*') &&
                      newData.child('fromUserId').val() === auth.uid &&
                      (!newData.child('location').exists() || 
                       (newData.child('location').child('lat').isNumber() &&
@@ -118,8 +124,9 @@
             ".write": "auth != null && (!data.exists() || data.child('fromUserId').val() === auth.uid)",
             ".validate": "newData.hasChildren(['message', 'fromUserId', 'timestamp']) &&
                          newData.child('message').val().length >= 1 && 
-                         newData.child('message').val().length <= 300 &&
-                         !newData.child('message').val().matches('.*[<>\"\\'].*') &&
+                        newData.child('message').val().length <= 300 &&
+                        !newData.child('message').val().matches('(?i).*<[^>]+>.*') &&
+                        !newData.child('message').val().matches('(?i).*javascript:.*') &&
                          newData.child('fromUserId').val() === auth.uid"
           }
         }
@@ -161,8 +168,9 @@
             ".write": "auth != null && (!data.exists() || data.child('fromUserId').val() === auth.uid)",
             ".validate": "newData.hasChildren(['message', 'fromUserId', 'timestamp']) &&
                          newData.child('message').val().length >= 1 && 
-                         newData.child('message').val().length <= 1000 &&
-                         !newData.child('message').val().matches('.*[<>\"\\'].*') &&
+                        newData.child('message').val().length <= 1000 &&
+                        !newData.child('message').val().matches('(?i).*<[^>]+>.*') &&
+                        !newData.child('message').val().matches('(?i).*javascript:.*') &&
                          newData.child('fromUserId').val() === auth.uid"
           }
         },
@@ -188,7 +196,8 @@
                      newData.child('lng').val() <= 180 &&
                      (!newData.child('address').exists() || 
                       (newData.child('address').val().length <= 200 &&
-                       !newData.child('address').val().matches('.*[<>\"\\'].*')))"
+                       !newData.child('address').val().matches('(?i).*<[^>]+>.*') &&
+                       !newData.child('address').val().matches('(?i).*javascript:.*')))"
       }
     },
     
@@ -200,8 +209,9 @@
                   (!data.exists() && newData.child('admins').child(auth.uid).exists()))",
         ".validate": "newData.hasChildren(['name', 'admins', 'members', 'createdAt', 'type']) &&
                      newData.child('name').val().length >= 3 && 
-                     newData.child('name').val().length <= 100 &&
-                     !newData.child('name').val().matches('.*[<>\"\\'].*') &&
+                    newData.child('name').val().length <= 100 &&
+                    !newData.child('name').val().matches('(?i).*<[^>]+>.*') &&
+                    !newData.child('name').val().matches('(?i).*javascript:.*') &&
                      (newData.child('type').val() === 'family' || 
                       newData.child('type').val() === 'work' || 
                       newData.child('type').val() === 'neighborhood' || 
@@ -217,7 +227,8 @@
           ".validate": "newData.hasChildren(['name', 'center', 'radiusMeters', 'type', 'createdAt']) &&
                        newData.child('name').val().length >= 1 && 
                        newData.child('name').val().length <= 100 &&
-                       !newData.child('name').val().matches('.*[<>\"\\'].*') &&
+                       !newData.child('name').val().matches('(?i).*<[^>]+>.*') &&
+                       !newData.child('name').val().matches('(?i).*javascript:.*') &&
                        (newData.child('type').val() === 'home' || 
                         newData.child('type').val() === 'work' || 
                         newData.child('type').val() === 'school' || 
@@ -244,10 +255,12 @@
           ".validate": "newData.hasChildren(['type', 'title', 'message', 'createdAt']) &&
                        newData.child('title').val().length >= 1 && 
                        newData.child('title').val().length <= 100 &&
-                       !newData.child('title').val().matches('.*[<>\"\\'].*') &&
+                       !newData.child('title').val().matches('(?i).*<[^>]+>.*') &&
+                       !newData.child('title').val().matches('(?i).*javascript:.*') &&
                        newData.child('message').val().length >= 1 && 
                        newData.child('message').val().length <= 500 &&
-                       !newData.child('message').val().matches('.*[<>\"\\'].*') &&
+                       !newData.child('message').val().matches('(?i).*<[^>]+>.*') &&
+                       !newData.child('message').val().matches('(?i).*javascript:.*') &&
                        (newData.child('type').val() === 'alert_sent' || 
                         newData.child('type').val() === 'alert_received' || 
                         newData.child('type').val() === 'friend_request_sent' || 

@@ -262,9 +262,9 @@ class InputSanitizationService {
       errors.push('Longitude must be between -180 and 180')
     }
 
-    // Round to reasonable precision (6 decimal places ≈ 0.1 meter accuracy)
-    const sanitizedLat = Math.round(lat * 1000000) / 1000000
-    const sanitizedLng = Math.round(lng * 1000000) / 1000000
+    // Round to reasonable precision (4 decimal places ≈ 11 meter accuracy)
+    const sanitizedLat = Math.round(lat * 10000) / 10000
+    const sanitizedLng = Math.round(lng * 10000) / 10000
 
     return {
       isValid: errors.length === 0,
