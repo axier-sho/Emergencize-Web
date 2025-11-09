@@ -96,7 +96,7 @@ export default function TermsOfServicePage() {
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
 
-  const toc = useMemo(() => sections.map((s) => ({ id: slugify(s.title), title: s.title })), [])
+  const toc = useMemo(() => sections.map((s) => ({ id: slugify(s.title), title: s.title })), [sections])
   const [activeId, setActiveId] = useState<string>(toc[0]?.id || '')
 
   useEffect(() => {

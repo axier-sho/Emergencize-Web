@@ -18,9 +18,9 @@ const missingVapidConfig = [
   !VAPID_SUBJECT ? 'VAPID_SUBJECT' : null
 ].filter(Boolean)
 
-if (missingVapidConfig.length === 0) {
+if (missingVapidConfig.length === 0 && VAPID_SUBJECT && VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
   try {
-    webpush.setVapidDetails(VAPID_SUBJECT as string, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY)
+    webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY)
   } catch (e) {
     console.error('Failed to set VAPID details', e)
   }

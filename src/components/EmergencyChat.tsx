@@ -315,7 +315,7 @@ export default function EmergencyChat({
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [isOpen])
+  }, [isOpen, sendEmergencyAlert])
 
   const handleTyping = () => {
     if (socket) {
