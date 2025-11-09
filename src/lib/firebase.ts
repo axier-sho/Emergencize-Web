@@ -1,6 +1,6 @@
-import { initializeApp, type FirebaseOptions } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
+import { initializeApp, type FirebaseOptions, type FirebaseApp } from 'firebase/app'
+import { getAuth, type Auth } from 'firebase/auth'
+import { getFirestore, type Firestore } from 'firebase/firestore'
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -22,15 +22,43 @@ const requiredFields: (keyof typeof firebaseConfig)[] = [
 
 const missing = requiredFields.filter((field) => !firebaseConfig[field])
 
-if (missing.length > 0) {
-  throw new Error(
-    `Missing required Firebase config: ${missing.join(
-      ', '
-    )}. Please set the corresponding environment variables.`
-  )
+let app: FirebaseApp | null = null
+let auth: Auth | null = null
+let db: Firestore | null = null
+
+// Only initialize Firebase if config is present
+// This allows the app to load even without Firebase config
+if (missing.length === 0) {
+  try {
+    app = initializeApp(firebaseConfig as FirebaseOptions)
+    auth = getAuth(app)
+    db = getFirestore(app)
+  } catch (error) {
+    console.error('Failed to initialize Firebase:', error)
+    // In development, log a helpful message
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(
+        'Firebase initialization failed. Please check your environment variables:\n' +
+        `Missing: ${missing.join(', ')}\n` +
+        'Create a .env.local file with NEXT_PUBLIC_FIREBASE_* variables.'
+      )
+    }
+  }
+} else {
+  // In development, show a helpful error
+  if (process.env.NODE_ENV === 'development') {
+    console.warn(
+      `Missing required Firebase config: ${missing.join(', ')}.\n` +
+      'Please set the corresponding environment variables in .env.local'
+    )
+  }
 }
 
-const app = initializeApp(firebaseConfig as FirebaseOptions)
-export const auth = getAuth(app)
-export const db = getFirestore(app)
+// Export with fallback checks
+export { auth, db }
 export default app
+
+// Helper to check if Firebase is initialized
+export function isFirebaseInitialized(): boolean {
+  return app !== null && auth !== null && db !== null
+}

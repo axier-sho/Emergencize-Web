@@ -40,6 +40,11 @@ export default class ErrorBoundary extends Component<Props, State> {
   reportError = (error: Error, errorInfo: ErrorInfo) => {
     // This could send error reports to a service like Sentry
     try {
+      // Check if we're in a browser environment
+      if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+        return
+      }
+      
       const errorReport = {
         message: error.message,
         stack: error.stack,

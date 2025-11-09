@@ -128,6 +128,9 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', lock
               if (phoneHintIndex === -1) {
                 throw new Error('Unsupported second factor')
               }
+              if (!auth) {
+                throw new Error('Firebase is not configured. Please check your environment variables.')
+              }
               const phoneInfoOptions = {
                 multiFactorHint: resolver.hints[phoneHintIndex],
                 session: resolver.session

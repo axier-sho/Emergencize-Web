@@ -12,7 +12,7 @@ import {
   multiFactor,
   PhoneMultiFactorGenerator
 } from 'firebase/auth'
-import { auth } from '@/lib/firebase'
+import { auth, isFirebaseInitialized } from '@/lib/firebase'
 import { createUserProfile, getUserProfile, updateUserStatus } from '@/lib/database'
 
 export function useAuth() {
@@ -22,6 +22,12 @@ export function useAuth() {
   const [recaptchaCache] = useState<Record<string, RecaptchaVerifier>>({})
 
   useEffect(() => {
+    // If Firebase is not initialized, set loading to false and return
+    if (!auth || !isFirebaseInitialized()) {
+      setLoading(false)
+      return
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         // Update user status to online
@@ -39,6 +45,9 @@ export function useAuth() {
   }, [])
 
   const login = async (email: string, password: string) => {
+    if (!auth) {
+      throw new Error('Firebase is not configured. Please check your environment variables.')
+    }
     try {
       await signInWithEmailAndPassword(auth, email, password)
     } catch (error: any) {
@@ -48,6 +57,9 @@ export function useAuth() {
   }
 
   const register = async (email: string, password: string) => {
+    if (!auth) {
+      throw new Error('Firebase is not configured. Please check your environment variables.')
+    }
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       const user = userCredential.user
@@ -77,6 +89,9 @@ export function useAuth() {
   // Sends an SMS code to enroll Phone as a multi-factor during signup
   // Returns the verificationId which must be used with the user's code
   const sendMfaEnrollmentCode = async (phoneNumber: string, recaptchaContainerId: string): Promise<string> => {
+    if (!auth) {
+      throw new Error('Firebase is not configured. Please check your environment variables.')
+    }
     if (!auth.currentUser) {
       throw new Error('Must be signed in to enroll MFA')
     }
@@ -97,6 +112,9 @@ export function useAuth() {
 
   // Completes MFA enrollment with the code user received by SMS
   const enrollMfaWithCode = async (verificationId: string, verificationCode: string, displayName = 'SMS') => {
+    if (!auth) {
+      throw new Error('Firebase is not configured. Please check your environment variables.')
+    }
     if (!auth.currentUser) {
       throw new Error('Must be signed in to enroll MFA')
     }
@@ -106,6 +124,11 @@ export function useAuth() {
   }
 
   const logout = async () => {
+    if (!auth) {
+      // If Firebase is not configured, just clear local state
+      setUser(null)
+      return
+    }
     try {
       if (user) {
         // Try to mark offline but don't block sign-out if this fails (e.g., missing profile doc)
