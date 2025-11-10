@@ -64,6 +64,16 @@ class RateLimitService {
       throw new Error(`No rate limit configuration found for operation: ${operation}`)
     }
 
+    const firestoreDb = db
+    if (!firestoreDb) {
+      console.warn('Firebase db not initialized. Allowing operation by default.')
+      return {
+        allowed: true,
+        remaining: config.maxRequests - 1,
+        resetTime: Date.now() + config.intervalMinutes * 60 * 1000
+      }
+    }
+
     const rateLimitKey = `${userId}_${operation}`
     const now = Date.now()
     const windowMs = config.intervalMinutes * 60 * 1000
@@ -71,7 +81,7 @@ class RateLimitService {
 
     try {
       // Get current rate limit data from Firestore
-      const rateLimitRef = doc(db, 'rateLimits', rateLimitKey)
+      const rateLimitRef = doc(firestoreDb, 'rateLimits', rateLimitKey)
       const rateLimitDoc = await getDoc(rateLimitRef)
       
       let rateLimitData: RateLimitData = {
@@ -190,7 +200,11 @@ class RateLimitService {
    */
   async resetRateLimit(userId: string, operation: string): Promise<void> {
     const rateLimitKey = `${userId}_${operation}`
-    const rateLimitRef = doc(db, 'rateLimits', rateLimitKey)
+    const firestoreDb = db
+    if (!firestoreDb) {
+      throw new Error('Firebase db not initialized')
+    }
+    const rateLimitRef = doc(firestoreDb, 'rateLimits', rateLimitKey)
     
     try {
       await setDoc(rateLimitRef, {
@@ -220,15 +234,20 @@ class RateLimitService {
       throw new Error(`No rate limit configuration found for operation: ${operation}`)
     }
 
+    const firestoreDb = db
+    if (!firestoreDb) {
+      throw new Error('Firebase db not initialized')
+    }
+
     const rateLimitKey = `${userId}_${operation}`
-    const rateLimitRef = doc(db, 'rateLimits', rateLimitKey)
+    const rateLimitRef = doc(firestoreDb, 'rateLimits', rateLimitKey)
     
     try {
       const rateLimitDoc = await getDoc(rateLimitRef)
       const current = rateLimitDoc.exists() ? rateLimitDoc.data() as RateLimitData : null
       
       // Get status without incrementing counter
-      const status = await this.checkRateLimitStatus(userId, operation, config)
+      const status = await this.checkRateLimitStatus(userId, operation, config, firestoreDb)
       
       return { config, current, status }
     } catch (error) {
@@ -243,14 +262,24 @@ class RateLimitService {
   private async checkRateLimitStatus(
     userId: string, 
     operation: string, 
-    config: RateLimitConfig
+    config: RateLimitConfig,
+    firestoreDbOverride?: typeof db
   ): Promise<RateLimitResult> {
+    const firestoreDb = firestoreDbOverride ?? db
+    if (!firestoreDb) {
+      return {
+        allowed: true,
+        remaining: config.maxRequests,
+        resetTime: Date.now() + config.intervalMinutes * 60 * 1000
+      }
+    }
+
     const rateLimitKey = `${userId}_${operation}`
     const now = Date.now()
     const windowMs = config.intervalMinutes * 60 * 1000
 
     try {
-      const rateLimitRef = doc(db, 'rateLimits', rateLimitKey)
+      const rateLimitRef = doc(firestoreDb, 'rateLimits', rateLimitKey)
       const rateLimitDoc = await getDoc(rateLimitRef)
       
       if (!rateLimitDoc.exists()) {

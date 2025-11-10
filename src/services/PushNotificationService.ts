@@ -229,7 +229,7 @@ class PushNotificationService {
       // Include auth token if available
       let token: string | undefined
       try {
-        token = await auth.currentUser?.getIdToken()
+        token = await auth?.currentUser?.getIdToken()
       } catch {}
 
       const response = await fetch('/api/push/send', {

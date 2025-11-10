@@ -79,6 +79,13 @@ export function useSocket({
   useEffect(() => {
     if (!userId) return
 
+    if (!auth) {
+      logger.error('Firebase auth not initialized, skipping socket connection')
+      return
+    }
+
+    const firebaseAuth = auth
+
     let isCancelled = false
     let activeSocket: Socket | null = null
     setConnectionAttempted(true)
@@ -100,7 +107,7 @@ export function useSocket({
         !signal.aborted && !isCancelled && activeAttemptIdRef.current === attemptId
 
       try {
-        const currentUser = auth.currentUser
+        const currentUser = firebaseAuth.currentUser
         if (!currentUser || !attemptIsActive()) {
           return
         }
@@ -192,7 +199,7 @@ export function useSocket({
           }
           logger.info('Reconnection attempt %d/2', attemptNumber)
           try {
-            const refreshed = await auth.currentUser?.getIdToken(true)
+            const refreshed = await firebaseAuth.currentUser?.getIdToken(true)
             if (refreshed) {
               newSocket.auth = { token: refreshed }
             }
@@ -270,13 +277,13 @@ export function useSocket({
       }
     }
 
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+    const unsubscribe = firebaseAuth.onAuthStateChanged((currentUser) => {
       if (currentUser && !isCancelled) {
         void connectSocket()
       }
     })
 
-    if (auth.currentUser) {
+    if (firebaseAuth.currentUser) {
       void connectSocket()
     } else {
       logger.info('Waiting for user authentication before connecting socket')

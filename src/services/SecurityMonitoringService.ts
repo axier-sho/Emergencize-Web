@@ -108,20 +108,28 @@ class SecurityMonitoringService {
       }
 
       // Add to Firestore audit log
-      const docRef = await addDoc(collection(db, 'auditLog'), {
-        ...enrichedEvent,
-        timestamp: Timestamp.fromDate(enrichedEvent.timestamp)
-      })
+      const firestoreDb = db
 
-      // Check if this event should trigger an alert
-      await this.checkForSecurityAlert(enrichedEvent)
+      if (firestoreDb) {
+        const docRef = await addDoc(collection(firestoreDb, 'auditLog'), {
+          ...enrichedEvent,
+          timestamp: Timestamp.fromDate(enrichedEvent.timestamp)
+        })
 
-      // Store locally for immediate access
+        // Check if this event should trigger an alert
+        await this.checkForSecurityAlert(enrichedEvent)
+
+        // Store locally for immediate access
+        this.storeEventLocally(enrichedEvent)
+
+        console.log('Security event logged:', enrichedEvent)
+        
+        return docRef.id
+      }
+
+      console.warn('Firestore not initialized; storing security event locally.')
       this.storeEventLocally(enrichedEvent)
-
-      console.log('Security event logged:', enrichedEvent)
-      
-      return docRef.id
+      return `local-${enrichedEvent.timestamp.getTime()}`
 
     } catch (error) {
       console.error('Failed to log security event:', error)
@@ -142,7 +150,12 @@ class SecurityMonitoringService {
    */
   async createSecurityAlert(alert: Omit<SecurityAlert, 'id' | 'timestamp'>): Promise<string> {
     try {
-      const docRef = await addDoc(collection(db, 'securityAlerts'), {
+      const firestoreDb = db
+      if (!firestoreDb) {
+        throw new Error('Firestore not initialized')
+      }
+
+      const docRef = await addDoc(collection(firestoreDb, 'securityAlerts'), {
         ...alert,
         timestamp: Timestamp.fromDate(new Date())
       })
@@ -169,8 +182,14 @@ class SecurityMonitoringService {
     eventType?: SecurityEventType
   ): Promise<SecurityEvent[]> {
     try {
+      const firestoreDb = db
+      if (!firestoreDb) {
+        console.warn('Firestore not initialized; returning cached events only.')
+        return []
+      }
+
       let q = query(
-        collection(db, 'auditLog'),
+        collection(firestoreDb, 'auditLog'),
         where('userId', '==', userId),
         orderBy('timestamp', 'desc'),
         limit(limitCount)
@@ -178,7 +197,7 @@ class SecurityMonitoringService {
 
       if (eventType) {
         q = query(
-          collection(db, 'auditLog'),
+          collection(firestoreDb, 'auditLog'),
           where('userId', '==', userId),
           where('type', '==', eventType),
           orderBy('timestamp', 'desc'),
@@ -360,8 +379,14 @@ class SecurityMonitoringService {
       const hours = timeframe === '24h' ? 24 : timeframe === '7d' ? 168 : 720 // 30d
       const cutoffTime = new Date(Date.now() - hours * 60 * 60 * 1000)
 
+      const firestoreDb = db
+      if (!firestoreDb) {
+        console.warn('Firestore not initialized; returning empty metrics.')
+        return this.getEmptyMetrics()
+      }
+
       const q = query(
-        collection(db, 'auditLog'),
+        collection(firestoreDb, 'auditLog'),
         where('timestamp', '>=', Timestamp.fromDate(cutoffTime)),
         orderBy('timestamp', 'desc')
       )

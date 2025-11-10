@@ -22,7 +22,9 @@ export function usePushNotifications() {
   const sendSubscriptionToBackend = useCallback(
     async (subscriptionData: PushSubscriptionData): Promise<boolean> => {
       try {
-        const token = await auth.currentUser?.getIdToken()
+        const token = auth?.currentUser
+          ? await auth.currentUser.getIdToken()
+          : undefined
         const response = await fetch('/api/push-subscriptions', {
           method: 'POST',
           headers: {
@@ -49,7 +51,9 @@ export function usePushNotifications() {
   const removeSubscriptionFromBackend = useCallback(
     async (endpoint?: string): Promise<boolean> => {
       try {
-        const token = await auth.currentUser?.getIdToken()
+        const token = auth?.currentUser
+          ? await auth.currentUser.getIdToken()
+          : undefined
         const response = await fetch('/api/push-subscriptions', {
           method: 'DELETE',
           headers: {

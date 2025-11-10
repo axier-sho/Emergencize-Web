@@ -34,9 +34,18 @@ export const useSecureAuth = (): AuthState & AuthActions => {
   const TOKEN_EXPIRY_BUFFER = 5 * 60 * 1000 // 5 minutes buffer
 
   useEffect(() => {
+    if (!auth) {
+      setError('Firebase auth not initialized')
+      setUser(null)
+      setLoading(false)
+      return
+    }
+
     let refreshInterval: NodeJS.Timeout | null = null
 
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const firebaseAuth = auth
+
+    const unsubscribe = onAuthStateChanged(firebaseAuth, async (firebaseUser) => {
       try {
         setError(null)
         
@@ -106,13 +115,16 @@ export const useSecureAuth = (): AuthState & AuthActions => {
   }, [TOKEN_REFRESH_INTERVAL])
 
   const refreshToken = async (): Promise<void> => {
-    if (!auth.currentUser) {
+    const firebaseAuth = auth
+
+    if (!firebaseAuth?.currentUser) {
       throw new Error('No authenticated user')
     }
 
     try {
-      const token = await getIdToken(auth.currentUser, true)
-      const tokenResult = await auth.currentUser.getIdTokenResult()
+      const currentUser = firebaseAuth.currentUser
+      const token = await getIdToken(currentUser, true)
+      const tokenResult = await currentUser.getIdTokenResult()
       
       setUser(prevUser => {
         if (!prevUser) return null
@@ -134,7 +146,13 @@ export const useSecureAuth = (): AuthState & AuthActions => {
   const logout = async (): Promise<void> => {
     try {
       setError(null)
-      await signOut(auth)
+      const firebaseAuth = auth
+
+      if (!firebaseAuth) {
+        throw new Error('Firebase auth not initialized')
+      }
+
+      await signOut(firebaseAuth)
       setUser(null)
     } catch (error) {
       console.error('Logout error:', error)
@@ -256,7 +274,7 @@ export const makeAuthenticatedRequest = async (
   try {
     if (authUser) {
       token = await getIdToken(authUser, false)
-    } else if (auth.currentUser) {
+    } else if (auth?.currentUser) {
       token = await getIdToken(auth.currentUser, false)
     }
   } catch (e) {
