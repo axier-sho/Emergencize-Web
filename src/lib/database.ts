@@ -123,10 +123,21 @@ export const getUserProfile = async (uid: string): Promise<User | null> => {
 export const updateUserProfile = async (uid: string, updates: Partial<User> & Record<string, any>) => {
   const firestoreDb = requireDb()
   const userRef = doc(firestoreDb, 'users', uid)
-  if (typeof updates.email === 'string') {
-    updates.normalizedEmail = normalizeEmail(updates.email)
+
+  const cleanedUpdates: Record<string, any> = {}
+  Object.entries(updates).forEach(([key, value]) => {
+    if (value !== undefined) {
+      cleanedUpdates[key] = value
+    }
+  })
+
+  if (typeof cleanedUpdates.email === 'string') {
+    cleanedUpdates.normalizedEmail = normalizeEmail(cleanedUpdates.email)
   }
-  await updateDoc(userRef, updates)
+
+  cleanedUpdates.updatedAt = serverTimestamp()
+
+  await setDoc(userRef, cleanedUpdates, { merge: true })
 }
 
 export const updateUserStatus = async (uid: string, isOnline: boolean) => {
