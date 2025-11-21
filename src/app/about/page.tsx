@@ -101,12 +101,12 @@ export default function AboutPage() {
         isScrolled ? 'top-6 px-6' : 'top-0 px-0'
       }`}>
         <motion.nav
-          className={`w-full backdrop-blur-2xl bg-white/5 border border-white/10 shadow-2xl transition-all duration-500 ${
+          className={`w-full backdrop-blur-xl bg-white/[0.08] border border-white/[0.15] shadow-2xl transition-all duration-500 ${
             isScrolled ? 'max-w-6xl rounded-full' : 'max-w-full rounded-none border-t-0 border-x-0'
           }`}
-          initial={{ opacity: 0, y: -40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
         >
           <div className={`flex justify-between items-center transition-all duration-500 ${
             isScrolled ? 'px-8 py-4' : 'px-8 md:px-16 lg:px-24 py-3'
@@ -128,7 +128,7 @@ export default function AboutPage() {
             href="https://github.com/axier-sho"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden md:flex items-center text-slate-300 hover:text-white transition-all px-5 py-2.5 rounded-full hover:bg-white/5"
+            className="hidden md:flex items-center text-slate-300 hover:text-white transition-all px-5 py-2.5 rounded-full hover:bg-white/[0.08] text-sm font-medium"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             transition={{ duration: 0.2 }}
@@ -144,7 +144,7 @@ export default function AboutPage() {
                   setAuthMode('login')
                   setAuthModalOpen(true)
                 }}
-                className="flex items-center space-x-2 px-5 py-2.5 text-white hover:bg-white/10 rounded-full transition-all text-sm font-medium"
+                className="flex items-center space-x-2 px-5 py-2.5 text-white hover:bg-white/[0.12] rounded-full transition-all text-sm font-medium"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 transition={{ duration: 0.2 }}
@@ -180,7 +180,7 @@ export default function AboutPage() {
               </Link>
               <motion.button
                 onClick={logout}
-                className="px-5 py-2.5 text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-all text-sm font-medium"
+                className="px-5 py-2.5 text-slate-300 hover:text-white hover:bg-white/[0.12] rounded-full transition-all text-sm font-medium"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 transition={{ duration: 0.2 }}
@@ -232,7 +232,7 @@ export default function AboutPage() {
 
             {/* Mission Statement */}
             <motion.div
-              className="backdrop-blur-sm bg-white/[0.02] border border-white/5 rounded-3xl max-w-5xl mx-auto mb-32 p-12"
+              className="backdrop-blur-sm bg-white/[0.05] border border-white/[0.12] rounded-3xl max-w-5xl mx-auto mb-32 p-12"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
@@ -264,7 +264,7 @@ export default function AboutPage() {
                 {features.map((feature, index) => (
                   <motion.div
                     key={index}
-                    className="backdrop-blur-sm bg-white/[0.02] border border-white/5 rounded-3xl p-8 transition-all duration-500 hover:bg-white/[0.04] hover:border-white/10"
+                    className="backdrop-blur-sm bg-white/[0.05] border border-white/[0.12] rounded-3xl p-8 transition-all duration-500 hover:bg-white/[0.08] hover:border-white/[0.2]"
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
@@ -292,7 +292,7 @@ export default function AboutPage() {
                 {technologies.map((tech, index) => (
                   <motion.div
                     key={index}
-                    className="backdrop-blur-sm bg-white/[0.02] border border-white/5 rounded-3xl p-8 text-center transition-all duration-500 hover:bg-white/[0.04] hover:border-white/10"
+                    className="backdrop-blur-sm bg-white/[0.05] border border-white/[0.12] rounded-3xl p-8 text-center transition-all duration-500 hover:bg-white/[0.08] hover:border-white/[0.2]"
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.5, delay: 0.9 + index * 0.1 }}
@@ -321,7 +321,7 @@ export default function AboutPage() {
               </h2>
               <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
                 <motion.div
-                  className="backdrop-blur-sm bg-white/[0.02] border border-white/5 rounded-3xl p-10 transition-all duration-500 hover:bg-white/[0.04] hover:border-blue-500/30"
+                  className="backdrop-blur-sm bg-white/[0.05] border border-white/[0.12] rounded-3xl p-10 transition-all duration-500 hover:bg-white/[0.08] hover:border-blue-500/40"
                   whileHover={{ y: -4 }}
                   transition={{ duration: 0.3 }}
                 >
@@ -352,7 +352,7 @@ export default function AboutPage() {
                 </motion.div>
 
                 <motion.div
-                  className="backdrop-blur-sm bg-white/[0.02] border border-white/5 rounded-3xl p-10 transition-all duration-500 hover:bg-white/[0.04] hover:border-red-500/30"
+                  className="backdrop-blur-sm bg-white/[0.05] border border-white/[0.12] rounded-3xl p-10 transition-all duration-500 hover:bg-white/[0.08] hover:border-red-500/40"
                   whileHover={{ y: -4 }}
                   transition={{ duration: 0.3 }}
                 >
