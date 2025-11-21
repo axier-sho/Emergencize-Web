@@ -10,7 +10,9 @@ import {
   RecaptchaVerifier,
   PhoneAuthProvider,
   multiFactor,
-  PhoneMultiFactorGenerator
+  PhoneMultiFactorGenerator,
+  GoogleAuthProvider,
+  signInWithPopup
 } from 'firebase/auth'
 import { auth, isFirebaseInitialized } from '@/lib/firebase'
 import { createUserProfile, getUserProfile, updateUserStatus } from '@/lib/database'
@@ -123,6 +125,40 @@ export function useAuth() {
     await multiFactor(auth.currentUser).enroll(assertion, displayName)
   }
 
+  const loginWithGoogle = async () => {
+    if (!auth) {
+      throw new Error('Firebase is not configured. Please check your environment variables.')
+    }
+    try {
+      const provider = new GoogleAuthProvider()
+      const result = await signInWithPopup(auth, provider)
+      const user = result.user
+      
+      // Check if user profile exists, if not create it
+      const existingProfile = await getUserProfile(user.uid)
+      if (!existingProfile) {
+        const profileData: any = {
+          uid: user.uid,
+          email: user.email!
+        }
+        
+        if (user.displayName) {
+          profileData.displayName = user.displayName
+        }
+        
+        if (user.photoURL) {
+          profileData.photoURL = user.photoURL
+        }
+        
+        await createUserProfile(profileData)
+      }
+      
+      return user
+    } catch (error: any) {
+      throw new Error(error.message)
+    }
+  }
+
   const logout = async () => {
     if (!auth) {
       // If Firebase is not configured, just clear local state
@@ -153,6 +189,7 @@ export function useAuth() {
     register,
     logout,
     sendMfaEnrollmentCode,
-    enrollMfaWithCode
+    enrollMfaWithCode,
+    loginWithGoogle
   }
 }

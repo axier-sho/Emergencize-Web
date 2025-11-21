@@ -29,7 +29,6 @@ import { useAuth } from '@/hooks/useAuth'
 export default function AboutPage() {
   const [showContent, setShowContent] = useState(false)
   const [authModalOpen, setAuthModalOpen] = useState(false)
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login')
   const [isScrolled, setIsScrolled] = useState(false)
   const { user, logout } = useAuth()
 
@@ -140,10 +139,7 @@ export default function AboutPage() {
           {!user ? (
             <>
               <motion.button
-                onClick={() => {
-                  setAuthMode('login')
-                  setAuthModalOpen(true)
-                }}
+                onClick={() => setAuthModalOpen(true)}
                 className="flex items-center space-x-2 px-5 py-2.5 text-white hover:bg-white/[0.12] rounded-full transition-all text-sm font-medium"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -154,10 +150,7 @@ export default function AboutPage() {
               </motion.button>
               
               <motion.button
-                onClick={() => {
-                  setAuthMode('signup')
-                  setAuthModalOpen(true)
-                }}
+                onClick={() => setAuthModalOpen(true)}
                 className="px-6 py-2.5 rounded-full bg-white text-black font-semibold text-sm hover:bg-white/90 transition-all shadow-lg"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -418,8 +411,6 @@ export default function AboutPage() {
       <AuthModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
-        initialMode={authMode}
-        lockMode={false}
       />
     </div>
   )

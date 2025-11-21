@@ -14,8 +14,6 @@ export default function LandingPage() {
   const router = useRouter()
   const [showContent, setShowContent] = useState(false)
   const [authModalOpen, setAuthModalOpen] = useState(false)
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login')
-  const [lockAuthMode, setLockAuthMode] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const isClient = useClient()
   const { user, logout } = useAuth()
@@ -70,9 +68,19 @@ export default function LandingPage() {
         isScrolled ? 'top-6 px-6' : 'top-0 px-0'
       }`}>
         <motion.nav
-          className={`w-full backdrop-blur-xl bg-white/[0.08] border border-white/[0.15] shadow-2xl transition-all duration-500 ${
-            isScrolled ? 'max-w-6xl rounded-full' : 'max-w-full rounded-none border-t-0 border-x-0'
+          className={`w-full transition-all duration-500 ${
+            isScrolled 
+              ? 'max-w-6xl rounded-full backdrop-blur-xl bg-white/[0.08] border border-white/[0.08] shadow-2xl' 
+              : 'max-w-full rounded-none'
           }`}
+          style={isScrolled ? {
+            backgroundImage: `
+              radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px),
+              radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: '20px 20px, 40px 40px',
+            backgroundPosition: '0 0, 10px 10px'
+          } : {}}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
@@ -139,11 +147,7 @@ export default function LandingPage() {
           {!user ? (
             <>
               <motion.button
-                onClick={() => {
-                  setAuthMode('login')
-                  setLockAuthMode(false)
-                  setAuthModalOpen(true)
-                }}
+                onClick={() => setAuthModalOpen(true)}
                 className="flex items-center space-x-2 px-5 py-2.5 text-white hover:bg-white/[0.12] rounded-full transition-all text-sm font-medium"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -154,11 +158,7 @@ export default function LandingPage() {
               </motion.button>
               
               <motion.button
-                onClick={() => {
-                  setAuthMode('signup')
-                  setLockAuthMode(true)
-                  setAuthModalOpen(true)
-                }}
+                onClick={() => setAuthModalOpen(true)}
                 className="px-6 py-2.5 rounded-full bg-white text-black font-semibold text-sm hover:bg-white/90 transition-all shadow-lg"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -249,8 +249,6 @@ export default function LandingPage() {
                       if (user) {
                         router.push('/dashboard')
                       } else {
-                        setAuthMode('signup')
-                        setLockAuthMode(true)
                         setAuthModalOpen(true)
                       }
                     }}
@@ -394,8 +392,6 @@ export default function LandingPage() {
       <AuthModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
-        initialMode={authMode}
-        lockMode={lockAuthMode}
       />
     </div>
   )
