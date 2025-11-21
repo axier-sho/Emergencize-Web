@@ -164,7 +164,7 @@ export const findUserByEmail = async (email: string): Promise<User | null> => {
     return { uid: userDoc.id, ...userDoc.data() } as User
   }
 
-  const fallbackQuery = query(collection(firestoreDb, 'users'), where('email', '==', email))
+  const fallbackQuery = query(collection(firestoreDb, 'users'), where('email', '==', normalized))
   const fallbackSnapshot = await getDocs(fallbackQuery)
 
   if (!fallbackSnapshot.empty) {
