@@ -63,29 +63,48 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen relative">
+      {/* SVG Pattern Definition */}
+      <svg width="0" height="0" className="absolute">
+        <defs>
+          <pattern id="plus-pattern" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse">
+            {/* Horizontal bar of plus */}
+            <rect x="2" y="2.5" width="2" height="1" fill="rgba(148, 163, 184, 0.15)" />
+            {/* Vertical bar of plus */}
+            <rect x="2.5" y="2" width="1" height="2" fill="rgba(148, 163, 184, 0.15)" />
+          </pattern>
+        </defs>
+      </svg>
+
       {/* Upscayl-style Floating Navigation - Compact on scroll */}
       <div className={`fixed left-0 right-0 z-50 flex justify-center transition-all duration-500 ${
         isScrolled ? 'top-6 px-6' : 'top-0 px-0'
       }`}>
         <motion.nav
-          className={`w-full transition-all duration-500 ${
+          className={`w-full backdrop-blur-xl shadow-2xl transition-all duration-500 relative overflow-hidden ${
             isScrolled 
-              ? 'max-w-6xl rounded-full backdrop-blur-xl bg-white/[0.08] border border-white/[0.08] shadow-2xl' 
-              : 'max-w-full rounded-none'
+              ? 'max-w-6xl rounded-full bg-white/[0.005] border border-white/[0.15]' 
+              : 'max-w-full rounded-none bg-transparent border border-transparent'
           }`}
-          style={isScrolled ? {
-            backgroundImage: `
-              radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px),
-              radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)
-            `,
-            backgroundSize: '20px 20px, 40px 40px',
-            backgroundPosition: '0 0, 10px 10px'
-          } : {}}
+          style={{
+            backgroundImage: 'url(#plus-pattern)'
+          }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          <div className={`flex justify-between items-center transition-all duration-500 ${
+          {/* Plus pattern overlay - only show when scrolled */}
+          {isScrolled && (
+            <div 
+              className="absolute inset-0 opacity-100"
+              style={{
+                backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Crect x=\'2\' y=\'2.5\' width=\'2\' height=\'1\' fill=\'rgba(148, 163, 184, 0.15)\'/%3E%3Crect x=\'2.5\' y=\'2\' width=\'1\' height=\'2\' fill=\'rgba(148, 163, 184, 0.15)\'/%3E%3C/svg%3E")',
+                backgroundSize: '6px 6px',
+                backgroundRepeat: 'repeat',
+                pointerEvents: 'none'
+              }}
+            />
+          )}
+          <div className={`flex justify-between items-center transition-all duration-500 relative z-10 bg-white/[0] ${
             isScrolled ? 'px-8 py-4' : 'px-8 md:px-16 lg:px-24 py-3'
           }`}>
         <Link href="/">
