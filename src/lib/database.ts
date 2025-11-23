@@ -194,14 +194,24 @@ export const addContact = async (userId: string, contactUserId: string, nickname
   }
 
   const contactRef = collection(firestoreDb, 'contacts')
-  const docRef = await addDoc(contactRef, {
+  
+  // Build contact data, excluding undefined values
+  const contactData: any = {
     userId,
     contactUserId,
-    nickname,
-    relationship,
     createdAt: serverTimestamp(),
     status: 'active'
-  })
+  }
+  
+  if (nickname !== undefined) {
+    contactData.nickname = nickname
+  }
+  
+  if (relationship !== undefined) {
+    contactData.relationship = relationship
+  }
+  
+  const docRef = await addDoc(contactRef, contactData)
 
   return docRef.id
 }
