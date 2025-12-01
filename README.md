@@ -74,7 +74,9 @@ npm install
 ### 2. Set Up Firebase (Required)
 
 1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
-2. Enable **Authentication** > Sign-in method > **Email/Password**
+2. Enable **Authentication** > Sign-in method:
+   - **Email/Password** - Enable this provider
+   - **Google** - Enable this provider and set your support email
 3. Enable **Firestore Database** in test mode
 4. Enable **Realtime Database** in test mode
 5. Copy your Firebase config and create `.env.local`:
@@ -463,6 +465,19 @@ cat .env.local
 # 1. Authentication enabled with Email/Password
 # 2. Firestore Database created
 # 3. Realtime Database created
+```
+
+**❌ Google Sign-In error: "Firebase: Error (auth/internal-error)"**
+```
+Cause: Google Sign-In provider is not enabled in Firebase Console
+
+Solution:
+1. Go to Firebase Console > Authentication > Sign-in method
+2. Click on "Google" in the providers list
+3. Toggle "Enable" and set your support email
+4. Click "Save"
+5. Verify "localhost" is in Authorized domains
+6. Refresh your app and try again
 ```
 
 **❌ Socket.io server won't start**

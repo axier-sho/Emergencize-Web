@@ -131,6 +131,15 @@ export function useAuth() {
     }
     try {
       const provider = new GoogleAuthProvider()
+      // Add recommended scopes
+      provider.addScope('profile')
+      provider.addScope('email')
+      
+      // Set custom parameters to ensure proper auth flow
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      })
+      
       const result = await signInWithPopup(auth, provider)
       const user = result.user
 
@@ -159,7 +168,22 @@ export function useAuth() {
       if (error.code) console.error('Error Code:', error.code);
       if (error.message) console.error('Error Message:', error.message);
       if (error.customData) console.error('Error Custom Data:', error.customData);
-      throw new Error(error.message)
+      
+      // Provide more specific error messages
+      let errorMessage = error.message
+      if (error.code === 'auth/internal-error') {
+        errorMessage = 'Google Sign-In configuration error. Please check:\n' +
+          '1. OAuth Consent Screen is configured in Google Cloud Console\n' +
+          '2. Authorized domains include your domain\n' +
+          '3. Popups are not blocked by your browser\n' +
+          '4. Third-party cookies are enabled'
+      } else if (error.code === 'auth/popup-blocked') {
+        errorMessage = 'Popup was blocked by your browser. Please allow popups for this site.'
+      } else if (error.code === 'auth/popup-closed-by-user') {
+        errorMessage = 'Sign-in was cancelled. Please try again.'
+      }
+      
+      throw new Error(errorMessage)
     }
   }
 
