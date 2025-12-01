@@ -349,7 +349,7 @@ export default function DashboardPage() {
 
     try {
       await addContact(targetUser.uid, nickname, relationship)
-      logger.info('Contact added: %s', targetUser.uid)
+      logger.info('Contact added: %s', targetUser.uid)1 
     } catch (error: any) {
       logger.error('Error adding contact:', error?.message ?? error)
       throw error

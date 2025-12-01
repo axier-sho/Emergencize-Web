@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { 
+import {
   User,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -65,24 +65,24 @@ export function useAuth() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       const user = userCredential.user
-      
+
       // Create user profile in Firestore
       // Only include fields that are not undefined
       const profileData: any = {
         uid: user.uid,
         email: user.email!
       }
-      
+
       if (user.displayName) {
         profileData.displayName = user.displayName
       }
-      
+
       if (user.photoURL) {
         profileData.photoURL = user.photoURL
       }
-      
+
       await createUserProfile(profileData)
-      
+
     } catch (error: any) {
       throw new Error(error.message)
     }
@@ -133,7 +133,7 @@ export function useAuth() {
       const provider = new GoogleAuthProvider()
       const result = await signInWithPopup(auth, provider)
       const user = result.user
-      
+
       // Check if user profile exists, if not create it
       const existingProfile = await getUserProfile(user.uid)
       if (!existingProfile) {
@@ -141,20 +141,24 @@ export function useAuth() {
           uid: user.uid,
           email: user.email!
         }
-        
+
         if (user.displayName) {
           profileData.displayName = user.displayName
         }
-        
+
         if (user.photoURL) {
           profileData.photoURL = user.photoURL
         }
-        
+
         await createUserProfile(profileData)
       }
-      
+
       return user
     } catch (error: any) {
+      console.error('Google Sign-In Error:', error);
+      if (error.code) console.error('Error Code:', error.code);
+      if (error.message) console.error('Error Message:', error.message);
+      if (error.customData) console.error('Error Custom Data:', error.customData);
       throw new Error(error.message)
     }
   }
@@ -177,7 +181,7 @@ export function useAuth() {
       await signOut(auth)
     } catch (error: any) {
       // As a safety, try signOut again in case status update threw above
-      try { await signOut(auth) } catch {}
+      try { await signOut(auth) } catch { }
       throw new Error(error.message)
     }
   }

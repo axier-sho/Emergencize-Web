@@ -21,6 +21,8 @@ const nextConfig = {
       'https://*.firebaseio.com',
       'https://firestore.googleapis.com',
       'https://www.googleapis.com',
+      'https://identitytoolkit.googleapis.com',
+      'https://securetoken.googleapis.com',
       'https://vitals.vercel-insights.com',
       'ws:',
       'wss:',
