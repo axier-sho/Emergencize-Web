@@ -19,11 +19,11 @@ import QuickActions from '@/components/QuickActions'
 import ContactManager from '@/components/ContactManager'
 import SettingsModal from '@/components/SettingsModal'
 import EmergencyChat from '@/components/EmergencyChat'
-import { 
-  Settings, 
-  LogOut, 
-  Home, 
-  Bell, 
+import {
+  Settings,
+  LogOut,
+  Home,
+  Bell,
   Activity,
   Wifi,
   WifiOff,
@@ -204,7 +204,7 @@ export default function DashboardPage() {
     userId: user?.uid,
     onEmergencyAlert: handleEmergencyAlertReceived
   })
-  
+
   const networkStatus = useNetworkStatus(isConnected)
 
   // Get user location
@@ -252,8 +252,8 @@ export default function DashboardPage() {
     }
     setLastAlertTime(now)
 
-    const message = type === 'danger' 
-      ? 'Emergency! I need immediate assistance!' 
+    const message = type === 'danger'
+      ? 'Emergency! I need immediate assistance!'
       : 'I need help, please respond when you can.'
 
     const alertData = {
@@ -284,7 +284,7 @@ export default function DashboardPage() {
         message,
         location: location || undefined
       })
-      
+
       if (networkStatus.connectionType !== 'online') {
         logger.info('Alert saved locally - will sync when online')
       }
@@ -296,7 +296,7 @@ export default function DashboardPage() {
     // Show confirmation based on connection type
     const targetCount = type === 'danger' ? contactIds.length : onlineContactIds.length
     let confirmationMessage = ''
-    
+
     if (networkStatus.connectionType === 'online') {
       confirmationMessage = `${type.toUpperCase()} alert sent to ${targetCount} contact${targetCount !== 1 ? 's' : ''} (real-time)`
     } else if (networkStatus.connectionType === 'browser-only') {
@@ -304,7 +304,7 @@ export default function DashboardPage() {
     } else {
       confirmationMessage = `${type.toUpperCase()} alert queued (will send when back online)`
     }
-    
+
     const confirmationAlert: Alert = {
       id: Date.now().toString(),
       type,
@@ -316,7 +316,7 @@ export default function DashboardPage() {
   }
 
   const dismissAlert = (alertId: string) => {
-    setAlerts(prev => prev.map(alert => 
+    setAlerts(prev => prev.map(alert =>
       alert.id === alertId ? { ...alert, isRead: true } : alert
     ))
   }
@@ -348,10 +348,10 @@ export default function DashboardPage() {
     }
 
     try {
-      await addContact(targetUser.uid, nickname, relationship)
-      logger.info('Contact added: %s', targetUser.uid)1 
+      await sendFriendRequest(email)
+      logger.info('Friend request sent to: %s', email)
     } catch (error: any) {
-      logger.error('Error adding contact:', error?.message ?? error)
+      logger.error('Error sending friend request:', error?.message ?? error)
       throw error
     }
   }
@@ -389,9 +389,9 @@ export default function DashboardPage() {
             <h1 className="text-3xl font-bold text-white mb-2">Access Denied</h1>
             <p className="text-blue-200">Please sign in to access the emergency dashboard</p>
           </div>
-          
+
           <div className="space-y-4">
-            <Link 
+            <Link
               href="/"
               className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center"
             >
@@ -434,7 +434,7 @@ export default function DashboardPage() {
                   </div>
                   <span className="text-white font-bold text-lg hidden sm:block">Emergencize</span>
                 </Link>
-                
+
                 <div className="flex items-center space-x-2 text-sm">
                   {networkStatus.connectionType === 'online' ? (
                     <div className="flex items-center px-3 py-1 bg-emerald-500/20 text-emerald-300 rounded-lg border border-emerald-500/30">
@@ -454,12 +454,12 @@ export default function DashboardPage() {
                   )}
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-3">
                 <span className="text-slate-300 text-sm hidden md:block">
                   Welcome, <span className="text-white font-semibold">{user.email?.split('@')[0]}</span>
                 </span>
-                
+
                 <Link href="/notifications">
                   <motion.button
                     className="p-2.5 text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition-all"
@@ -480,7 +480,7 @@ export default function DashboardPage() {
                     <Home size={20} />
                   </motion.button>
                 </Link>
-                
+
                 <motion.button
                   onClick={() => setSettingsOpen(true)}
                   className="p-2.5 text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition-all"
@@ -489,8 +489,8 @@ export default function DashboardPage() {
                 >
                   <Settings size={20} />
                 </motion.button>
-                
-                <motion.button 
+
+                <motion.button
                   onClick={logout}
                   className="p-2.5 text-red-300 hover:text-white hover:bg-red-500/20 rounded-xl transition-all"
                   whileHover={{ scale: 1.05 }}
@@ -626,14 +626,14 @@ export default function DashboardPage() {
 
             {/* Online Users Sidebar */}
             <div className="xl:col-span-1">
-              <OnlineUsers 
+              <OnlineUsers
                 users={contacts.map(c => ({
                   id: c.id,
                   name: c.nickname || c.user?.displayName || c.user?.email?.split('@')[0] || 'Unknown',
                   isOnline: c.isOnline,
                   lastSeen: c.user?.lastActive?.toDate?.() || undefined
-                }))} 
-                currentUserId={user?.uid} 
+                }))}
+                currentUserId={user?.uid}
               />
             </div>
           </div>
