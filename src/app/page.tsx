@@ -151,7 +151,7 @@ export default function LandingPage() {
           </Link>
           
           <motion.a
-            href="https://github.com/axier-sho"
+            href="https://github.com/axier-sho/Emergencize-Web"
             target="_blank"
             rel="noopener noreferrer"
             className="hidden md:flex items-center text-slate-300 hover:text-white transition-all px-5 py-2.5 rounded-full hover:bg-white/5"
