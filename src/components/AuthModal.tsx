@@ -15,6 +15,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [acceptedTerms, setAcceptedTerms] = useState(false)
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false)
 
   const { loginWithGoogle } = useAuth()
 
@@ -23,11 +24,12 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     setError('')
     setLoading(false)
     setAcceptedTerms(false)
+    setAcceptedPrivacy(false)
   }, [isOpen])
 
   const handleGoogleSignIn = async () => {
-    if (!acceptedTerms) {
-      setError('You must accept the Terms of Service to continue.')
+    if (!acceptedTerms || !acceptedPrivacy) {
+      setError('You must accept both the Terms of Service and Privacy Policy to continue.')
       return
     }
 
@@ -93,8 +95,9 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 Sign in with your Google account to access emergency services
               </p>
 
-              {/* Terms of Service Checkbox */}
-              <div className="mb-6">
+              {/* Terms of Service and Privacy Policy Checkboxes */}
+              <div className="mb-6 space-y-4">
+                {/* Terms of Service */}
                 <div className="flex items-start space-x-3">
                   <input
                     type="checkbox"
@@ -113,7 +116,29 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                       Terms of Service
                       <ExternalLink size={12} />
                     </Link>
-                    {' '}and acknowledge the platform&apos;s emergency disclaimers and limitations.
+                  </label>
+                </div>
+
+                {/* Privacy Policy */}
+                <div className="flex items-start space-x-3">
+                  <input
+                    type="checkbox"
+                    id="acceptPrivacy"
+                    checked={acceptedPrivacy}
+                    onChange={(e) => setAcceptedPrivacy(e.target.checked)}
+                    className="mt-1 w-4 h-4 text-blue-600 bg-transparent border-2 border-white border-opacity-30 rounded focus:ring-blue-500 focus:ring-2"
+                  />
+                  <label htmlFor="acceptPrivacy" className="text-sm text-gray-300 leading-relaxed">
+                    I have read and understood the{' '}
+                    <Link 
+                      href="/privacy-policy" 
+                      target="_blank"
+                      className="text-green-400 hover:text-green-300 underline inline-flex items-center gap-1 transition-colors"
+                    >
+                      Privacy Policy
+                      <ExternalLink size={12} />
+                    </Link>
+                    {' '}and how my data will be collected and used
                   </label>
                 </div>
               </div>
