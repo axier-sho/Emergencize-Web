@@ -401,6 +401,15 @@ export default function AboutPage() {
                   Open source project dedicated to making emergency response accessible to everyone.
                 </p>
                 <p className="text-slate-600 text-xs mt-4">© 2024 Emergencize. All Rights Reserved.</p>
+                <div className="flex items-center justify-center gap-4 mt-4">
+                  <Link href="/tos" className="text-slate-500 hover:text-slate-300 text-xs transition-colors">
+                    Terms of Service
+                  </Link>
+                  <span className="text-slate-700">•</span>
+                  <Link href="/privacy-policy" className="text-slate-500 hover:text-slate-300 text-xs transition-colors">
+                    Privacy Policy
+                  </Link>
+                </div>
               </div>
             </motion.div>
           </div>

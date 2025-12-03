@@ -366,6 +366,25 @@ export default function DocumentationPage() {
             Please read through all sections to ensure you understand how to use the emergency alert system.
           </p>
         </motion.div>
+
+        {/* Footer Links */}
+        <motion.div
+          className="text-center mt-8 pb-12"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 1.4 }}
+        >
+          <p className="text-slate-600 text-xs mb-4">© 2024 Emergencize. Open Source Emergency Response System.</p>
+          <div className="flex items-center justify-center gap-4">
+            <Link href="/tos" className="text-slate-500 hover:text-slate-300 text-xs transition-colors">
+              Terms of Service
+            </Link>
+            <span className="text-slate-700">•</span>
+            <Link href="/privacy-policy" className="text-slate-500 hover:text-slate-300 text-xs transition-colors">
+              Privacy Policy
+            </Link>
+          </div>
+        </motion.div>
       </div>
     </div>
   )
