@@ -50,9 +50,9 @@ export function useFriendRequests() {
     }
   }
 
-  const respondToRequest = async (requestId: string, response: 'accepted' | 'declined' | 'blocked') => {
+  const respondToRequest = async (requestId: string, response: 'accepted' | 'declined' | 'blocked', nickname?: string) => {
     try {
-      await respondToFriendRequest(requestId, response)
+      await respondToFriendRequest(requestId, response, nickname)
     } catch (err: any) {
       setError(err.message)
       throw err

@@ -49,7 +49,7 @@ interface ContactManagerProps {
   onRemoveContact: (contactId: string) => void
   onEditContact: (contactId: string, contact: Partial<Contact>) => void
   friendRequests?: FriendRequest[]
-  onRespondToFriendRequest?: (requestId: string, response: 'accepted' | 'declined' | 'blocked') => void
+  onRespondToFriendRequest?: (requestId: string, response: 'accepted' | 'declined' | 'blocked', nickname?: string) => void
 }
 
 export default function ContactManager({
@@ -160,15 +160,13 @@ export default function ContactManager({
 
     try {
       // Accept the friend request with a custom nickname
-      await onRespondToFriendRequest?.(duplicateNameModal.requestId, 'accepted')
-      
-      // Note: In a real implementation, you'd need to update the contact with the nickname
-      // This would require modifying the friend request system to include nickname data
+      await onRespondToFriendRequest?.(duplicateNameModal.requestId, 'accepted', newNickname)
       
       setDuplicateNameModal({ show: false, requestId: '', existingName: '', newEmail: '' })
       setNewNickname('')
     } catch (error) {
       console.error('Error accepting friend request:', error)
+      alert('Failed to accept friend request. Please try again.')
     }
   }
 

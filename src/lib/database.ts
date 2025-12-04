@@ -264,7 +264,12 @@ export const sendFriendRequest = async (fromUserId: string, toUserEmail: string,
     throw new Error('User not found')
   }
 
-  // Check if request already exists
+  // Check if user is trying to add themselves
+  if (fromUserId === toUser.uid) {
+    throw new Error('You cannot send a friend request to yourself')
+  }
+
+  // Check if request already exists (from sender to receiver)
   const q = query(
     collection(firestoreDb, 'friendRequests'),
     where('fromUserId', '==', fromUserId),
@@ -275,6 +280,36 @@ export const sendFriendRequest = async (fromUserId: string, toUserEmail: string,
   
   if (!existingRequests.empty) {
     throw new Error('Friend request already exists')
+  }
+
+  // Check for reverse request (from receiver to sender)
+  const reverseQuery = query(
+    collection(firestoreDb, 'friendRequests'),
+    where('fromUserId', '==', toUser.uid),
+    where('toUserId', '==', fromUserId),
+    where('status', 'in', ['pending', 'accepted'])
+  )
+  const reverseRequests = await getDocs(reverseQuery)
+  
+  if (!reverseRequests.empty) {
+    throw new Error('This user has already sent you a friend request. Please check your pending requests.')
+  }
+
+  // Check if either user has blocked the other
+  const blockCheckQuery = query(
+    collection(firestoreDb, 'friendRequests'),
+    where('status', '==', 'blocked')
+  )
+  const blockDocs = await getDocs(blockCheckQuery)
+  
+  for (const blockDoc of blockDocs.docs) {
+    const blockData = blockDoc.data()
+    if (
+      (blockData.fromUserId === fromUserId && blockData.toUserId === toUser.uid) ||
+      (blockData.fromUserId === toUser.uid && blockData.toUserId === fromUserId)
+    ) {
+      throw new Error('Unable to send friend request to this user')
+    }
   }
 
   // Check if they're already contacts
@@ -288,6 +323,23 @@ export const sendFriendRequest = async (fromUserId: string, toUserEmail: string,
   
   if (!existingContacts.empty) {
     throw new Error('User is already in your contacts')
+  }
+
+  // Check if user is blocked as a contact
+  const blockedContactQuery = query(
+    collection(firestoreDb, 'contacts'),
+    where('status', '==', 'blocked')
+  )
+  const blockedContacts = await getDocs(blockedContactQuery)
+  
+  for (const blockedDoc of blockedContacts.docs) {
+    const blockedData = blockedDoc.data()
+    if (
+      (blockedData.userId === fromUserId && blockedData.contactUserId === toUser.uid) ||
+      (blockedData.userId === toUser.uid && blockedData.contactUserId === fromUserId)
+    ) {
+      throw new Error('Unable to send friend request to this user')
+    }
   }
 
   // Create friend request
@@ -321,7 +373,11 @@ export const getFriendRequests = (userId: string, callback: (requests: FriendReq
   })
 }
 
-export const respondToFriendRequest = async (requestId: string, response: 'accepted' | 'declined' | 'blocked') => {
+export const respondToFriendRequest = async (
+  requestId: string, 
+  response: 'accepted' | 'declined' | 'blocked',
+  nickname?: string
+) => {
   const firestoreDb = requireDb()
   const requestRef = doc(firestoreDb, 'friendRequests', requestId)
   const requestSnap = await getDoc(requestRef)
@@ -341,9 +397,36 @@ export const respondToFriendRequest = async (requestId: string, response: 'accep
   // If accepted, add each other as contacts
   if (response === 'accepted') {
     await Promise.all([
-      addContact(request.toUserId, request.fromUserId),
+      addContact(request.toUserId, request.fromUserId, nickname),
       addContact(request.fromUserId, request.toUserId)
     ])
+  }
+
+  // If blocked, create blocked contact entry to prevent future requests
+  if (response === 'blocked') {
+    // Check if contact already exists and update it, or create a new blocked contact
+    const existingContactQuery = query(
+      collection(firestoreDb, 'contacts'),
+      where('userId', '==', request.toUserId),
+      where('contactUserId', '==', request.fromUserId)
+    )
+    const existingContactSnap = await getDocs(existingContactQuery)
+    
+    if (!existingContactSnap.empty) {
+      // Update existing contact to blocked
+      const existingContactId = existingContactSnap.docs[0].id
+      await blockContact(existingContactId)
+    } else {
+      // Create new blocked contact
+      const contactRef = collection(firestoreDb, 'contacts')
+      await addDoc(contactRef, {
+        userId: request.toUserId,
+        contactUserId: request.fromUserId,
+        createdAt: serverTimestamp(),
+        status: 'blocked',
+        blockedAt: serverTimestamp()
+      })
+    }
   }
 }
 
