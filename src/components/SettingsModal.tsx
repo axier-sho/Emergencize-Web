@@ -33,6 +33,23 @@ interface SettingsModalProps {
   }
 }
 
+interface SettingsState {
+  displayName: string
+  phone: string
+  emergencyInfo: string
+  soundEnabled: boolean
+  vibrationEnabled: boolean
+  pushNotifications: boolean
+  emailAlerts: boolean
+  locationSharing: boolean
+  onlineStatus: boolean
+  profileVisibility: 'contacts' | 'public' | 'private'
+  autoLocationShare: boolean
+  emergencyTimeout: number
+  requireConfirmation: boolean
+  emergencyContacts: number
+}
+
 export default function SettingsModal({ isOpen, onClose, currentUser }: SettingsModalProps) {
   const { user } = useAuth()
   const [activeTab, setActiveTab] = useState<'profile' | 'notifications' | 'privacy' | 'emergency'>('profile')
@@ -45,7 +62,7 @@ export default function SettingsModal({ isOpen, onClose, currentUser }: Settings
     unsubscribe,
     testNotification
   } = usePushNotifications()
-  const [settings, setSettings] = useState({
+  const [settings, setSettings] = useState<SettingsState>({
     // Profile settings
     displayName: currentUser?.displayName || '',
     phone: '',
@@ -60,7 +77,7 @@ export default function SettingsModal({ isOpen, onClose, currentUser }: Settings
     // Privacy settings
     locationSharing: true,
     onlineStatus: true,
-    profileVisibility: 'contacts', // 'contacts' | 'public' | 'private'
+    profileVisibility: 'contacts' as 'contacts' | 'public' | 'private',
     
     // Emergency settings
     autoLocationShare: true,
@@ -101,7 +118,6 @@ export default function SettingsModal({ isOpen, onClose, currentUser }: Settings
           return
         }
 
-        const profileAny = profile as Record<string, any>
         setSettings((prev) => ({
           ...prev,
           displayName:
@@ -109,48 +125,48 @@ export default function SettingsModal({ isOpen, onClose, currentUser }: Settings
             currentUser?.displayName ??
             prev.displayName ??
             '',
-          phone: profileAny.phone ?? prev.phone ?? '',
-          emergencyInfo: profileAny.emergencyInfo ?? prev.emergencyInfo ?? '',
-          profileVisibility: profileAny.profileVisibility ?? prev.profileVisibility,
+          phone: profile.phone ?? prev.phone ?? '',
+          emergencyInfo: profile.emergencyInfo ?? prev.emergencyInfo ?? '',
+          profileVisibility: profile.profileVisibility ?? prev.profileVisibility,
           soundEnabled:
-            typeof profileAny.soundEnabled === 'boolean'
-              ? profileAny.soundEnabled
+            typeof profile.soundEnabled === 'boolean'
+              ? profile.soundEnabled
               : prev.soundEnabled,
           vibrationEnabled:
-            typeof profileAny.vibrationEnabled === 'boolean'
-              ? profileAny.vibrationEnabled
+            typeof profile.vibrationEnabled === 'boolean'
+              ? profile.vibrationEnabled
               : prev.vibrationEnabled,
           pushNotifications:
-            typeof profileAny.pushNotifications === 'boolean'
-              ? profileAny.pushNotifications
+            typeof profile.pushNotifications === 'boolean'
+              ? profile.pushNotifications
               : prev.pushNotifications,
           emailAlerts:
-            typeof profileAny.emailAlerts === 'boolean'
-              ? profileAny.emailAlerts
+            typeof profile.emailAlerts === 'boolean'
+              ? profile.emailAlerts
               : prev.emailAlerts,
           locationSharing:
-            typeof profileAny.locationSharing === 'boolean'
-              ? profileAny.locationSharing
+            typeof profile.locationSharing === 'boolean'
+              ? profile.locationSharing
               : prev.locationSharing,
           onlineStatus:
-            typeof profileAny.onlineStatus === 'boolean'
-              ? profileAny.onlineStatus
+            typeof profile.onlineStatus === 'boolean'
+              ? profile.onlineStatus
               : prev.onlineStatus,
           autoLocationShare:
-            typeof profileAny.autoLocationShare === 'boolean'
-              ? profileAny.autoLocationShare
+            typeof profile.autoLocationShare === 'boolean'
+              ? profile.autoLocationShare
               : prev.autoLocationShare,
           emergencyTimeout:
-            typeof profileAny.emergencyTimeout === 'number'
-              ? profileAny.emergencyTimeout
+            typeof profile.emergencyTimeout === 'number'
+              ? profile.emergencyTimeout
               : prev.emergencyTimeout,
           requireConfirmation:
-            typeof profileAny.requireConfirmation === 'boolean'
-              ? profileAny.requireConfirmation
+            typeof profile.requireConfirmation === 'boolean'
+              ? profile.requireConfirmation
               : prev.requireConfirmation,
           emergencyContacts:
-            typeof profileAny.emergencyContacts === 'number'
-              ? profileAny.emergencyContacts
+            typeof profile.emergencyContacts === 'number'
+              ? profile.emergencyContacts
               : prev.emergencyContacts
         }))
       } catch (error) {

@@ -37,6 +37,20 @@ export interface User {
   createdAt: Timestamp
   lastActive: Timestamp
   isOnline: boolean
+  // User settings
+  phone?: string
+  emergencyInfo?: string
+  profileVisibility?: 'contacts' | 'public' | 'private'
+  soundEnabled?: boolean
+  vibrationEnabled?: boolean
+  pushNotifications?: boolean
+  emailAlerts?: boolean
+  locationSharing?: boolean
+  onlineStatus?: boolean
+  autoLocationShare?: boolean
+  emergencyTimeout?: number
+  requireConfirmation?: boolean
+  emergencyContacts?: number
 }
 
 export interface Contact {
