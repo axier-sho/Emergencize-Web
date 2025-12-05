@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { FormEvent, useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, ExternalLink } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
@@ -14,36 +14,75 @@ interface AuthModalProps {
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [mode, setMode] = useState<'login' | 'register'>('login')
+  const [formValues, setFormValues] = useState({
+    email: '',
+    password: '',
+    confirmPassword: ''
+  })
   const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false)
 
-  const { loginWithGoogle } = useAuth()
+  const { login, register } = useAuth()
 
   // Reset state when opening/closing
   useEffect(() => {
     setError('')
     setLoading(false)
+    setFormValues({
+      email: '',
+      password: '',
+      confirmPassword: ''
+    })
     setAcceptedTerms(false)
     setAcceptedPrivacy(false)
-  }, [isOpen])
+  }, [isOpen, mode])
 
-  const handleGoogleSignIn = async () => {
-    if (!acceptedTerms || !acceptedPrivacy) {
-      setError('You must accept both the Terms of Service and Privacy Policy to continue.')
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    if (!formValues.email.trim() || !formValues.password.trim()) {
+      setError('Please enter both email and password.')
       return
+    }
+
+    if (mode === 'register') {
+      if (formValues.password !== formValues.confirmPassword) {
+        setError('Passwords do not match.')
+        return
+      }
+
+      if (!acceptedTerms || !acceptedPrivacy) {
+        setError('You must accept both the Terms of Service and Privacy Policy to continue.')
+        return
+      }
     }
 
     setLoading(true)
     setError('')
 
     try {
-      await loginWithGoogle()
+      if (mode === 'login') {
+        await login(formValues.email, formValues.password)
+      } else {
+        await register(formValues.email, formValues.password)
+      }
       onClose()
     } catch (err: any) {
-      setError(err.message || 'Failed to sign in with Google')
+      const defaultMessage = mode === 'login'
+        ? 'Failed to sign in. Please check your credentials.'
+        : 'Failed to create an account. Please try again.'
+      setError(err?.message || defaultMessage)
     } finally {
       setLoading(false)
     }
+  }
+
+  const renderDescription = () => {
+    if (mode === 'login') {
+      return 'Sign in with your Emergencize email and password to access emergency services.'
+    }
+    return 'Create an Emergencize account to coordinate emergency readiness with your team.'
   }
 
   return (
@@ -92,84 +131,162 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
               {/* Description */}
               <p className="text-gray-300 text-center mb-6">
-                Sign in with your Google account to access emergency services
+                {renderDescription()}
               </p>
 
-              {/* Terms of Service and Privacy Policy Checkboxes */}
-              <div className="mb-6 space-y-4">
-                {/* Terms of Service */}
-                <div className="flex items-start space-x-3">
-                  <input
-                    type="checkbox"
-                    id="acceptTerms"
-                    checked={acceptedTerms}
-                    onChange={(e) => setAcceptedTerms(e.target.checked)}
-                    className="mt-1 w-4 h-4 text-blue-600 bg-transparent border-2 border-white border-opacity-30 rounded focus:ring-blue-500 focus:ring-2"
-                  />
-                  <label htmlFor="acceptTerms" className="text-sm text-gray-300 leading-relaxed">
-                    I have read, understood, and agree to be bound by the{' '}
-                    <Link 
-                      href="/tos" 
-                      target="_blank"
-                      className="text-blue-400 hover:text-blue-300 underline inline-flex items-center gap-1 transition-colors"
-                    >
-                      Terms of Service
-                      <ExternalLink size={12} />
-                    </Link>
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div>
+                  <label htmlFor="email" className="block text-sm text-gray-300 mb-1">
+                    Email address
                   </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={formValues.email}
+                    onChange={(event) => setFormValues((prev) => ({
+                      ...prev,
+                      email: event.target.value
+                    }))}
+                    className="w-full rounded-lg bg-white/10 border border-white/20 px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    placeholder="you@example.com"
+                  />
                 </div>
 
-                {/* Privacy Policy */}
-                <div className="flex items-start space-x-3">
-                  <input
-                    type="checkbox"
-                    id="acceptPrivacy"
-                    checked={acceptedPrivacy}
-                    onChange={(e) => setAcceptedPrivacy(e.target.checked)}
-                    className="mt-1 w-4 h-4 text-blue-600 bg-transparent border-2 border-white border-opacity-30 rounded focus:ring-blue-500 focus:ring-2"
-                  />
-                  <label htmlFor="acceptPrivacy" className="text-sm text-gray-300 leading-relaxed">
-                    I have read and understood the{' '}
-                    <Link 
-                      href="/privacy-policy" 
-                      target="_blank"
-                      className="text-green-400 hover:text-green-300 underline inline-flex items-center gap-1 transition-colors"
-                    >
-                      Privacy Policy
-                      <ExternalLink size={12} />
-                    </Link>
-                    {' '}and how my data will be collected and used
+                <div>
+                  <label htmlFor="password" className="block text-sm text-gray-300 mb-1">
+                    Password
                   </label>
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                    required
+                    value={formValues.password}
+                    onChange={(event) => setFormValues((prev) => ({
+                      ...prev,
+                      password: event.target.value
+                    }))}
+                    className="w-full rounded-lg bg-white/10 border border-white/20 px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    placeholder="Enter a secure password"
+                    minLength={6}
+                  />
                 </div>
-              </div>
 
-              {/* Google Sign In Button */}
-              <motion.button
-                onClick={handleGoogleSignIn}
-                disabled={loading}
-                className="w-full py-3 bg-white hover:bg-gray-100 disabled:bg-gray-300 text-gray-800 rounded-lg font-medium transition-colors flex items-center justify-center space-x-3 shadow-lg"
-                whileHover={{ scale: loading ? 1 : 1.02 }}
-                whileTap={{ scale: loading ? 1 : 0.98 }}
-              >
-                {loading ? (
-                  <div className="w-6 h-6 border-2 border-gray-800 border-t-transparent rounded-full animate-spin" />
+                {mode === 'register' && (
+                  <div>
+                    <label htmlFor="confirmPassword" className="block text-sm text-gray-300 mb-1">
+                      Confirm password
+                    </label>
+                    <input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type="password"
+                      required
+                      value={formValues.confirmPassword}
+                      onChange={(event) => setFormValues((prev) => ({
+                        ...prev,
+                        confirmPassword: event.target.value
+                      }))}
+                      className="w-full rounded-lg bg-white/10 border border-white/20 px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      placeholder="Re-enter your password"
+                      minLength={6}
+                    />
+                  </div>
+                )}
+
+                {mode === 'register' && (
+                  <div className="space-y-4">
+                    {/* Terms of Service */}
+                    <div className="flex items-start space-x-3">
+                      <input
+                        type="checkbox"
+                        id="acceptTerms"
+                        checked={acceptedTerms}
+                        onChange={(e) => setAcceptedTerms(e.target.checked)}
+                        className="mt-1 w-4 h-4 text-blue-600 bg-transparent border-2 border-white border-opacity-30 rounded focus:ring-blue-500 focus:ring-2"
+                      />
+                      <label htmlFor="acceptTerms" className="text-sm text-gray-300 leading-relaxed">
+                        I agree to the{' '}
+                        <Link 
+                          href="/tos" 
+                          target="_blank"
+                          className="text-blue-400 hover:text-blue-300 underline inline-flex items-center gap-1 transition-colors"
+                        >
+                          Terms of Service
+                          <ExternalLink size={12} />
+                        </Link>
+                      </label>
+                    </div>
+
+                    {/* Privacy Policy */}
+                    <div className="flex items-start space-x-3">
+                      <input
+                        type="checkbox"
+                        id="acceptPrivacy"
+                        checked={acceptedPrivacy}
+                        onChange={(e) => setAcceptedPrivacy(e.target.checked)}
+                        className="mt-1 w-4 h-4 text-blue-600 bg-transparent border-2 border-white border-opacity-30 rounded focus:ring-blue-500 focus:ring-2"
+                      />
+                      <label htmlFor="acceptPrivacy" className="text-sm text-gray-300 leading-relaxed">
+                        I have read and understood the{' '}
+                        <Link 
+                          href="/privacy-policy" 
+                          target="_blank"
+                          className="text-green-400 hover:text-green-300 underline inline-flex items-center gap-1 transition-colors"
+                        >
+                          Privacy Policy
+                          <ExternalLink size={12} />
+                        </Link>
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {/* Submit Button */}
+                <motion.button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3 bg-white hover:bg-gray-100 disabled:bg-gray-300 text-gray-800 rounded-lg font-medium transition-colors flex items-center justify-center space-x-3 shadow-lg"
+                  whileHover={{ scale: loading ? 1 : 1.02 }}
+                  whileTap={{ scale: loading ? 1 : 0.98 }}
+                >
+                  {loading ? (
+                    <div className="w-6 h-6 border-2 border-gray-800 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <span>{mode === 'login' ? 'Sign In' : 'Create Account'}</span>
+                  )}
+                </motion.button>
+              </form>
+
+              <div className="mt-6 text-center text-sm text-gray-300">
+                {mode === 'login' ? (
+                  <>
+                    Need an account?{' '}
+                    <button
+                      type="button"
+                      onClick={() => setMode('register')}
+                      className="text-blue-400 hover:text-blue-300 font-medium"
+                    >
+                      Create one
+                    </button>
+                  </>
                 ) : (
                   <>
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M19.6 10.227c0-.709-.064-1.39-.182-2.045H10v3.868h5.382a4.6 4.6 0 01-1.996 3.018v2.51h3.232c1.891-1.742 2.982-4.305 2.982-7.35z" fill="#4285F4"/>
-                      <path d="M10 20c2.7 0 4.964-.895 6.618-2.423l-3.232-2.509c-.895.6-2.04.955-3.386.955-2.605 0-4.81-1.76-5.595-4.123H1.064v2.59A9.996 9.996 0 0010 20z" fill="#34A853"/>
-                      <path d="M4.405 11.9c-.2-.6-.314-1.24-.314-1.9 0-.66.114-1.3.314-1.9V5.51H1.064A9.996 9.996 0 000 10c0 1.614.386 3.14 1.064 4.49l3.34-2.59z" fill="#FBBC05"/>
-                      <path d="M10 3.977c1.468 0 2.786.505 3.823 1.496l2.868-2.868C14.96.991 12.696 0 10 0 6.09 0 2.71 2.24 1.064 5.51l3.34 2.59C5.19 5.736 7.396 3.977 10 3.977z" fill="#EA4335"/>
-                    </svg>
-                    <span>Continue with Google</span>
+                    Already have an account?{' '}
+                    <button
+                      type="button"
+                      onClick={() => setMode('login')}
+                      className="text-blue-400 hover:text-blue-300 font-medium"
+                    >
+                      Sign in
+                    </button>
                   </>
                 )}
-              </motion.button>
-
-              {/* Security Note */}
-              <p className="text-xs text-gray-400 text-center mt-6">
-                Your information is secure and will only be used for emergency services
-              </p>
+              </div>
             </motion.div>
           </motion.div>
         </>

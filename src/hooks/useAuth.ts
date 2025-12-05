@@ -10,12 +10,10 @@ import {
   RecaptchaVerifier,
   PhoneAuthProvider,
   multiFactor,
-  PhoneMultiFactorGenerator,
-  GoogleAuthProvider,
-  signInWithPopup
+  PhoneMultiFactorGenerator
 } from 'firebase/auth'
 import { auth, isFirebaseInitialized } from '@/lib/firebase'
-import { createUserProfile, getUserProfile, updateUserStatus } from '@/lib/database'
+import { createUserProfile, updateUserStatus } from '@/lib/database'
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
@@ -125,68 +123,6 @@ export function useAuth() {
     await multiFactor(auth.currentUser).enroll(assertion, displayName)
   }
 
-  const loginWithGoogle = async () => {
-    if (!auth) {
-      throw new Error('Firebase is not configured. Please check your environment variables.')
-    }
-    try {
-      const provider = new GoogleAuthProvider()
-      // Add recommended scopes
-      provider.addScope('profile')
-      provider.addScope('email')
-      
-      // Set custom parameters to ensure proper auth flow
-      provider.setCustomParameters({
-        prompt: 'select_account'
-      })
-      
-      const result = await signInWithPopup(auth, provider)
-      const user = result.user
-
-      // Check if user profile exists, if not create it
-      const existingProfile = await getUserProfile(user.uid)
-      if (!existingProfile) {
-        const profileData: any = {
-          uid: user.uid,
-          email: user.email!
-        }
-
-        if (user.displayName) {
-          profileData.displayName = user.displayName
-        }
-
-        if (user.photoURL) {
-          profileData.photoURL = user.photoURL
-        }
-
-        await createUserProfile(profileData)
-      }
-
-      return user
-    } catch (error: any) {
-      console.error('Google Sign-In Error:', error);
-      if (error.code) console.error('Error Code:', error.code);
-      if (error.message) console.error('Error Message:', error.message);
-      if (error.customData) console.error('Error Custom Data:', error.customData);
-      
-      // Provide more specific error messages
-      let errorMessage = error.message
-      if (error.code === 'auth/internal-error') {
-        errorMessage = 'Google Sign-In configuration error. Please check:\n' +
-          '1. OAuth Consent Screen is configured in Google Cloud Console\n' +
-          '2. Authorized domains include your domain\n' +
-          '3. Popups are not blocked by your browser\n' +
-          '4. Third-party cookies are enabled'
-      } else if (error.code === 'auth/popup-blocked') {
-        errorMessage = 'Popup was blocked by your browser. Please allow popups for this site.'
-      } else if (error.code === 'auth/popup-closed-by-user') {
-        errorMessage = 'Sign-in was cancelled. Please try again.'
-      }
-      
-      throw new Error(errorMessage)
-    }
-  }
-
   const logout = async () => {
     if (!auth) {
       // If Firebase is not configured, just clear local state
@@ -217,7 +153,6 @@ export function useAuth() {
     register,
     logout,
     sendMfaEnrollmentCode,
-    enrollMfaWithCode,
-    loginWithGoogle
+    enrollMfaWithCode
   }
 }
