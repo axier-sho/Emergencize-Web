@@ -309,19 +309,24 @@ export const sendFriendRequest = async (fromUserId: string, toUserEmail: string,
     throw new Error('This user has already sent you a friend request. Please check your pending requests.')
   }
 
-  // Check if either user has blocked the other
-  const blockCheckQuery = query(
-    collection(firestoreDb, 'friendRequests'),
-    where('status', '==', 'blocked')
-  )
-  const blockDocs = await getDocs(blockCheckQuery)
-  
-  for (const blockDoc of blockDocs.docs) {
-    const blockData = blockDoc.data()
-    if (
-      (blockData.fromUserId === fromUserId && blockData.toUserId === toUser.uid) ||
-      (blockData.fromUserId === toUser.uid && blockData.toUserId === fromUserId)
-    ) {
+  // Check if either user has blocked the other via friend requests
+  const blockedRequestQueries = [
+    query(
+      collection(firestoreDb, 'friendRequests'),
+      where('fromUserId', '==', fromUserId),
+      where('toUserId', '==', toUser.uid),
+      where('status', '==', 'blocked')
+    ),
+    query(
+      collection(firestoreDb, 'friendRequests'),
+      where('fromUserId', '==', toUser.uid),
+      where('toUserId', '==', fromUserId),
+      where('status', '==', 'blocked')
+    )
+  ]
+  for (const blockedQuery of blockedRequestQueries) {
+    const blockedSnap = await getDocs(blockedQuery)
+    if (!blockedSnap.empty) {
       throw new Error('Unable to send friend request to this user')
     }
   }
@@ -340,18 +345,23 @@ export const sendFriendRequest = async (fromUserId: string, toUserEmail: string,
   }
 
   // Check if user is blocked as a contact
-  const blockedContactQuery = query(
-    collection(firestoreDb, 'contacts'),
-    where('status', '==', 'blocked')
-  )
-  const blockedContacts = await getDocs(blockedContactQuery)
-  
-  for (const blockedDoc of blockedContacts.docs) {
-    const blockedData = blockedDoc.data()
-    if (
-      (blockedData.userId === fromUserId && blockedData.contactUserId === toUser.uid) ||
-      (blockedData.userId === toUser.uid && blockedData.contactUserId === fromUserId)
-    ) {
+  const blockedContactQueries = [
+    query(
+      collection(firestoreDb, 'contacts'),
+      where('userId', '==', fromUserId),
+      where('contactUserId', '==', toUser.uid),
+      where('status', '==', 'blocked')
+    ),
+    query(
+      collection(firestoreDb, 'contacts'),
+      where('userId', '==', toUser.uid),
+      where('contactUserId', '==', fromUserId),
+      where('status', '==', 'blocked')
+    )
+  ]
+  for (const blockedQuery of blockedContactQueries) {
+    const blockedSnap = await getDocs(blockedQuery)
+    if (!blockedSnap.empty) {
       throw new Error('Unable to send friend request to this user')
     }
   }
