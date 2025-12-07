@@ -5,6 +5,7 @@ import { useAuth } from './useAuth'
 import {
   sendFriendRequest,
   getFriendRequests,
+  getSentFriendRequests,
   respondToFriendRequest,
   type FriendRequest
 } from '@/lib/database'
@@ -12,6 +13,7 @@ import {
 export function useFriendRequests() {
   const { user } = useAuth()
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([])
+  const [sentRequests, setSentRequests] = useState<FriendRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -19,18 +21,27 @@ export function useFriendRequests() {
   useEffect(() => {
     if (!user) {
       setFriendRequests([])
+      setSentRequests([])
       setLoading(false)
       return
     }
 
     setLoading(true)
-    const unsubscribe = getFriendRequests(user.uid, (requests) => {
+    const unsubscribeReceived = getFriendRequests(user.uid, (requests) => {
       setFriendRequests(requests)
-      setLoading(false)
+      setError(null)
+    })
+    const unsubscribeSent = getSentFriendRequests(user.uid, (requests) => {
+      setSentRequests(requests)
       setError(null)
     })
 
-    return unsubscribe
+    setLoading(false)
+
+    return () => {
+      unsubscribeReceived()
+      unsubscribeSent()
+    }
   }, [user])
 
   const sendRequest = async (toUserEmail: string) => {
@@ -61,6 +72,7 @@ export function useFriendRequests() {
 
   return {
     friendRequests,
+    sentRequests,
     loading,
     sending,
     error,

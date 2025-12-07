@@ -16,7 +16,9 @@ import {
   UserCheck,
   UserX,
   Shield,
-  Clock
+  Clock,
+  Send,
+  Loader2
 } from 'lucide-react'
 import { findUserByEmail } from '@/lib/database'
 
@@ -49,6 +51,7 @@ interface ContactManagerProps {
   onRemoveContact: (contactId: string) => void
   onEditContact: (contactId: string, contact: Partial<Contact>) => void
   friendRequests?: FriendRequest[]
+  sentFriendRequests?: FriendRequest[]
   onRespondToFriendRequest?: (requestId: string, response: 'accepted' | 'declined' | 'blocked', nickname?: string) => void
 }
 
@@ -60,6 +63,7 @@ export default function ContactManager({
   onRemoveContact,
   onEditContact,
   friendRequests = [],
+  sentFriendRequests = [],
   onRespondToFriendRequest
 }: ContactManagerProps) {
   const [searchTerm, setSearchTerm] = useState('')
@@ -87,6 +91,7 @@ export default function ContactManager({
   const [newNickname, setNewNickname] = useState('')
   const [checkEmailLoading, setCheckEmailLoading] = useState(false)
   const [checkEmailResult, setCheckEmailResult] = useState<null | { exists: boolean; name?: string }>(null)
+  const [requestView, setRequestView] = useState<'received' | 'sent'>('received')
 
   const filteredContacts = contacts.filter(contact =>
     contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -487,72 +492,155 @@ export default function ContactManager({
                   </>
                 ) : (
                   /* Friend Requests Tab */
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-white mb-4">Pending Friend Requests</h3>
-                    {friendRequests.length === 0 ? (
-                      <div className="text-center py-12">
-                        <UserCheck size={48} className="text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-300 text-lg mb-2">No pending requests</p>
-                        <p className="text-gray-400">Friend requests will appear here</p>
-                      </div>
-                    ) : (
-                      friendRequests.map((request, index) => (
-                        <motion.div
-                          key={request.id}
-                          className="bg-white bg-opacity-5 rounded-xl p-4 border border-white border-opacity-10"
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3, delay: index * 0.05 }}
+                  <div className="space-y-6">
+                    <div className="flex flex-wrap gap-3 items-center justify-between">
+                      <h3 className="text-lg font-semibold text-white">Friend Requests</h3>
+                      <div className="inline-flex rounded-lg overflow-hidden border border-white/10">
+                        <button
+                          onClick={() => setRequestView('received')}
+                          className={`px-4 py-2 text-sm font-medium transition-colors ${
+                            requestView === 'received'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-white/5 text-gray-300 hover:bg-white/10'
+                          }`}
                         >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-4">
-                              <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
-                                <span className="text-white font-semibold">
-                                  {request.fromUserEmail.charAt(0).toUpperCase()}
-                                </span>
-                              </div>
-                              <div>
-                                <h4 className="text-white font-semibold">{request.fromUserEmail}</h4>
-                                <p className="text-gray-300 text-sm">Wants to add you as an emergency contact</p>
-                                <div className="flex items-center text-xs text-gray-400 mt-1">
-                                  <Clock size={12} className="mr-1" />
-                                  {new Date(request.createdAt?.toDate?.() || request.createdAt).toLocaleDateString()}
+                          Received ({friendRequests.length})
+                        </button>
+                        <button
+                          onClick={() => setRequestView('sent')}
+                          className={`px-4 py-2 text-sm font-medium transition-colors ${
+                            requestView === 'sent'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-white/5 text-gray-300 hover:bg-white/10'
+                          }`}
+                        >
+                          Sent ({sentFriendRequests.length})
+                        </button>
+                      </div>
+                    </div>
+
+                    {requestView === 'received' ? (
+                      friendRequests.length === 0 ? (
+                        <div className="text-center py-12">
+                          <UserCheck size={48} className="text-gray-400 mx-auto mb-4" />
+                          <p className="text-gray-300 text-lg mb-2">No pending requests</p>
+                          <p className="text-gray-400">Friend requests will appear here</p>
+                        </div>
+                      ) : (
+                        friendRequests.map((request, index) => (
+                          <motion.div
+                            key={request.id}
+                            className="bg-white bg-opacity-5 rounded-xl p-4 border border-white border-opacity-10"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3, delay: index * 0.05 }}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-4">
+                                <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+                                  <span className="text-white font-semibold">
+                                    {request.fromUserEmail.charAt(0).toUpperCase()}
+                                  </span>
+                                </div>
+                                <div>
+                                  <h4 className="text-white font-semibold">{request.fromUserEmail}</h4>
+                                  <p className="text-gray-300 text-sm">Wants to add you as an emergency contact</p>
+                                  <div className="flex items-center text-xs text-gray-400 mt-1">
+                                    <Clock size={12} className="mr-1" />
+                                    {new Date(request.createdAt?.toDate?.() || request.createdAt).toLocaleDateString()}
+                                  </div>
                                 </div>
                               </div>
+                              
+                              <div className="flex items-center space-x-2">
+                                <motion.button
+                                  onClick={() => handleAcceptFriendRequest(request.id, request.fromUserEmail)}
+                                  className="p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.9 }}
+                                  title="Accept"
+                                >
+                                  <UserCheck size={16} />
+                                </motion.button>
+                                <motion.button
+                                  onClick={() => onRespondToFriendRequest?.(request.id, 'declined')}
+                                  className="p-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.9 }}
+                                  title="Decline"
+                                >
+                                  <UserX size={16} />
+                                </motion.button>
+                                <motion.button
+                                  onClick={() => onRespondToFriendRequest?.(request.id, 'blocked')}
+                                  className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.9 }}
+                                  title="Block"
+                                >
+                                  <Shield size={16} />
+                                </motion.button>
+                              </div>
                             </div>
-                            
-                            <div className="flex items-center space-x-2">
-                              <motion.button
-                                onClick={() => handleAcceptFriendRequest(request.id, request.fromUserEmail)}
-                                className="p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                title="Accept"
+                          </motion.div>
+                        ))
+                      )
+                    ) : sentFriendRequests.length === 0 ? (
+                      <div className="text-center py-12">
+                        <Send size={48} className="text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-300 text-lg mb-2">No sent requests yet</p>
+                        <p className="text-gray-400">Send a friend request to track its status</p>
+                      </div>
+                    ) : (
+                      sentFriendRequests.map((request, index) => {
+                        const statusStyles: Record<FriendRequest['status'], string> = {
+                          pending: 'bg-yellow-500/20 text-yellow-200 border-yellow-500/30',
+                          accepted: 'bg-emerald-500/20 text-emerald-200 border-emerald-500/30',
+                          declined: 'bg-red-500/20 text-red-200 border-red-500/30',
+                          blocked: 'bg-gray-500/20 text-gray-200 border-gray-500/30'
+                        }
+
+                        const StatusIcon = {
+                          pending: Loader2,
+                          accepted: UserCheck,
+                          declined: UserX,
+                          blocked: Shield
+                        }[request.status]
+
+                        return (
+                          <motion.div
+                            key={request.id}
+                            className="bg-white bg-opacity-5 rounded-xl p-4 border border-white border-opacity-10"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3, delay: index * 0.05 }}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-4">
+                                <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
+                                  <span className="text-white font-semibold">
+                                    {request.toUserEmail.charAt(0).toUpperCase()}
+                                  </span>
+                                </div>
+                                <div>
+                                  <h4 className="text-white font-semibold">{request.toUserEmail}</h4>
+                                  <div className="flex items-center text-xs text-gray-400 mt-1">
+                                    <Clock size={12} className="mr-1" />
+                                    Sent {new Date(request.createdAt?.toDate?.() || request.createdAt).toLocaleDateString()}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div
+                                className={`flex items-center px-3 py-1 rounded-full border text-sm font-medium ${statusStyles[request.status]}`}
                               >
-                                <UserCheck size={16} />
-                              </motion.button>
-                              <motion.button
-                                onClick={() => onRespondToFriendRequest?.(request.id, 'declined')}
-                                className="p-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                title="Decline"
-                              >
-                                <UserX size={16} />
-                              </motion.button>
-                              <motion.button
-                                onClick={() => onRespondToFriendRequest?.(request.id, 'blocked')}
-                                className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                title="Block"
-                              >
-                                <Shield size={16} />
-                              </motion.button>
+                                <StatusIcon size={14} className="mr-2" />
+                                {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                              </div>
                             </div>
-                          </div>
-                        </motion.div>
-                      ))
+                          </motion.div>
+                        )
+                      })
                     )}
                   </div>
                 )}

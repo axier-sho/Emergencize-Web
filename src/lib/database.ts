@@ -397,6 +397,23 @@ export const getFriendRequests = (userId: string, callback: (requests: FriendReq
   })
 }
 
+export const getSentFriendRequests = (userId: string, callback: (requests: FriendRequest[]) => void) => {
+  const firestoreDb = requireDb()
+  const q = query(
+    collection(firestoreDb, 'friendRequests'),
+    where('fromUserId', '==', userId),
+    orderBy('createdAt', 'desc')
+  )
+
+  return onSnapshot(q, (querySnapshot) => {
+    const requests: FriendRequest[] = []
+    querySnapshot.forEach((doc) => {
+      requests.push({ id: doc.id, ...doc.data() } as FriendRequest)
+    })
+    callback(requests)
+  })
+}
+
 export const respondToFriendRequest = async (
   requestId: string, 
   response: 'accepted' | 'declined' | 'blocked',
